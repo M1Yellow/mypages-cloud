@@ -16,7 +16,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-admin</name>
     <description>MyPages admin</description>
-    <packaging>war</packaging>
+    <!--<packaging>war</packaging>--><!-- 外部 tomcat 需要 -->
+    <packaging>jar</packaging><!-- 默认内嵌 tomcat 运行 -->
 
     <dependencies>
         <!-- mypages security 安全模块 -->
@@ -130,8 +131,8 @@
                 </configuration>
             </plugin>
 
-            <!-- 项目直接部署为 docker 镜像，【暂未调通】 -->
-            <!-- 【dockerfile-maven-plugin 版本】 -->
+            <!-- 项目直接部署为 docker 镜像 -->
+            <!-- 【dockerfile-maven-plugin 版本】 官方推荐 -->
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>dockerfile-maven-plugin</artifactId>
@@ -146,7 +147,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>${project.name}</repository>
+                    <repository>${project.artifactId}</repository>
                     <tag>${project.version}</tag>
                     <buildArgs>
                         <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
