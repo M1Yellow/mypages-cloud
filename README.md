@@ -1,2 +1,1 @@
-# mypages
-Define the homepage of your interest.
+# New default branch
