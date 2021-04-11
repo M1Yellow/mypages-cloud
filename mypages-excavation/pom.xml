@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.vegetable.mypages</groupId>
+        <artifactId>mypages</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <!-- 数据挖掘模块 -->
+    <groupId>com.vegetable.mypages</groupId>
+    <artifactId>mypages-excavation</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>mypages-excavation</name>
+    <description>Excavation of data.</description>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- mypages security 安全模块 -->
+        <dependency>
+            <groupId>com.vegetable.mypages</groupId>
+            <artifactId>mypages-security</artifactId>
+        </dependency>
+
+        <!-- mysql 连接驱动 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <!-- mybatis-plus 引入后就不用加 mybatis 的依赖了 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!-- 上方为 Maven xml 的约束，创建项目后默认不用改动 -->
+
+    <!-- Maven 模型的版本，对于 Maven2 和 Maven3 来说，它只能是 4.0.0 -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 父依赖 -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.4.3</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <!-- 当前项目信息 -->
+    <!-- 公共父模块 -->
+    <groupId>com.vegetable.mypages</groupId>
+    <artifactId>mypages</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>MyPages</name>
+    <description>Pages interesting.</description>
+    <packaging>pom</packaging>
+
+    <!-- 聚合模块 -->
+    <modules>
+        <module>mypages-admin</module>
+        <module>mypages-common</module>
+        <module>mypages-excavation</module>
+        <module>mypages-security</module>
+        <module>mypages-generator</module>
+    </modules>
+
+    <!-- 参数配置 -->
+    <properties>
+        <skipTests>true</skipTests><!-- 打包跳过测试 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <mysql-connector.version>8.0.22</mysql-connector.version><!-- MySQL 连接驱动版本 -->
+        <druid-starter.version>1.1.22</druid-starter.version><!-- druid 连接池 -->
+        <mybatis.version>2.1.4</mybatis.version>
+        <mybatis-plus.version>3.4.2</mybatis-plus.version>
+        <mybatis-plus-starter.version>3.4.2</mybatis-plus-starter.version>
+        <mpg.version>3.4.1</mpg.version><!-- mybatis-plus 代码生成器 -->
+        <velocity-core.version>2.2</velocity-core.version><!-- mybatis-plus 代码生成器需要的模板引擎 -->
+        <freemarker.version>2.3.30</freemarker.version><!-- mybatis-plus 代码生成器自定义模板引擎 -->
+        <freemarker-starter.version>2.4.3</freemarker-starter.version>
+        <jedis.version>3.3.0</jedis.version>
+        <fastjson.version>1.2.62</fastjson.version>
+        <swagger.version>2.9.2</swagger.version>
+        <swagger-ui.version>2.9.2</swagger-ui.version>
+        <swagger-models.version>1.5.22</swagger-models.version>
+        <swagger-annotations.version>1.5.22</swagger-annotations.version>
+        <httpclient.version>4.5.13</httpclient.version>
+        <jsoup.version>1.13.1</jsoup.version>
+        <gson.version>2.8.6</gson.version>
+        <fastjson.version>1.2.75</fastjson.version>
+        <docker-maven-plugin.version>1.2.2</docker-maven-plugin.version>
+        <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
+        <mypages-common.version>0.0.1-SNAPSHOT</mypages-common.version>
+        <mypages-security.version>0.0.1-SNAPSHOT</mypages-security.version>
+        <mypages-generator.version>0.0.1-SNAPSHOT</mypages-generator.version>
+        <mypages-excavation.version>0.0.1-SNAPSHOT</mypages-excavation.version>
+
+    </properties>
+
+    <!-- 项目或模块自身引用的依赖 -->
+    <!-- 父模块的依赖尽可能是子项目共用的 -->
+    <dependencies>
+        <!-- web场景启动器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- springboot单元测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <!-- swagger -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${swagger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${swagger-ui.version}</version>
+        </dependency>
+        <!--解决Swagger 2.9.2版本NumberFormatException-->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>${swagger-models.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${swagger-annotations.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <!--
+    Maven 中的 dependencyManagement 意义：
+    1、在 Maven 中 dependencyManagement 的作用其实相当于一个对所依赖 jar 包进行版本管理的管理器。
+    2、pom.xml 文件中，jar 的版本判断的两种途径
+        1）如果 dependencies 里的 dependency 自己没有声明 version 元素，那么 maven 就会到 dependencyManagement 里面去找有没有对该 artifactId 和 groupId 进行过版本声明，如果有，就继承它，如果没有就会报错，告诉你必须为 dependency 声明一个 version。
+        2）如果 dependencies 中的 dependency 声明了 version，那么无论 dependencyManagement 中有无对该 jar 的 version 声明，都以 dependency 里的 version 为准。
+    3、1）dependencies 即使在子项目中不写该依赖项，那么子项目仍然会从父项目中继承该依赖项（全部继承）
+       2）dependencyManagement 里只是声明依赖，并不实现引入，因此子项目需要显示的声明需要用的依赖。如果不在子项目中声明依赖，是不会从父项目中继承下来的；只有在子项目中写了该依赖项，并且没有指定具体版本，才会从父项目中继承该项，并且 version 和 scope 都读取自父 pom;另外如果子项目中指定了版本号，那么会使用子项目中指定的 jar 版本。
+    -->
+
+    <!-- 只是对版本进行管理，不会实际引入jar -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- mypages common 通用模块 -->
+            <dependency>
+                <groupId>com.vegetable.mypages</groupId>
+                <artifactId>mypages-common</artifactId>
+                <version>${mypages-common.version}</version>
+            </dependency>
+            <!-- mypages security 安全模块 -->
+            <dependency>
+                <groupId>com.vegetable.mypages</groupId>
+                <artifactId>mypages-security</artifactId>
+                <version>${mypages-security.version}</version>
+            </dependency>
+            <!-- mypages generator 代码生成器模块 -->
+            <dependency>
+                <groupId>com.vegetable.mypages</groupId>
+                <artifactId>mypages-generator</artifactId>
+                <version>${mypages-generator.version}</version>
+            </dependency>
+            <!-- mypages excavation 数据挖掘模块 -->
+            <dependency>
+                <groupId>com.vegetable.mypages</groupId>
+                <artifactId>mypages-excavation</artifactId>
+                <version>${mypages-excavation.version}</version>
+            </dependency>
+
+            <!-- mysql 连接驱动 -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql-connector.version}</version>
+            </dependency>
+            <!-- druid-spring-boot-starter -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid-starter.version}</version>
+            </dependency>
+            <!-- mybatis -->
+            <!--
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            -->
+            <!-- mybatis-plus 非官方开发的。引入后就不用加 mybatis 的依赖了 -->
+            <!-- 注意！！坑了大半天！一定要按照官网教程，引入 mybatis-plus-boot-starter 依赖，而不是 mybatis-plus -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus-starter.version}</version>
+            </dependency>
+            <!-- mybatis-plus 代码生成器 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-generator</artifactId>
+                <version>${mpg.version}</version>
+            </dependency>
+            <!-- velocity 模板引擎，mybatis-plus 代码生成器需要，没有会报错 -->
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-engine-core</artifactId>
+                <version>${velocity-core.version}</version>
+            </dependency>
+            <!-- freemarker -->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
+            <!-- httpclient -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <!-- jsoup 解析 html 页面 -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+</project>

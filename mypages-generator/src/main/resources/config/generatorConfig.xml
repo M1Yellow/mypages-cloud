@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+    <!-- 使用本地 jar 包 -->
+    <!--<classPathEntry location="mysql-connector-java-5.1.26-bin.jar"/>-->
+
+    <!-- 引入外部属性文件 -->
+    <!--<properties resource="application.properties"/>-->
+
+    <!-- context 是逆向工程的主要配置信息 -->
+    <!-- id 起个名字 -->
+    <!-- targetRuntime 设置生成的文件适用于那个 mybatis 版本 -->
+    <context id="mypage" targetRuntime="MyBatis3">
+        <!-- 注意，context 中的标签元素有顺序要求 -->
+        <!-- 配置通用 Mapper 的 MBG 插件相关信息 -->
+        <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+            <property name="mappers" value="tk.mybatis.mapper.common.Mapper" />
+        </plugin>
+
+        <!-- MBG + Lombok （注意，这个方法需要修改官方 jar 包） -->
+        <!--
+        <plugin type="org.mybatis.generator.plugins.LombokPlugin" >
+            <property name="hasLombok" value="true"/>
+        </plugin>
+        -->
+
+        <!-- optional，指在创建 class 时，对注释进行控制 -->
+        <commentGenerator>
+            <!-- suppressDate: 阻止生成的注释包含时间戳，默认为 false -->
+            <property name="suppressDate" value="true"/>
+            <!-- suppressAllComments: 阻止生成注释，默认为 false -->
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <!--
+        通过逆向工程生成代码，如果字段是 int(1) 或者 tinyint(1) 会自动生成 Boolean 类型.但如果是 status 多状态类型，除了 0 和 1，还有 2、3、4。。。
+        区分办法：
+        1.直接修改字段长度，比如 int(2)，int/tinyint 默认长度是 3
+        2.在 jdbcURL 上加 ?tinyInt1isBit=false，默认是true，注意参数名区分大小写，否则不生效
+
+        试验了，只有 bit 能转换为 Boolean，tinyint 或 int 即使长度为 1 也还是 Byte
+        -->
+        <!-- jdbc 的数据库连接配置 -->
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://192.168.3.151:3306/mypage?useUnicode=true&amp;characeterEncoding=utf-8&amp;serverTimezone=UTC"
+                        userId="root"
+                        password="123456.a">
+        </jdbcConnection>
+
+        <!-- 非必须，类型处理器，在数据库类型和 java 类型之间的转换控制 -->
+        <javaTypeResolver>
+            <!-- 默认情况下数据库中的 decimal，bigInt 在 Java 对应是 sql 下的 BigDecimal 类 -->
+            <!-- 不是 double 和 long 类型 -->
+            <!-- 使用常用的基本类型代替 sql 包下的引用类型 -->
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!-- targetPackage：生成的实体类所在的包 -->
+        <!-- targetProject：生成的实体类所在的硬盘位置 -->
+        <javaModelGenerator targetPackage="com.vegetable.model"
+                            targetProject="src/main/java">
+            <!-- 是否允许子包 -->
+            <property name="enableSubPackages" value="false"/>
+            <!-- 是否对 model 添加构造函数 -->
+            <property name="constructorBased" value="false"/>
+            <property name="" value=""/>
+            <!-- 是否清理从数据库中查询出的字符串左右两边的空白字符 -->
+            <property name="trimStrings" value="true"/>
+            <!-- 建立 model 对象是否不可改变 即生成的 model 对象不会有 setter 方法，只有构造方法 -->
+            <property name="immutable" value="false"/>
+        </javaModelGenerator>
+
+        <!-- targetPackage 和 targetProject：生成的 mapper 文件的包和位置 -->
+        <sqlMapGenerator targetPackage="com.vegetable.mapper"
+                         targetProject="src/main/resources">
+            <!-- 针对数据库的一个配置，是否把 schema 作为子包名 -->
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!-- targetPackage 和 targetProject：生成的 interface 文件的包和位置 -->
+        <javaClientGenerator type="XMLMAPPER"
+                             targetPackage="com.vegetable.dao.mapper" targetProject="src/main/java">
+            <!-- 针对 oracle 数据库的一个配置，是否把 schema 作为子包名 -->
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!-- tableName 是数据库中的表名，domainObjectName 是生成的 java 模型名，其他的参数不用改，要生成更多的表就在下面继续加 table 标签 -->
+        <!-- tableName = "%"表示数据库中所有表都参与逆向工程，此时使用默认规则 -->
+        <!-- 默认规则：table_dept → TableDept -->
+        <table tableName="user_base" domainObjectName="UserBase">
+            <!-- 配置主键生成策略 -->
+            <!--<generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
+        </table>
+        <table tableName="platform" domainObjectName="Platform"/>
+        <table tableName="user_opinion" domainObjectName="UserOpinion"/>
+        <table tableName="user_following" domainObjectName="UserFollowing"/>
+        <table tableName="user_following_type" domainObjectName="UserFollowingType"/>
+        <table tableName="user_following_remark" domainObjectName="UserFollowingRemark"/>
+        <table tableName="check_following_update" domainObjectName="CheckFollowingUpdate"/>
+
+    </context>
+</generatorConfiguration>
