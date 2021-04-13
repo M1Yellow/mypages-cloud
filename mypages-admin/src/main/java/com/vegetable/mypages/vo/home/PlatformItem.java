@@ -1,7 +1,7 @@
 package com.vegetable.mypages.vo.home;
 
-import com.vegetable.mypages.entity.Platform;
 import com.vegetable.mypages.entity.UserOpinion;
+import com.vegetable.mypages.entity.UserPlatform;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class PlatformItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "平台信息对象")
-    private Platform platformBaseInfo;
+    private UserPlatform platformBaseInfo;
 
     @ApiModelProperty(value = "用户对平台的看法列表")
     private List<UserOpinion> platformOpinionList;

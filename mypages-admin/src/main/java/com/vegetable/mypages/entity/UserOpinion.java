@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
  * 用户观点看法表
  * </p>
  *
- * @author Ming1
- * @since 2021-04-01
+ * @author M1Yellow
+ * @since 2021-04-13
  */
 @Data
 @AllArgsConstructor

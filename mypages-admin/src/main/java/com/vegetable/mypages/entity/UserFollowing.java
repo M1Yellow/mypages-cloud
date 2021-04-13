@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
  * 用户关注表
  * </p>
  *
- * @author Ming1
- * @since 2021-04-01
+ * @author M1Yellow
+ * @since 2021-04-13
  */
 @Data
 @AllArgsConstructor
@@ -53,7 +53,7 @@ public class UserFollowing implements Serializable {
     @ApiModelProperty(value = "个性签名")
     private String signature;
 
-    @ApiModelProperty(value = "优先级由低到高：1-10，默认5")
+    @ApiModelProperty(value = "优先级由低到高：1-10，默认5。8-思想、学习；7-美食、营养；6、健身、锻炼；5-兴趣、生活；4~其他")
     private Integer sortNo;
 
     @ApiModelProperty(value = "是否为用户，1-是用户；0-不是，默认1")

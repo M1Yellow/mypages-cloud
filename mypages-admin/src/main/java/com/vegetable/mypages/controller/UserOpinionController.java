@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
  * 用户观点看法表 前端控制器
  * </p>
  *
- * @author Ming1
- * @since 2021-04-01
+ * @author M1Yellow
+ * @since 2021-04-13
  */
 @RestController
 @RequestMapping("/user-opinion")

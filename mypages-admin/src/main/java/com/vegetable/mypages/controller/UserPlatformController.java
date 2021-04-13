@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 用户关注分类表 前端控制器
+ * 社交媒体平台表 前端控制器
  * </p>
  *
  * @author M1Yellow
  * @since 2021-04-13
  */
 @RestController
-@RequestMapping("/user-following-type")
-public class UserFollowingTypeController {
+@RequestMapping("/user-platform")
+public class UserPlatformController {
 
 }

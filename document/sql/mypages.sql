@@ -11,61 +11,11 @@
  Target Server Version : 50732
  File Encoding         : 65001
 
- Date: 12/04/2021 03:59:15
+ Date: 13/04/2021 14:11:37
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for check_following_update
--- ----------------------------
-DROP TABLE IF EXISTS `check_following_update`;
-CREATE TABLE `check_following_update`  (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
-  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id（冗余，方便关联查询）',
-  `following_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户关注表的id',
-  `new_count` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '新动态数量',
-  `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_following_id`(`following_id`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '检查关注用户更新表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of check_following_update
--- ----------------------------
-
--- ----------------------------
--- Table structure for platform
--- ----------------------------
-DROP TABLE IF EXISTS `platform`;
-CREATE TABLE `platform`  (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '平台名称',
-  `main_page` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台主页',
-  `platform_logo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台logo',
-  `platform_long_logo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台长logo',
-  `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5',
-  `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE,
-  INDEX `idx_sort_no`(`sort_no`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '社交媒体平台表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of platform
--- ----------------------------
-INSERT INTO `platform` VALUES (1, '前言', '/', '/images/platform-logo/mypages-logo.png', '/images/platform-logo/mypages-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `platform` VALUES (2, 'B站', 'https://www.bilibili.com', '/images/platform-logo/bilibili-logo.png', '/images/platform-logo/bilibili-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `platform` VALUES (3, '微博', 'https://weibo.com', '/images/platform-logo/weibo-logo.png', '/images/platform-logo/weibo-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `platform` VALUES (4, '豆瓣', 'https://www.douban.com', '/images/platform-logo/douban-logo.png', '/images/platform-logo/douban-long-logo-2.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `platform` VALUES (5, '知乎', 'https://www.zhihu.com', '/images/platform-logo/zhihu-logo.png', '/images/platform-logo/zhihu-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
 
 -- ----------------------------
 -- Table structure for user_base
@@ -121,6 +71,28 @@ INSERT INTO `user_base` VALUES (27, 'inout1129471', '123456', NULL, NULL, NULL, 
 INSERT INTO `user_base` VALUES (28, 'inout1129472', '123456', NULL, NULL, NULL, 1, b'0', '2021-01-06 11:29:47', '2021-01-06 11:29:47');
 INSERT INTO `user_base` VALUES (29, 'inout1129473', '123456', NULL, NULL, NULL, 1, b'0', '2021-01-06 11:29:47', '2021-01-06 11:29:47');
 INSERT INTO `user_base` VALUES (30, 'inout1129474', '123456', NULL, NULL, NULL, 1, b'0', '2021-01-06 11:29:47', '2021-01-06 11:29:47');
+
+-- ----------------------------
+-- Table structure for user_check_update
+-- ----------------------------
+DROP TABLE IF EXISTS `user_check_update`;
+CREATE TABLE `user_check_update`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id（冗余，方便关联查询）',
+  `following_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户关注表的id',
+  `new_count` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '新动态数量',
+  `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_following_id`(`following_id`) USING BTREE,
+  INDEX `idx_update_time`(`update_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '检查关注用户更新表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_check_update
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for user_following
@@ -438,7 +410,7 @@ CREATE TABLE `user_opinion`  (
   INDEX `idx_target_id`(`platform_id`) USING BTREE,
   INDEX `idx_update_time`(`update_time`) USING BTREE,
   INDEX `idx_sort_no`(`sort_no`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户观点看法表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户观点看法表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_opinion
@@ -472,6 +444,37 @@ INSERT INTO `user_opinion` VALUES (26, 1, 4, 0, '女性群聚之地，各种NC�
 INSERT INTO `user_opinion` VALUES (27, 1, 2, 0, '经常看到一些大UP主都说自己某某大学毕业，或者逆袭名校上岸，名校光环有效吗？有！但是否能走得长远，还得是活到老学到老，社会、人生是一辈子的大学。不盲目、不自卑、不好高骛远，结合自身实际条件，踏实走好每一步，高楼大厦固然宏伟壮阔，但空中楼阁却非常容易崩塌！', 5, b'0', '2021-04-01 07:17:15', '2021-04-01 07:17:15');
 INSERT INTO `user_opinion` VALUES (28, 1, 3, 0, '知道为什么现在的年轻人大都喜欢玩游戏吗？看看这几年评分高的电影、电视剧有几部啊？资本娱乐一个圈，矮子里面挑高个，硬凑生给，资本投喂`资本喂shi`，为了快速圈钱，捧造流量，造假热度。。。完全对不上观众的口味，不看吧，娱乐消遣的内容全都一个样，看吧，真的是==浪费生命==。上头政策管制约束只是一个框架，框架内部同样可以精彩纷呈，波澜壮阔。也不排除有各家对手职业买黑，毕竟市场蛋糕就这么大，竞争十分激烈。但观众用户都不是傻子，我想要的你没有，还一个劲地生给硬塞，投喂垃圾内容，我TM肯定不乐意啊，给差评还是客观了，你TM喂shi给我，我就骂你两句，是不是太便宜你了！！', 5, b'0', '2021-04-01 07:24:56', '2021-04-01 07:24:56');
 INSERT INTO `user_opinion` VALUES (29, 1, 5, 0, '**矮个子男生没人要吗？身高在择偶标准中有多重要**？有看到很多对男生 160+ 的情侣，每次看到都很有正能量。', 5, b'0', '2021-04-01 07:27:46', '2021-04-01 07:27:46');
+INSERT INTO `user_opinion` VALUES (30, 1, 1, 0, '>其中对各个平台的观点看法仅仅是个人观点，可能有些片面、过激，或是认知错误，不理会便是了，做好自己的事已不易。', 10, b'0', '2021-04-12 05:54:46', '2021-04-12 05:54:46');
+
+-- ----------------------------
+-- Table structure for user_platform
+-- ----------------------------
+DROP TABLE IF EXISTS `user_platform`;
+CREATE TABLE `user_platform`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '平台名称',
+  `main_page` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台主页',
+  `platform_logo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台logo',
+  `platform_long_logo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台长logo',
+  `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5',
+  `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_update_time`(`update_time`) USING BTREE,
+  INDEX `idx_sort_no`(`sort_no`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '社交媒体平台表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_platform
+-- ----------------------------
+INSERT INTO `user_platform` VALUES (1, 1, '前言', '/', '/images/platform-logo/mypages-logo.png', '/images/platform-logo/mypages-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (2, 1, 'B站', 'https://www.bilibili.com', '/images/platform-logo/bilibili-logo.png', '/images/platform-logo/bilibili-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (3, 1, '微博', 'https://weibo.com', '/images/platform-logo/weibo-logo.png', '/images/platform-logo/weibo-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (4, 1, '豆瓣', 'https://www.douban.com', '/images/platform-logo/douban-logo.png', '/images/platform-logo/douban-long-logo-2.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (5, 1, '知乎', 'https://www.zhihu.com', '/images/platform-logo/zhihu-logo.png', '/images/platform-logo/zhihu-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
 
 -- ----------------------------
 -- Function structure for f_test_empty

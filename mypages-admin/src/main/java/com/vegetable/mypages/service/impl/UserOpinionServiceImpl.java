@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
  * 用户观点看法表 服务实现类
  * </p>
  *
- * @author Ming1
- * @since 2021-04-01
+ * @author M1Yellow
+ * @since 2021-04-13
  */
 @Service
 public class UserOpinionServiceImpl extends ServiceImpl<UserOpinionMapper, UserOpinion> implements UserOpinionService {

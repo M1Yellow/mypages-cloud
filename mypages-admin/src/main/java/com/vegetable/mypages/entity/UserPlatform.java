@@ -13,18 +13,18 @@ import lombok.NoArgsConstructor;
 
 /**
  * <p>
- * 检查关注用户更新表
+ * 社交媒体平台表
  * </p>
  *
- * @author Ming1
- * @since 2021-04-01
+ * @author M1Yellow
+ * @since 2021-04-13
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "CheckFollowingUpdate对象", description = "检查关注用户更新表")
-public class CheckFollowingUpdate implements Serializable {
+@ApiModel(value = "UserPlatform对象", description = "社交媒体平台表")
+public class UserPlatform implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,14 +32,23 @@ public class CheckFollowingUpdate implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "关联用户id（冗余，方便关联查询）")
+    @ApiModelProperty(value = "关联用户id")
     private Long userId;
 
-    @ApiModelProperty(value = "关联用户关注表的id")
-    private Long followingId;
+    @ApiModelProperty(value = "平台名称")
+    private String name;
 
-    @ApiModelProperty(value = "新动态数量")
-    private Integer newCount;
+    @ApiModelProperty(value = "平台主页")
+    private String mainPage;
+
+    @ApiModelProperty(value = "平台logo")
+    private String platformLogo;
+
+    @ApiModelProperty(value = "平台长logo")
+    private String platformLongLogo;
+
+    @ApiModelProperty(value = "优先级由低到高：1-10，默认5")
+    private Integer sortNo;
 
     @ApiModelProperty(value = "本条数据是否已删除，1-是；0-否，默认0")
     private Boolean isDeleted;

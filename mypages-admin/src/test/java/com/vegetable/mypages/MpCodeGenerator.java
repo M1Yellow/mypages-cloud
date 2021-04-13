@@ -9,24 +9,24 @@ import com.vegetable.mypages.generator.service.CodeGenerator;
 public class MpCodeGenerator {
 
     /** 作者 */
-    private static final String AUTHOR = "Ming1";
+    private static final String AUTHOR = "M1Yellow";
 
     /** 数据库类型，mysql、oracle */
     private static final String DB_NAME = "mysql";
 
     /** 数据库表 */
     private static final String[] TABLES = {
-            "check_following_update",
-            "platform",
             "user_base",
+            "user_platform",
             "user_following",
-            "user_following_remark",
             "user_following_type",
-            "user_opinion"
+            "user_following_remark",
+            "user_opinion",
+            "user_check_update"
     };
 
     // 数据库连接信息
-    private static final String URL = "jdbc:mysql://192.168.3.151:3306/mypage?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8";
+    private static final String URL = "jdbc:mysql://192.168.3.151:3306/mypages?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8";
     private static final String DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "123456.a";

@@ -33,7 +33,7 @@ public class HomeController {
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     @Autowired
-    private PlatformService platformService;
+    private UserPlatformService userPlatformService;
     @Autowired
     private UserBaseService userBaseService;
     @Autowired
@@ -54,20 +54,21 @@ public class HomeController {
     @RequestMapping(value = "platformList")
     public CommonResult<List<PlatformItem>> platformList() {
         // 查询平台表，获取平台数据
-        QueryWrapper<Platform> platformQueryWrapper = new QueryWrapper();
+        QueryWrapper<UserPlatform> platformQueryWrapper = new QueryWrapper();
         platformQueryWrapper.eq("is_deleted", 0);
         platformQueryWrapper.orderByDesc("sort_no");
         platformQueryWrapper.orderByAsc("id");
-        List<Platform> PlatformList = platformService.list(platformQueryWrapper);
+        List<UserPlatform> PlatformList = userPlatformService.list(platformQueryWrapper);
 
         if (PlatformList == null || PlatformList.size() <= 0) { // 平台表数据异常
             logger.error("平台表数据异常");
             return CommonResult.failed();
         }
 
+        // TODO 获取内容代码太长，后续需抽取封装。太长对不熟悉业务的人非常不友好。
         // >>>> 首页平台内容数据封装 >>>>
         List<PlatformItem> platformItemList = new ArrayList<>();
-        for (Platform platform : PlatformList) {
+        for (UserPlatform platform : PlatformList) {
             PlatformItem platformItem = new PlatformItem();
             // 平台基础信息封装
             platformItem.setPlatformBaseInfo(platform);
@@ -227,7 +228,7 @@ public class HomeController {
 
     @ApiOperation("批量同步关注用户的信息")
     @RequestMapping(value = "syncFollowingUserInfoBatch")
-    public CommonResult<List<UserInfoItem>> syncFollowingUserInfoBatch(@RequestParam Long platformId) {
+    public CommonResult<List<UserInfoItem>> syncFollowingUserInfoBatch(@RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
 
         if (platformId == null) {
             logger.error("请求参数错误");
@@ -239,6 +240,7 @@ public class HomeController {
         followingQueryWrapper.eq("is_deleted", 0);
         followingQueryWrapper.eq("platform_id", platformId);
         followingQueryWrapper.eq("is_user", 1);
+        if (typeId != null) followingQueryWrapper.eq("ftype_Id", typeId);
 
         /*
         新增数据
