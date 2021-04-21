@@ -112,7 +112,7 @@
 
         <!-- 使用 yml 配置：log-impl: org.apache.ibatis.logging.stdout.StdOutImpl -->
         <!--
-        <logger name="com.vegetable.mypages.mapper" level="DEBUG">
+        <logger name="com.m1yellow.mypages.mapper" level="DEBUG">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE_INFO"/>
             <appender-ref ref="FILE_ERROR"/>

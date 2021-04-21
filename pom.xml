@@ -16,7 +16,7 @@
 
     <!-- 当前项目信息 -->
     <!-- 公共父模块 -->
-    <groupId>com.vegetable.mypages</groupId>
+    <groupId>com.m1yellow.mypages</groupId>
     <artifactId>mypages</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>MyPages</name>
@@ -80,12 +80,20 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- tomcat 设置 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <!-- 打包阶段 exclude 剔除 -->
             <scope>provided</scope>
         </dependency>
+        <!-- common-lang3 util 工具类 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <!-- lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -130,25 +138,25 @@
         <dependencies>
             <!-- mypages common 通用模块 -->
             <dependency>
-                <groupId>com.vegetable.mypages</groupId>
+                <groupId>com.m1yellow.mypages</groupId>
                 <artifactId>mypages-common</artifactId>
                 <version>${mypages-common.version}</version>
             </dependency>
             <!-- mypages security 安全模块 -->
             <dependency>
-                <groupId>com.vegetable.mypages</groupId>
+                <groupId>com.m1yellow.mypages</groupId>
                 <artifactId>mypages-security</artifactId>
                 <version>${mypages-security.version}</version>
             </dependency>
             <!-- mypages generator 代码生成器模块 -->
             <dependency>
-                <groupId>com.vegetable.mypages</groupId>
+                <groupId>com.m1yellow.mypages</groupId>
                 <artifactId>mypages-generator</artifactId>
                 <version>${mypages-generator.version}</version>
             </dependency>
             <!-- mypages excavation 数据挖掘模块 -->
             <dependency>
-                <groupId>com.vegetable.mypages</groupId>
+                <groupId>com.m1yellow.mypages</groupId>
                 <artifactId>mypages-excavation</artifactId>
                 <version>${mypages-excavation.version}</version>
             </dependency>

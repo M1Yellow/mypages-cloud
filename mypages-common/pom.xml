@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.vegetable.mypages</groupId>
+        <groupId>com.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- 通用功能模块 -->
-    <groupId>com.vegetable.mypages</groupId>
+    <groupId>com.m1yellow.mypages</groupId>
     <artifactId>mypages-common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-common</name>

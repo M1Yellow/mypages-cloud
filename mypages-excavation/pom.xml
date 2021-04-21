@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.vegetable.mypages</groupId>
+        <groupId>com.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- 数据挖掘模块 -->
-    <groupId>com.vegetable.mypages</groupId>
+    <groupId>com.m1yellow.mypages</groupId>
     <artifactId>mypages-excavation</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-excavation</name>
@@ -21,7 +21,7 @@
     <dependencies>
         <!-- mypages security 安全模块 -->
         <dependency>
-            <groupId>com.vegetable.mypages</groupId>
+            <groupId>com.m1yellow.mypages</groupId>
             <artifactId>mypages-security</artifactId>
         </dependency>
 

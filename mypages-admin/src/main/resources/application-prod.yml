@@ -62,9 +62,9 @@ spring:
 
 mybatis-plus:
   # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
-  mapper-locations: classpath:com/vegetable/mypages/mapper/xml/*.xml
+  mapper-locations: classpath:com/m1yellow/mypages/mapper/xml/*.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: com.vegetable.mypages.entity
+  typeAliasesPackage: com.m1yellow.mypages.entity
   global-config:
     banner: false
     # 数据库相关配置
@@ -96,3 +96,8 @@ mybatis-plus:
 # logging.config 加载配置文件，如果外部配置和xml配置同时配置了参数，最终取xml的配置
 logging:
   config: classpath:config/logback-spring.xml
+
+# 用户头像保存位置
+user:
+  avatar:
+    savedir: mypages-admin/src/main/resources/public/images/user-profile-photo/
