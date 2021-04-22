@@ -96,8 +96,10 @@ mybatis-plus:
 # logging.config 加载配置文件，如果外部配置和xml配置同时配置了参数，最终取xml的配置
 logging:
   config: classpath:config/logback-spring.xml
+  log-path: logs
+
 
 # 用户头像保存位置
 user:
   avatar:
-    savedir: mypages-admin/src/main/resources/public/images/user-profile-photo/
+    savedir: public/images/user-profile-photo/

@@ -96,8 +96,33 @@ mybatis-plus:
 # logging.config 加载配置文件，如果外部配置和xml配置同时配置了参数，最终取xml的配置
 logging:
   config: classpath:config/logback-spring.xml
+  log-path: logs
+
+
+# 【项目文件路径问题】
+# https://juejin.cn/post/6844904186690142222
+# 使用工程相对路径是靠不住的。本地运行没问题，发布到 Linux 路径不对。
+# 使用 CLASSPATH 路径是可靠的。对于程序要读取的文件，尽可能放到 CLASSPATH 下，这样就能保证在开发和发布时候均正常读取。
+
+# 在 project 中，相对路径的根目录是 project 的根文件夹，创建文件的写法是：
+# 相对路径：D:\code\River\JavaSE（也就是工程的相对路径），注意路径不能以"/"开头
+# File file = new File("javaIO/src/main/java/org/test/stream/a.jpg");
+# 绝对路径：
+# File file = new File("D:\code\River\JavaSE\javaIO\src\main\java\org\test\stream\a.jpg");
+
+# System.out.println(MyTest.class.getResource("")); // 类所在的具体目录
+# System.out.println(MyTest.class.getResource("/")); // 项目 classpath 目录的路径
+# System.out.println(this.getClass().getResource(""));
+# System.out.println(this.getClass().getResource("/"));
+
+# Class.getClassLoader().getResource(String path)
+# 该方法中的参数path不能以“/“开头，path表示的是从classpath下获取资源
+
 
 # 用户头像保存位置
 user:
   avatar:
-    savedir: mypages-admin/src/main/resources/public/images/user-profile-photo/
+    # 相对项目根目录，本地运行可行，部署 Linux 之后，根目录为 /，导致路径出错
+    #savedir: mypages-admin/src/main/resources/public/images/user-profile-photo/
+    # target 下的 classes 目录，不区分平台，但本地项目执行 mvn clean 后会被清理
+    savedir: public/images/user-profile-photo/

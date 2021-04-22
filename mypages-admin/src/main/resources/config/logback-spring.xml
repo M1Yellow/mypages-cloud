@@ -17,7 +17,7 @@
     <!--<property name="LOG_PATH" value="E:/DevRes/Projects/mypages/mypages-admin/logs"/>-->
     <!-- 相对路径，项目目录/logs -->
     <!--<property name="LOG_PATH" value="logs"/>-->
-    <!-- 配置参数 LOG_PATH 读取 application.yml 中的 log-path 属性，如果没有配置，默认是只 logs -->
+    <!-- 配置参数 LOG_PATH 读取 application.yml 中的 log-path 属性，如果没有配置，默认是 logs -->
     <springProperty scope="context" name="LOG_PATH" source="logging.log-path" defaultValue="logs"/>
 
     <!-- 自定义参数 -->
@@ -129,7 +129,7 @@
     </springProfile>
 
     <springProfile name="!prod">
-        <!-- 当 "生产" 环境时，该配置不激活-->
+        <!-- 非生产环境配置 -->
     </springProfile>
 
 </configuration>

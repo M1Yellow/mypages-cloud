@@ -33,9 +33,6 @@ public class DataOfBiliExcavateServiceImpl implements DataExcavateService {
 
     private static final Logger logger = LoggerFactory.getLogger(DataOfBiliExcavateServiceImpl.class);
 
-    @Value("${user.avatar.savedir}")
-    private String saveDir;
-
     // TODO 这里报错，实际是能通过编译的
     @Resource(name = "httpClientDownloadService")
     FileDownloadService httpClientDownloadService;

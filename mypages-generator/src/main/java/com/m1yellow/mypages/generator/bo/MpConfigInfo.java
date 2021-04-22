@@ -67,6 +67,8 @@ public class MpConfigInfo implements Serializable {
     // StrategyConfig 策略配置
     @ApiModelProperty(value = "要操作的数据库表")
     private String[] scInclude;
+    @ApiModelProperty(value = "逻辑删除字段")
+    private String scLogicDeleteFieldName;
     @ApiModelProperty(value = "是否启用 lombok")
     private boolean scEntityLombokModel;
     @ApiModelProperty(value = "是否启用 restful 风格")

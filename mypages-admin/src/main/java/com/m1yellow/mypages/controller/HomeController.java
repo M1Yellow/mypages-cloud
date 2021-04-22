@@ -3,7 +3,6 @@ package com.m1yellow.mypages.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.m1yellow.mypages.common.api.CommonResult;
 import com.m1yellow.mypages.entity.*;
-import com.m1yellow.mypages.excavation.bo.UserInfoItem;
 import com.m1yellow.mypages.service.*;
 import com.m1yellow.mypages.vo.home.PlatformItem;
 import com.m1yellow.mypages.vo.home.UserFollowingItem;
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -173,119 +171,6 @@ public class HomeController {
         }
 
         return CommonResult.success(platformItemList);
-    }
-
-
-    @ApiOperation("同步关注用户的信息")
-    //@RequestMapping(value = "syncFollowingUserInfo/{fuid}") // @PathVariable String fuid
-    @RequestMapping(value = "syncFollowingUserInfo")
-    public CommonResult<UserInfoItem> syncFollowingUserInfo(@RequestParam Long fuid) {
-
-        if (fuid == null) {
-            logger.error("请求参数错误");
-            return CommonResult.failed("请求参数错误");
-        }
-
-        // 查询用户主页
-        QueryWrapper<UserFollowing> followingQueryWrapper = new QueryWrapper();
-        followingQueryWrapper.eq("is_deleted", 0);
-        //followingQueryWrapper.eq("platform_id", platformId);
-        followingQueryWrapper.eq("id", fuid);
-        followingQueryWrapper.eq("is_user", 1);
-        UserFollowing following = userFollowingService.getOne(followingQueryWrapper);
-
-        if (following == null) {
-            logger.error("关注用户表不存在id:" + fuid);
-            return CommonResult.failed();
-        }
-
-        /**
-         * 使用工程相对路径是靠不住的。
-         * 使用CLASSPATH路径是可靠的。
-         * 对于程序要读取的文件，尽可能放到CLASSPATH下，这样就能保证在开发和发布时候均正常读取。
-         */
-        // 获取用户信息
-        UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
-        if (userInfoItem == null) {
-            logger.error("用户信息获取失败，following id:" + fuid);
-            return CommonResult.failed();
-        }
-
-        // 更新信息，保存入库
-        userFollowingService.saveUserInfo(userInfoItem, following);
-
-        return CommonResult.success(userInfoItem);
-    }
-
-
-    @ApiOperation("批量同步关注用户的信息")
-    @RequestMapping(value = "syncFollowingUserInfoBatch")
-    public CommonResult<List<UserInfoItem>> syncFollowingUserInfoBatch(@RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
-
-        if (platformId == null) {
-            logger.error("请求参数错误");
-            return CommonResult.failed("请求参数错误");
-        }
-
-        // 查询用户主页
-        QueryWrapper<UserFollowing> followingQueryWrapper = new QueryWrapper();
-        followingQueryWrapper.eq("is_deleted", 0);
-        followingQueryWrapper.eq("platform_id", platformId);
-        followingQueryWrapper.eq("is_user", 1);
-        if (typeId != null) followingQueryWrapper.eq("ftype_Id", typeId);
-
-        /*
-        新增数据
-        -- 8-思想、学习；7-美食、营养；6、健身、锻炼；5-兴趣、生活；4~其他
-        select * from user_following where platform_id = 2 order by sort_no desc, id asc;
-
-        INSERT INTO `mypage`.`user_following` (`user_id`, `platform_id`, `ftype_id`, `name`, `main_page`) VALUES (1, 3, 3, '帅soserious', 'https://m.weibo.cn/u/2289940200');
-
-        select @muid := max(id) from user_following;
-        INSERT INTO `mypage`.`user_following_remark` (`user_id`, `following_id`, `label_name`)
-        VALUES
-        (1, @muid, '时尚'),
-        (1, @muid, '穿搭'),
-        (1, @muid, '生活');
-
-        处理中断之后的数据
-        select * from user_following where platform_id = 3 and is_user = 1 and is_deleted = 0 and signature like '这个人%';
-
-        */
-        //followingQueryWrapper.like("signature", "这个人%");
-        //followingQueryWrapper.gt("id", 59);
-        //followingQueryWrapper.isNull("profile_photo");
-
-        List<UserFollowing> userFollowingList = userFollowingService.list(followingQueryWrapper);
-
-        if (userFollowingList == null || userFollowingList.size() <= 0) {
-            logger.error("关注用户表数据异常");
-            return CommonResult.failed();
-        }
-
-        List<UserInfoItem> userInfoItemList = new ArrayList<>();
-        for (UserFollowing following : userFollowingList) {
-            // 获取用户信息
-            UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
-            if (userInfoItem == null) {
-                logger.error("用户信息获取失败，following id:" + following.getId());
-                return CommonResult.failed();
-            }
-
-            // 更新信息，保存入库
-            userFollowingService.saveUserInfo(userInfoItem, following);
-
-            userInfoItemList.add(userInfoItem);
-
-            // 避免频繁访问被封
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return CommonResult.success(userInfoItemList);
     }
 
 }

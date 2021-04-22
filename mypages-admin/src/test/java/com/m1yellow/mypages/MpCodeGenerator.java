@@ -65,6 +65,7 @@ public class MpCodeGenerator {
 
         // StrategyConfig 策略配置
         //mpConfigInfo.setScInclude(TABLES);
+        mpConfigInfo.setScLogicDeleteFieldName("is_deleted"); // 注意，是对应数据库表字段
         mpConfigInfo.setScEntityLombokModel(true);
         mpConfigInfo.setScRestControllerStyle(true);
         mpConfigInfo.setScControllerMappingHyphenStyle(true);

@@ -13,4 +13,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserPlatformService extends IService<UserPlatform> {
 
+    /**
+     * 逻辑删除平台
+     * @param platform
+     * @return
+     */
+    boolean deleteById(UserPlatform platform);
+
 }

@@ -14,7 +14,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,9 +32,6 @@ public class DataOfWeiboExcavateServiceImpl implements DataExcavateService {
 
     private static final Logger logger = LoggerFactory.getLogger(DataOfWeiboExcavateServiceImpl.class);
 
-    @Value("${user.avatar.savedir}")
-    private String saveDir;
-
     // TODO 这里报错，实际是能通过编译的
     @Resource(name = "httpClientDownloadService")
     FileDownloadService httpClientDownloadService;
@@ -45,6 +41,7 @@ public class DataOfWeiboExcavateServiceImpl implements DataExcavateService {
 
     /**
      * 一部加载渲染内容数据，不方便获取（暂未使用）
+     *
      * @param fromUrl
      * @param saveDir
      * @param params

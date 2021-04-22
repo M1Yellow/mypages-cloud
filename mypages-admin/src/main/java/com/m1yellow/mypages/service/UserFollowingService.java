@@ -29,4 +29,11 @@ public interface UserFollowingService extends IService<UserFollowing> {
      */
     boolean saveUserInfo(UserInfoItem userInfoItem, UserFollowing following);
 
+    /**
+     * 根据 id 逻辑删除
+     * @param following
+     * @return
+     */
+    boolean deleteById(UserFollowing following);
+
 }

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
 import com.baomidou.mybatisplus.generator.InjectionConfig;
 import com.baomidou.mybatisplus.generator.config.*;
+import com.baomidou.mybatisplus.generator.config.builder.ConfigBuilder;
+import com.baomidou.mybatisplus.generator.config.rules.FileType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.m1yellow.mypages.generator.bo.MpConfigInfo;
@@ -11,8 +13,7 @@ import com.m1yellow.mypages.generator.service.CodeGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
 
 /**
  * MyBatis-Plus 代码生成器实现类
@@ -96,6 +97,7 @@ public class MpCodeGenerator implements CodeGenerator<MpConfigInfo> {
         strategy.setInclude(mpConfigInfo.getDbTables());
         strategy.setNaming(NamingStrategy.underline_to_camel);
         strategy.setColumnNaming(NamingStrategy.underline_to_camel);
+        strategy.setLogicDeleteFieldName(mpConfigInfo.getScLogicDeleteFieldName());
         strategy.setEntityLombokModel(mpConfigInfo.isScEntityLombokModel());
         strategy.setRestControllerStyle(mpConfigInfo.isScRestControllerStyle());
         strategy.setControllerMappingHyphenStyle(mpConfigInfo.isScControllerMappingHyphenStyle()); // localhost:8080/hello_id_2
@@ -104,6 +106,7 @@ public class MpCodeGenerator implements CodeGenerator<MpConfigInfo> {
 
 
         // 自定义属性注入，不需要可以不定义
+        /*
         InjectionConfig injectionConfig = new InjectionConfig() {
             // 自定义属性注入:abc
             // 在.ftl(或者是.vm)模板中，通过${cfg.abc}获取属性
@@ -114,16 +117,72 @@ public class MpCodeGenerator implements CodeGenerator<MpConfigInfo> {
                 this.setMap(map);
             }
         };
+        */
+
         // 配置自定义属性注入
+        // TODO injectionConfig() 中配置了只生成 entity 实体类，如果不限制，注释下面两行代码
+        InjectionConfig injectionConfig = injectionConfig();
         mpg.setCfg(injectionConfig);
 
         // 执行生成器
         mpg.execute();
     }
 
+
+    /**
+     * 自定义配置
+     * @param fileTypeEnum
+     * @return
+     */
+    private InjectionConfig injectionConfig(FileType... fileTypeEnum) {
+        InjectionConfig injectionConfig = new InjectionConfig() {
+            @Override
+            public void initMap() {
+                // to do nothing
+            }
+        };
+        injectionConfig.setFileCreate(new IFileCreate() {
+            @Override
+            public boolean isCreate(ConfigBuilder configBuilder, FileType fileType, String filePath) {
+                if (fileTypeEnum.length == 0) {
+                    // 无参情况下，先检查 .java 文件是否存在
+                    // 如果不存在，则创建；如果存在，判断是否为 entity.java，如果是，创建（覆盖）；否则，不创建
+                    checkDir(filePath);
+                    File file = new File(filePath);
+                    if (file.exists()) {
+                        // 只创建 entity 实体类文件
+                        if (FileType.ENTITY == fileType) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    // 有参情况下，只创建传入的 .java，无论存在都直接覆盖。
+                    boolean isType = false;
+                    for (int i = 0; i < fileTypeEnum.length; i++) {
+                        if (fileTypeEnum[i] == fileType) {
+                            isType = true;
+                            break;
+                        }
+                    }
+                    if (!isType) {
+                        return false;
+                    }
+                    checkDir(filePath);
+                    return true;
+                }
+            }
+        });
+
+        return injectionConfig;
+    }
+
+
     private DbType getDbTypeByName(String dbName) {
         if (StringUtils.isNotEmpty(dbName)) {
-            switch(dbName.trim().toLowerCase()) {
+            switch (dbName.trim().toLowerCase()) {
                 case "oracle":
                     return DbType.ORACLE;
             }

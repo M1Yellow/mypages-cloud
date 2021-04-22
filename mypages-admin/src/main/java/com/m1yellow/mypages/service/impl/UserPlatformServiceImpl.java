@@ -17,4 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserPlatformServiceImpl extends ServiceImpl<UserPlatformMapper, UserPlatform> implements UserPlatformService {
 
+    @Override
+    public boolean deleteById(UserPlatform platform) {
+        return updateById(platform);
+    }
 }
