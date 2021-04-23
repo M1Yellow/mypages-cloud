@@ -18,7 +18,9 @@ public class MpCodeGenerator {
     private static final String[] TABLES = {
             "user_base",
             "user_platform",
+            "user_platform_relation",
             "user_following",
+            "user_following_relation",
             "user_following_type",
             "user_following_remark",
             "user_opinion",
@@ -65,7 +67,8 @@ public class MpCodeGenerator {
 
         // StrategyConfig 策略配置
         //mpConfigInfo.setScInclude(TABLES);
-        mpConfigInfo.setScLogicDeleteFieldName("is_deleted"); // 注意，是对应数据库表字段
+        // TODO yml配置不生效，代码配置后才生效。可以在这控制是否启用逻辑删除功能。注意，名称是对应数据库表字段
+        mpConfigInfo.setScLogicDeleteFieldName("is_deleted");
         mpConfigInfo.setScEntityLombokModel(true);
         mpConfigInfo.setScRestControllerStyle(true);
         mpConfigInfo.setScControllerMappingHyphenStyle(true);

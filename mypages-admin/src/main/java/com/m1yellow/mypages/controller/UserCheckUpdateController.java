@@ -2,7 +2,6 @@ package com.m1yellow.mypages.controller;
 
 
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2021-04-13
  */
 @RestController
-@RequestMapping("/user-check-update")
+@RequestMapping("/update")
 public class UserCheckUpdateController {
 
 }

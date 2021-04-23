@@ -3,6 +3,7 @@ package com.m1yellow.mypages.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
  * </p>
  *
  * @author M1Yellow
- * @since 2021-04-13
+ * @since 2021-04-22
  */
 @Data
 @AllArgsConstructor
@@ -48,6 +49,7 @@ public class UserOpinion implements Serializable {
     private Integer sortNo;
 
     @ApiModelProperty(value = "本条数据是否已删除，1-是；0-否，默认0")
+    @TableLogic
     private Boolean isDeleted;
 
     @ApiModelProperty(value = "创建时间")

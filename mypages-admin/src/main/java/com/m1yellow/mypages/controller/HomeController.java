@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * 首页内容 controller
  */
-@RestController
+@RestController // 整个 controller 返回 json 格式数据。@ResponseBody 是单个方法返回 json 格式数据
 @RequestMapping("/home")
 public class HomeController {
 
@@ -43,12 +44,31 @@ public class HomeController {
     private UserFollowingRemarkService userFollowingRemarkService;
 
 
+    /*
+    RequestMapping 注解中 consumes 与 produces 的区别：
+    HTTP协议Header中的ContentType 和Accept
+
+    在 Request 中
+    ContentType 用来告诉服务器当前发送的数据是什么格式
+    Accept 用来告诉服务器，客户端能认识哪些格式，最好返回这些格式中的其中一种
+    accept: Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*\/\*;q=0.8,application/signed-exchange;v=b3;q=0.9
+
+    consumes 用来限制 ContentType
+    produces 用来限制 Accept
+    charset=utf-8 指定编码格式
+
+    如果使用了 @RestController 或 @ResponseBody，produces 中可以不用重复指定
+    , method = RequestMethod.GET, produces = "application/json;charset=utf-8"
+
+    */
+
     @ApiOperation("首页平台所有内容")
-    @RequestMapping(value = "platformList")
+    @RequestMapping(value = "platformList", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     public CommonResult<List<PlatformItem>> platformList() {
         // 查询平台表，获取平台数据
         QueryWrapper<UserPlatform> platformQueryWrapper = new QueryWrapper();
-        platformQueryWrapper.eq("is_deleted", 0);
+        // TODO 配置逻辑删除功能之后，手动筛选代码要去掉，不然会筛选两次，影响效率！
+        //platformQueryWrapper.eq("is_deleted", 0);
         platformQueryWrapper.orderByDesc("sort_no");
         platformQueryWrapper.orderByAsc("id");
         List<UserPlatform> PlatformList = userPlatformService.list(platformQueryWrapper);
@@ -68,7 +88,7 @@ public class HomeController {
 
             // 用户对平台看法表内容封装
             QueryWrapper<UserOpinion> opinionQueryWrapper = new QueryWrapper();
-            opinionQueryWrapper.eq("is_deleted", 0);
+            //opinionQueryWrapper.eq("is_deleted", 0);
             opinionQueryWrapper.eq("platform_id", platform.getId()); // 关联目标的id，平台id、关注类型id
             opinionQueryWrapper.eq("opinion_type", 0); // 观点对应类型，0-平台；其他-某一类型
             opinionQueryWrapper.orderByDesc("sort_no");
@@ -78,7 +98,7 @@ public class HomeController {
 
             // 用户关注类型列表封装 start
             QueryWrapper<UserFollowing> followingTypeIdQueryWrapper = new QueryWrapper();
-            followingTypeIdQueryWrapper.eq("is_deleted", 0);
+            //followingTypeIdQueryWrapper.eq("is_deleted", 0);
             followingTypeIdQueryWrapper.eq("platform_id", platform.getId());
             followingTypeIdQueryWrapper.select("ftype_id");
             followingTypeIdQueryWrapper.groupBy("ftype_id");
@@ -86,7 +106,7 @@ public class HomeController {
 
             // 没有关注用户的类型，可能也有意见看法，查询该平台有看法的类型
             QueryWrapper<UserOpinion> opinionTypeIdQueryWrapper = new QueryWrapper();
-            opinionTypeIdQueryWrapper.eq("is_deleted", 0);
+            //opinionTypeIdQueryWrapper.eq("is_deleted", 0);
             opinionTypeIdQueryWrapper.eq("platform_id", platform.getId());
             opinionTypeIdQueryWrapper.ne("opinion_type", 0); // 0-平台的看法
             opinionTypeIdQueryWrapper.select("opinion_type");
@@ -126,7 +146,7 @@ public class HomeController {
 
                 // 用户对关注类型的看法列表
                 QueryWrapper<UserOpinion> typeOpinionQueryWrapper = new QueryWrapper();
-                typeOpinionQueryWrapper.eq("is_deleted", 0);
+                //typeOpinionQueryWrapper.eq("is_deleted", 0);
                 typeOpinionQueryWrapper.eq("platform_id", platform.getId()); // 关联目标的id，平台id、关注类型id
                 typeOpinionQueryWrapper.eq("opinion_type", typeId); // 观点对应类型，0-平台；其他-某一类型
                 typeOpinionQueryWrapper.orderByDesc("sort_no");
@@ -136,7 +156,7 @@ public class HomeController {
 
                 // 用户在某类型下的关注用户列表
                 QueryWrapper<UserFollowing> typeFollowingQueryWrapper = new QueryWrapper();
-                typeFollowingQueryWrapper.eq("is_deleted", 0);
+                //typeFollowingQueryWrapper.eq("is_deleted", 0);
                 typeFollowingQueryWrapper.eq("platform_id", platform.getId());
                 typeFollowingQueryWrapper.eq("ftype_id", typeId);
                 typeFollowingQueryWrapper.orderByDesc("sort_no");

@@ -16,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -61,9 +58,9 @@ public class UserFollowingController {
      * @RequestParam适用于name-valueString类型的请求域，@RequestPart适用于复杂的请求域（像JSON，XML）。 <b>添加关注用户</b>
      */
 
-    @ApiOperation("添加关注用户")
-    @RequestMapping(value = "add")
-    public CommonResult<UserFollowingItem> addFollowing(UserFollowing following, @RequestPart(required = false) MultipartFile profile, @RequestParam(required = false) String[] remarks) {
+    @ApiOperation("添加/更新关注用户")
+    @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
+    public CommonResult<UserFollowingItem> add(@RequestBody UserFollowing following, @RequestPart(required = false) MultipartFile profile, @RequestParam(required = false) String[] remarks) {
 
         if (following == null) {
             logger.error("请求参数错误");
@@ -181,7 +178,7 @@ public class UserFollowingController {
 
     @ApiOperation("同步关注用户的信息")
     //@RequestMapping(value = "syncOne/{fuid}") // @PathVariable String fuid
-    @RequestMapping(value = "syncOne")
+    @RequestMapping(value = "syncOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     public CommonResult<UserInfoItem> syncFollowingInfo(@RequestParam Long fuid) {
 
         if (fuid == null) {
@@ -191,7 +188,7 @@ public class UserFollowingController {
 
         // 查询用户主页
         QueryWrapper<UserFollowing> followingQueryWrapper = new QueryWrapper();
-        followingQueryWrapper.eq("is_deleted", 0);
+        //followingQueryWrapper.eq("is_deleted", 0);
         //followingQueryWrapper.eq("platform_id", platformId);
         followingQueryWrapper.eq("id", fuid);
         followingQueryWrapper.eq("is_user", 1);
@@ -217,7 +214,7 @@ public class UserFollowingController {
 
 
     @ApiOperation("批量同步关注用户的信息")
-    @RequestMapping(value = "syncBatch")
+    @RequestMapping(value = "syncBatch", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     public CommonResult<List<UserInfoItem>> syncFollowingInfoBatch(@RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
 
         if (platformId == null) {
@@ -227,7 +224,7 @@ public class UserFollowingController {
 
         // 查询用户主页
         QueryWrapper<UserFollowing> followingQueryWrapper = new QueryWrapper();
-        followingQueryWrapper.eq("is_deleted", 0);
+        //followingQueryWrapper.eq("is_deleted", 0);
         followingQueryWrapper.eq("platform_id", platformId);
         followingQueryWrapper.eq("is_user", 1);
         if (typeId != null) followingQueryWrapper.eq("ftype_Id", typeId);
@@ -237,10 +234,10 @@ public class UserFollowingController {
         -- 8-思想、学习；7-美食、营养；6、健身、锻炼；5-兴趣、生活；4~其他
         select * from user_following where platform_id = 2 order by sort_no desc, id asc;
 
-        INSERT INTO `mypage`.`user_following` (`user_id`, `platform_id`, `ftype_id`, `name`, `main_page`) VALUES (1, 3, 3, '帅soserious', 'https://m.weibo.cn/u/2289940200');
+        INSERT INTO `mypages`.`user_following` (`user_id`, `platform_id`, `ftype_id`, `name`, `main_page`) VALUES (1, 3, 3, '帅soserious', 'https://m.weibo.cn/u/2289940200');
 
         select @muid := max(id) from user_following;
-        INSERT INTO `mypage`.`user_following_remark` (`user_id`, `following_id`, `label_name`)
+        INSERT INTO `mypages`.`user_following_remark` (`user_id`, `following_id`, `label_name`)
         VALUES
         (1, @muid, '时尚'),
         (1, @muid, '穿搭'),
@@ -288,24 +285,28 @@ public class UserFollowingController {
 
 
     @ApiOperation("移除关注用户")
-    @RequestMapping(value = "remove")
-    public CommonResult<String> removeFollowing(@RequestParam Long fuid) {
+    @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    public CommonResult<String> remove(@RequestParam Long id) {
 
-        if (fuid == null) {
+        if (id == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
+        /*
+        // 手动实现逻辑删除
         UserFollowing following = new UserFollowing();
-        following.setId(fuid); // 不会整表更新。不设置 id，也还是会有 where id=? 传的是 null
+        following.setId(id); // 不会整表更新。不设置 id，也还是会有 where id=? 传的是 null
         following.setIsDeleted(true);
+        */
 
-        if (!userFollowingService.removeById(fuid)) {
-            logger.error("移除关注用户失败，following id:" + fuid);
-            return CommonResult.failed("移除关注用户失败");
+        // TODO 配置了逻辑删除，走的是更新逻辑
+        if (!userFollowingService.removeById(id)) {
+            logger.error("移除失败，id:" + id);
+            return CommonResult.failed("移除失败");
         }
 
-        return CommonResult.success("移除关注用户成功");
+        return CommonResult.success("操作成功");
     }
 
 
