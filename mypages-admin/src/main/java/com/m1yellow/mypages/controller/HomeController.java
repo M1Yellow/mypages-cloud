@@ -1,8 +1,12 @@
 package com.m1yellow.mypages.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.m1yellow.mypages.bo.UserFollowingBo;
+import com.m1yellow.mypages.bo.UserPlatformBo;
 import com.m1yellow.mypages.common.api.CommonResult;
-import com.m1yellow.mypages.entity.*;
+import com.m1yellow.mypages.entity.UserFollowingRemark;
+import com.m1yellow.mypages.entity.UserFollowingType;
+import com.m1yellow.mypages.entity.UserOpinion;
 import com.m1yellow.mypages.service.*;
 import com.m1yellow.mypages.vo.home.PlatformItem;
 import com.m1yellow.mypages.vo.home.UserFollowingItem;
@@ -13,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -64,24 +69,32 @@ public class HomeController {
 
     @ApiOperation("首页平台所有内容")
     @RequestMapping(value = "platformList", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
-    public CommonResult<List<PlatformItem>> platformList() {
+    public CommonResult<List<PlatformItem>> platformList(@RequestParam Long userId) {
+
+        if (userId == null) {
+            logger.error("请求参数错误");
+            return CommonResult.failed("请求参数错误");
+        }
+
+        /**
+         * 数据查询封装顺序
+         * 每个平台的数据 -> 平台下的类型数据 -> 类型下的用户数据
+         */
+
         // 查询平台表，获取平台数据
-        QueryWrapper<UserPlatform> platformQueryWrapper = new QueryWrapper();
-        // TODO 配置逻辑删除功能之后，手动筛选代码要去掉，不然会筛选两次，影响效率！
-        //platformQueryWrapper.eq("is_deleted", 0);
-        platformQueryWrapper.orderByDesc("sort_no");
-        platformQueryWrapper.orderByAsc("id");
-        List<UserPlatform> PlatformList = userPlatformService.list(platformQueryWrapper);
+        Map<String, Object> platformQueryParams = new HashMap<>();
+        platformQueryParams.put("userId", userId);
+        List<UserPlatformBo> PlatformList = userPlatformService.queryUserPlatformList(platformQueryParams);
 
         if (PlatformList == null || PlatformList.size() <= 0) { // 平台表数据异常
             logger.error("平台表数据异常");
-            return CommonResult.failed();
+            return CommonResult.failed("获取平台记录失败");
         }
 
         // TODO 获取内容代码太长，后续需抽取封装。太长对不熟悉业务的人非常不友好。
         // >>>> 首页平台内容数据封装 >>>>
         List<PlatformItem> platformItemList = new ArrayList<>();
-        for (UserPlatform platform : PlatformList) {
+        for (UserPlatformBo platform : PlatformList) {
             PlatformItem platformItem = new PlatformItem();
             // 平台基础信息封装
             platformItem.setPlatformBaseInfo(platform);
@@ -89,42 +102,34 @@ public class HomeController {
             // 用户对平台看法表内容封装
             QueryWrapper<UserOpinion> opinionQueryWrapper = new QueryWrapper();
             //opinionQueryWrapper.eq("is_deleted", 0);
-            opinionQueryWrapper.eq("platform_id", platform.getId()); // 关联目标的id，平台id、关注类型id
+            opinionQueryWrapper.eq("user_id", userId);
+            opinionQueryWrapper.eq("platform_id", platform.getPlatformId()); // 对应平台表的id
             opinionQueryWrapper.eq("opinion_type", 0); // 观点对应类型，0-平台；其他-某一类型
             opinionQueryWrapper.orderByDesc("sort_no");
-            opinionQueryWrapper.orderByAsc("id");
             List<UserOpinion> platformOpinionList = userOpinionService.list(opinionQueryWrapper);
             platformItem.setPlatformOpinionList(platformOpinionList);
 
-            // 用户关注类型列表封装 start
-            QueryWrapper<UserFollowing> followingTypeIdQueryWrapper = new QueryWrapper();
-            //followingTypeIdQueryWrapper.eq("is_deleted", 0);
-            followingTypeIdQueryWrapper.eq("platform_id", platform.getId());
-            followingTypeIdQueryWrapper.select("ftype_id");
-            followingTypeIdQueryWrapper.groupBy("ftype_id");
-            List<UserFollowing> followingTypeIdList = userFollowingService.list(followingTypeIdQueryWrapper);
+            // 关注类型列表封装 start
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("platformId", platform.getId());
+            List<Long> typeIdList1 = userFollowingService.queryTypeIdList(params);
 
-            // 没有关注用户的类型，可能也有意见看法，查询该平台有看法的类型
+            // 没有关注用户的类型，可能也有意见看法（新建的分类，没有用户，但是有观点），查询该平台有观点的类型
             QueryWrapper<UserOpinion> opinionTypeIdQueryWrapper = new QueryWrapper();
             //opinionTypeIdQueryWrapper.eq("is_deleted", 0);
+            opinionTypeIdQueryWrapper.eq("user_id", userId);
             opinionTypeIdQueryWrapper.eq("platform_id", platform.getId());
             opinionTypeIdQueryWrapper.ne("opinion_type", 0); // 0-平台的看法
             opinionTypeIdQueryWrapper.select("opinion_type");
-            opinionTypeIdQueryWrapper.groupBy("opinion_type");
+            //opinionTypeIdQueryWrapper.groupBy("opinion_type"); // 在代码内排序，数据库分组排序产生临时表和文件排序，影响查询效率
             List<UserOpinion> opinionTypeList = userOpinionService.list(opinionTypeIdQueryWrapper);
 
-            // 将关注用户的类型 id 和对平台看法的类型 id 合并。也不不熟，看这里可能会蒙。
-            List<Long> typeIdList1 = new ArrayList<>();
+            // 将关注用户的类型 id 和对平台看法的类型 id 合并。业务不熟，看这里可能会懵圈，我自己都懵了。
             List<Long> typeIdList2 = new ArrayList<>();
-            if (followingTypeIdList != null && followingTypeIdList.size() > 0) {
-                typeIdList1 = followingTypeIdList.stream()
-                        .map(UserFollowing::getFtypeId)
-                        .collect(Collectors.toList());
-            }
             if (opinionTypeList != null && opinionTypeList.size() > 0) {
-                typeIdList2 = opinionTypeList.stream()
-                        .map(UserOpinion::getOpinionType)
-                        .collect(Collectors.toList());
+                typeIdList2 = opinionTypeList.stream().map(UserOpinion::getOpinionType)
+                        .distinct().collect(Collectors.toList());
             }
             if ((typeIdList1 == null || typeIdList1.size() <= 0) && (typeIdList2 == null || typeIdList2.size() <= 0)) {
                 // 没关注用户，且没有观点看法的类型，直接返回
@@ -132,46 +137,48 @@ public class HomeController {
                 platformItemList.add(platformItem);
                 continue;
             }
-            // 合并，去重
+            // 合并，去重，排序
             typeIdList1.addAll(typeIdList2);
-            typeIdList1 = typeIdList1.stream().distinct().collect(Collectors.toList());
+            typeIdList1 = typeIdList1.stream().distinct().sorted().collect(Collectors.toList());
             logger.info(platform.getId() + "-" + platform.getName() + " type id: " + typeIdList1.toString());
 
             List<UserFollowingTypeItem> userFollowingTypeList = new ArrayList<>();
             for (Long typeId : typeIdList1) {
                 UserFollowingTypeItem userFollowingTypeItem = new UserFollowingTypeItem();
                 // 用户关注类型信息封装对象
-                UserFollowingType followingType = userFollowingTypeService.getById(typeId);
+                QueryWrapper<UserFollowingType> followingTypeWrapper = new QueryWrapper();
+                followingTypeWrapper.eq("user_id", userId);
+                followingTypeWrapper.eq("id", typeId);
+                UserFollowingType followingType = userFollowingTypeService.getOne(followingTypeWrapper);
                 userFollowingTypeItem.setUserFollowingTypeInfo(followingType);
 
                 // 用户对关注类型的看法列表
                 QueryWrapper<UserOpinion> typeOpinionQueryWrapper = new QueryWrapper();
                 //typeOpinionQueryWrapper.eq("is_deleted", 0);
+                typeOpinionQueryWrapper.eq("user_id", userId);
                 typeOpinionQueryWrapper.eq("platform_id", platform.getId()); // 关联目标的id，平台id、关注类型id
                 typeOpinionQueryWrapper.eq("opinion_type", typeId); // 观点对应类型，0-平台；其他-某一类型
                 typeOpinionQueryWrapper.orderByDesc("sort_no");
-                typeOpinionQueryWrapper.orderByAsc("id");
                 List<UserOpinion> typeOpinionList = userOpinionService.list(typeOpinionQueryWrapper);
                 userFollowingTypeItem.setUserOpinionList(typeOpinionList);
 
-                // 用户在某类型下的关注用户列表
-                QueryWrapper<UserFollowing> typeFollowingQueryWrapper = new QueryWrapper();
-                //typeFollowingQueryWrapper.eq("is_deleted", 0);
-                typeFollowingQueryWrapper.eq("platform_id", platform.getId());
-                typeFollowingQueryWrapper.eq("ftype_id", typeId);
-                typeFollowingQueryWrapper.orderByDesc("sort_no");
-                typeFollowingQueryWrapper.orderByAsc("id");
-                List<UserFollowing> typeFollowingList = userFollowingService.list(typeFollowingQueryWrapper);
+                // 用户在平台某类型下的关注用户列表
+                params.clear();
+                params.put("userId", userId);
+                params.put("platformId", platform.getId());
+                params.put("typeId", typeId);
+                List<UserFollowingBo> typeFollowingList = userFollowingService.queryUserFollowingList(params);
 
                 // 用户列表封装对象添加对应的标签 List<UserFollowing> 转换为 List<UserFollowingItem>
                 List<UserFollowingItem> userFollowingItemList = new ArrayList<>();
-                for (UserFollowing userFollowing : typeFollowingList) {
+                for (UserFollowingBo userFollowing : typeFollowingList) {
                     UserFollowingItem userFollowingItem = new UserFollowingItem();
                     userFollowingItem.setUserFollowing(userFollowing);
 
                     // 用户在某类型下的关注用户对应的标签列表
                     Map<String, Object> queryParams = new HashMap<>();
-                    queryParams.put("following_id", userFollowing.getId());
+                    queryParams.put("user_id", userId);
+                    queryParams.put("following_id", userFollowing.getFollowingId()); // 对应用户关注表的id
                     List<UserFollowingRemark> followingRemarkList = userFollowingRemarkService.queryUserFollowingRemarkListRegularly(queryParams);
                     userFollowingItem.setUserFollowingRemarkList(followingRemarkList);
 

@@ -1,8 +1,11 @@
 package com.m1yellow.mypages.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.m1yellow.mypages.common.api.CommonResult;
 import com.m1yellow.mypages.entity.UserPlatform;
+import com.m1yellow.mypages.entity.UserPlatformRelation;
+import com.m1yellow.mypages.service.UserPlatformRelationService;
 import com.m1yellow.mypages.service.UserPlatformService;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -29,6 +32,8 @@ public class UserPlatformController {
 
     @Autowired
     private UserPlatformService userPlatformService;
+    @Autowired
+    private UserPlatformRelationService userPlatformRelationService;
 
 
     @ApiOperation("添加/更新平台")
@@ -60,6 +65,29 @@ public class UserPlatformController {
 
         if (!userPlatformService.removeById(id)) {
             logger.error("移除平台失败，id:" + id);
+            return CommonResult.failed("移除失败");
+        }
+
+        return CommonResult.success("操作成功");
+    }
+
+
+    @ApiOperation("移除用户平台")
+    @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId) {
+
+        if (userId == null || platformId == null) {
+            logger.error("请求参数错误");
+            return CommonResult.failed("请求参数错误");
+        }
+
+        UpdateWrapper<UserPlatformRelation> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("is_deleted", 1);
+        updateWrapper.eq("user_id", userId);
+        updateWrapper.eq("platform_id", platformId);
+
+        if (!userPlatformRelationService.update(updateWrapper)) {
+            logger.error("移除失败，platform id:" + platformId);
             return CommonResult.failed("移除失败");
         }
 

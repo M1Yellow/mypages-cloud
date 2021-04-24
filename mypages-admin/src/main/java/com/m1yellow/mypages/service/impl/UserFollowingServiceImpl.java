@@ -1,6 +1,7 @@
 package com.m1yellow.mypages.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.m1yellow.mypages.bo.UserFollowingBo;
 import com.m1yellow.mypages.constant.PlatformInfo;
 import com.m1yellow.mypages.controller.UserFollowingController;
 import com.m1yellow.mypages.entity.UserFollowing;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,6 +36,8 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     @Value("${user.avatar.savedir}")
     private String saveDir;
 
+    @Resource
+    private UserFollowingMapper userFollowingMapper;
     @Resource(name = "dataOfBiliExcavateService")
     private DataExcavateService dataOfBiliExcavateService;
     @Resource(name = "dataOfWeiboExcavateService")
@@ -41,16 +45,16 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
 
 
     @Override
-    public UserInfoItem doExcavate(UserFollowing following) {
+    public UserInfoItem doExcavate(UserFollowingBo following) {
 
         if (following == null) {
             return null;
         }
 
-        // 获取、校验用户id
+        // 获取、校验用户所属平台的id
         Long userId = getUserIdFromUrl(following.getMainPage());
         if (userId == null || userId < 1) {
-            logger.error("用户主页不符合要求，following id:" + following.getId());
+            logger.error("用户主页不符合要求，following id:" + following.getFollowingId());
             return null;
         }
 
@@ -137,5 +141,20 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     @Override
     public boolean deleteById(UserFollowing following) {
         return updateById(following);
+    }
+
+    @Override
+    public UserFollowingBo getUserFollowing(Map params) {
+        return userFollowingMapper.getUserFollowing(params);
+    }
+
+    @Override
+    public List<UserFollowingBo> queryUserFollowingList(Map params) {
+        return userFollowingMapper.queryUserFollowingList(params);
+    }
+
+    @Override
+    public List<Long> queryTypeIdList(Map params) {
+        return userFollowingMapper.queryTypeIdList(params);
     }
 }

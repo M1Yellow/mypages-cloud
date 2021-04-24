@@ -1,7 +1,11 @@
 package com.m1yellow.mypages.service;
 
+import com.m1yellow.mypages.bo.UserPlatformBo;
 import com.m1yellow.mypages.entity.UserPlatform;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -19,5 +23,21 @@ public interface UserPlatformService extends IService<UserPlatform> {
      * @return
      */
     boolean deleteById(UserPlatform platform);
+
+    /**
+     * 自定义查询一个对象
+     *
+     * @param params 参数封装 map
+     * @return
+     */
+    UserPlatformBo getUserPlatform(Map params);
+
+    /**
+     * 自定义查询列表
+     *
+     * @param params
+     * @return
+     */
+    List<UserPlatformBo> queryUserPlatformList(Map params);
 
 }

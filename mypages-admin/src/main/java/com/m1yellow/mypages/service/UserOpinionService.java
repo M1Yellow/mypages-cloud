@@ -1,7 +1,7 @@
 package com.m1yellow.mypages.service;
 
-import com.m1yellow.mypages.entity.UserOpinion;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.m1yellow.mypages.entity.UserOpinion;
 
 /**
  * <p>

@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * <p>
- * 用户关注备注（标签）表
+ * 用户与平台关联表
  * </p>
  *
  * @author M1Yellow
@@ -24,8 +24,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "UserFollowingRemark对象", description = "用户关注备注（标签）表")
-public class UserFollowingRemark implements Serializable {
+@ApiModel(value = "UserPlatformRelation对象", description = "用户与平台关联表")
+public class UserPlatformRelation implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,11 +36,8 @@ public class UserFollowingRemark implements Serializable {
     @ApiModelProperty(value = "关联用户id")
     private Long userId;
 
-    @ApiModelProperty(value = "注意是用户关系表的id")
-    private Long followingId;
-
-    @ApiModelProperty(value = "备注/标签")
-    private String labelName;
+    @ApiModelProperty(value = "关联平台id")
+    private Long platformId;
 
     @ApiModelProperty(value = "优先级由低到高：1-10，默认5")
     private Integer sortNo;

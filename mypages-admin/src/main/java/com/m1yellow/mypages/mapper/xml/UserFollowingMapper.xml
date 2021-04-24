@@ -2,4 +2,57 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.m1yellow.mypages.mapper.UserFollowingMapper">
 
+    <select id="getUserFollowing" parameterType="java.util.Map" resultType="com.m1yellow.mypages.bo.UserFollowingBo">
+        select ufr.id, uf.platform_id, uf.type_id, uf.user_key, uf.name, uf.main_page, uf.profile_photo,
+        uf.signature, uf.is_user, uf.create_time, uf.update_time,
+        ufr.user_id, ufr.following_id, ufr.is_deleted, ufr.sort_no
+        from user_following_relation ufr left join user_following uf on ufr.following_id = uf.id
+        where ufr.is_deleted = 0
+        <if test="userId != null and userId != &quot;&quot;">
+            and ufr.user_id = #{userId}
+        </if>
+        <if test="followingId != null and followingId != &quot;&quot;">
+            and ufr.following_id = #{followingId}
+        </if>
+        <if test="platformId != null and platformId != &quot;&quot;">
+            and uf.platform_id = #{platformId}
+        </if>
+        <if test="typeId != null and typeId != &quot;&quot;">
+            and uf.type_id = #{typeId}
+        </if>
+        order by ufr.sort_no desc
+        limit 1
+    </select>
+
+    <select id="queryUserFollowingList" parameterType="java.util.Map" resultType="com.m1yellow.mypages.bo.UserFollowingBo">
+        select ufr.id, uf.platform_id, uf.type_id, uf.user_key, uf.name, uf.main_page, uf.profile_photo,
+        uf.signature, uf.is_user, uf.create_time, uf.update_time,
+        ufr.user_id, ufr.following_id, ufr.is_deleted, ufr.sort_no
+        from user_following_relation ufr left join user_following uf on ufr.following_id = uf.id
+        where ufr.is_deleted = 0
+        <if test="userId != null and userId != &quot;&quot;">
+            and ufr.user_id = #{userId}
+        </if>
+        <if test="platformId != null and platformId != &quot;&quot;">
+            and uf.platform_id = #{platformId}
+        </if>
+        <if test="typeId != null and typeId != &quot;&quot;">
+            and uf.type_id = #{typeId}
+        </if>
+        order by ufr.sort_no desc
+    </select>
+
+    <select id="queryTypeIdList" resultType="java.lang.Long">
+        <!-- TODO 使用之前，需要在代码中手动去重。distinct 或 group by 去重，会创建临时表，影响性能 -->
+        select uf.type_id
+        from user_following_relation ufr left join user_following uf on ufr.following_id = uf.id
+        where ufr.is_deleted = 0
+        <if test="userId != null and userId != &quot;&quot;">
+            and ufr.user_id = #{userId}
+        </if>
+        <if test="platformId != null and platformId != &quot;&quot;">
+            and uf.platform_id = #{platformId}
+        </if>
+    </select>
+
 </mapper>

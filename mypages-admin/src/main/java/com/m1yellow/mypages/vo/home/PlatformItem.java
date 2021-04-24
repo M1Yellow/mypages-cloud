@@ -1,7 +1,7 @@
 package com.m1yellow.mypages.vo.home;
 
+import com.m1yellow.mypages.bo.UserPlatformBo;
 import com.m1yellow.mypages.entity.UserOpinion;
-import com.m1yellow.mypages.entity.UserPlatform;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class PlatformItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "平台信息对象")
-    private UserPlatform platformBaseInfo;
+    private UserPlatformBo platformBaseInfo;
 
     @ApiModelProperty(value = "用户对平台的看法列表")
     private List<UserOpinion> platformOpinionList;

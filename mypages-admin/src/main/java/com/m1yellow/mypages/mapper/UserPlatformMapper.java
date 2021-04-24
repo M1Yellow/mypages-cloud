@@ -1,7 +1,11 @@
 package com.m1yellow.mypages.mapper;
 
-import com.m1yellow.mypages.entity.UserPlatform;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.m1yellow.mypages.bo.UserPlatformBo;
+import com.m1yellow.mypages.entity.UserPlatform;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -12,5 +16,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2021-04-13
  */
 public interface UserPlatformMapper extends BaseMapper<UserPlatform> {
+
+    UserPlatformBo getUserPlatform(Map params);
+
+    List<UserPlatformBo> queryUserPlatformList(Map params);
 
 }

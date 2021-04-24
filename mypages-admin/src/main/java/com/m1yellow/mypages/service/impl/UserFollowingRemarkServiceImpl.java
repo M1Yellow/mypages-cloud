@@ -24,10 +24,10 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
     @Override
     public List<UserFollowingRemark> queryUserFollowingRemarkListRegularly(Map<String, Object> params) {
         QueryWrapper<UserFollowingRemark> followingRemarkQueryWrapper = new QueryWrapper();
+        followingRemarkQueryWrapper.eq("user_id", params.get("user_id"));
         followingRemarkQueryWrapper.eq("following_id", params.get("following_id"));
-        //followingRemarkQueryWrapper.eq("is_deleted", 0);
+        //followingRemarkQueryWrapper.eq("is_deleted", 0); // 已经有逻辑删除功能
         followingRemarkQueryWrapper.orderByDesc("sort_no");
-        followingRemarkQueryWrapper.orderByAsc("id");
         return this.list(followingRemarkQueryWrapper);
     }
 }
