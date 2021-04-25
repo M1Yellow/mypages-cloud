@@ -2,6 +2,7 @@
 # https://github.com/github/gitignore/blob/master/Java.gitignore
 # Compiled class file
 *.class
+src/test/**/MyTest.java
 
 # Log file
 logs/

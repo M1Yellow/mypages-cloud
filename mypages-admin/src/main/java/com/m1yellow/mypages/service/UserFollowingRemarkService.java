@@ -1,5 +1,6 @@
 package com.m1yellow.mypages.service;
 
+import com.m1yellow.mypages.bo.UserFollowingBo;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -15,5 +16,9 @@ import java.util.Map;
  * @since 2021-04-13
  */
 public interface UserFollowingRemarkService extends IService<UserFollowingRemark> {
+
     List<UserFollowingRemark> queryUserFollowingRemarkListRegularly(Map<String, Object> params);
+
+    boolean saveRemarks(List<UserFollowingRemark> remarkList, UserFollowingBo followingBo);
+
 }

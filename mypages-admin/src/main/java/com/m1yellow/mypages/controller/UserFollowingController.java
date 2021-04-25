@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.m1yellow.mypages.bo.UserFollowingBo;
 import com.m1yellow.mypages.common.api.CommonResult;
+import com.m1yellow.mypages.common.exception.AtomicityException;
+import com.m1yellow.mypages.common.exception.FileSaveException;
 import com.m1yellow.mypages.common.util.UUIDGenerateUtil;
 import com.m1yellow.mypages.entity.UserFollowing;
 import com.m1yellow.mypages.entity.UserFollowingRelation;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -66,8 +68,11 @@ public class UserFollowingController {
      */
 
     @ApiOperation("添加/更新关注用户")
+    @Transactional //(rollbackFor = {AtomicityException.class, FileSaveException.class})
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
-    public CommonResult<UserFollowingItem> add(@RequestBody UserFollowingBo following, @RequestPart(required = false) MultipartFile profile) {
+    public CommonResult<UserFollowingItem> add(@RequestPart UserFollowingBo following, @RequestPart(required = false) MultipartFile profile) {
+
+        logger.info(">>>> following/add, following: {}", following);
 
         if (following == null) {
             logger.error("请求参数错误");
@@ -78,6 +83,12 @@ public class UserFollowingController {
         if (StringUtils.isBlank(following.getName()) || StringUtils.isBlank(following.getMainPage())) {
             logger.error("请检查必须参数");
             return CommonResult.failed("请检查必须参数");
+        }
+        if (!following.getIsUser()) { // 非用户头像不能为空
+            if (profile == null) {
+                logger.error("非用户需要上传头像");
+                return CommonResult.failed("非用户需要上传头像");
+            }
         }
 
         // 根据关注用户id是否为空，判断是新增还是更新
@@ -92,51 +103,15 @@ public class UserFollowingController {
             // 查询数据库中的记录
             originalFollowing = userFollowingService.getUserFollowing(params);
         }
+        // 旧头像路径，用于删除旧头像
+        String oldFilePath = originalFollowing.getProfilePhoto();
 
-        if (!following.getIsUser()) { // 非用户
-            if (profile == null) {
-                logger.error("非用户需要上传头像");
-                return CommonResult.failed("非用户需要上传头像");
-            } else {
-                // TODO 设置保存路径为 target 下的 classpath 目录，但本地项目执行 mvn clean 之后，target 会被清理掉
-                saveDir = UserFollowingController.class.getResource("/").getPath() + saveDir;
-
-                // 更新用户头像时，先删除旧头像
-                if (originalFollowing != null && StringUtils.isNotBlank(originalFollowing.getProfilePhoto())) {
-                    String oldProfilePath = originalFollowing.getProfilePhoto();
-                    String oldProfileName = oldProfilePath.substring(oldProfilePath.lastIndexOf("/") + 1);
-                    oldProfilePath = saveDir + oldProfileName;
-                    File oldFile = new File(oldProfilePath);
-                    if (oldFile.exists() && oldFile.isFile()) {
-                        if (!oldFile.delete()) {
-                            logger.error("用户旧头像删除失败");
-                            return CommonResult.failed("用户旧头像删除失败");
-                        }
-                    }
-                }
-
-                // 上传新头像文件
-                String fileName = profile.getOriginalFilename();
-                // 获取后缀 .jpg
-                String suffixName = fileName.substring(fileName.lastIndexOf("."));
-                // 重新生成文件名
-                fileName = UUIDGenerateUtil.getUUID40() + suffixName;
-                String filePath = saveDir + fileName;
-                File dest = new File(filePath);
-                try {
-                    Files.copy(profile.getInputStream(), dest.toPath());
-                    //file.transferTo(new File(filePath));
-                } catch (IOException e) {
-                    logger.error("用户头像上传出错：" + e.getMessage());
-                    return CommonResult.failed("用户头像上传失败");
-                }
-                // 处理头像本地路径
-                String profileDir = filePath.substring(saveDir.lastIndexOf("/images"));
-                following.setProfilePhoto(profileDir);
-            }
-        }
-        // TODO 注意，上面用户头像文件已经上传完成了，如果下面的代码出错异常（放任何地方，只要代码异常，数据库记录会回滚，但已上传的文件不能自动撤销），
-        //  会导致头像文件成为孤立的垃圾文件。后续优化（利用自定义全局异常捕获，加 redis 缓存，出现异常，则从缓存中取出对应用户上传的文件路径，删除）。
+        // TODO 设置保存路径为 target 下的 classpath 目录，但本地项目执行 mvn clean 之后，target 会被清理掉
+        saveDir = UserFollowingController.class.getResource("/").getPath() + saveDir;
+        // 获取新头像路径
+        String newFilePath = getFilePath(profile);
+        // 设置新头像路径
+        following.setProfilePhoto(newFilePath);
 
 
         // 保存关注用户
@@ -150,35 +125,37 @@ public class UserFollowingController {
         beanCopier.copy(following, originalFollowing, converter);
         beanCopier.copy(following, saveFollowing, converter);
         */
-        BeanUtils.copyProperties(following, originalFollowing);
-        BeanUtils.copyProperties(following, saveFollowing);
+        //BeanUtils.copyProperties(following, originalFollowing);
+        BeanUtils.copyProperties(following, saveFollowing); // 属性为null也会被复制，内部类不会复制过去
         // 修正 id
-        saveFollowing.setId(following.getFollowingId());
-
-        // 入库前，确认同平台、同用户标识是否已经有关注的用户，如果有，直接用这个用户，没有则新增
-        if (saveFollowing.getPlatformId() != null && StringUtils.isNotBlank(saveFollowing.getUserKey())) {
-            QueryWrapper<UserFollowing> existedFollowingWrapper = new QueryWrapper<>();
-            existedFollowingWrapper.eq("platform_id", saveFollowing.getPlatformId());
-            existedFollowingWrapper.eq("user_key", saveFollowing.getUserKey());
-            UserFollowing existedFollowing = userFollowingService.getOne(existedFollowingWrapper);
-            if (existedFollowing != null && existedFollowing.getId() != null) {
-                saveFollowing.setId(existedFollowing.getId());
+        if (following.getFollowingId() != null && following.getFollowingId() > 0) {
+            saveFollowing.setId(following.getFollowingId());
+        } else {
+            // 确认同平台、同用户标识是否已经有关注的用户，如果有，直接用这个用户id
+            if (saveFollowing.getPlatformId() != null && StringUtils.isNotBlank(saveFollowing.getUserKey())) {
+                QueryWrapper<UserFollowing> existedFollowingWrapper = new QueryWrapper<>();
+                existedFollowingWrapper.eq("platform_id", saveFollowing.getPlatformId());
+                existedFollowingWrapper.eq("user_key", saveFollowing.getUserKey());
+                UserFollowing existedFollowing = userFollowingService.getOne(existedFollowingWrapper);
+                if (existedFollowing != null && existedFollowing.getId() != null) {
+                    saveFollowing.setId(existedFollowing.getId());
+                }
             }
         }
 
         if (!userFollowingService.saveOrUpdate(saveFollowing)) {
             logger.error("添加关注用户失败");
-            return CommonResult.failed("添加关注用户失败");
+            throw new AtomicityException("添加关注用户失败");
         }
 
         // 校验保存后的新增用户
         if (saveFollowing.getId() == null || saveFollowing.getId() <= 0) {
             logger.error("新增用户信息错误");
-            return CommonResult.failed("新增用户信息错误");
+            throw new AtomicityException("新增用户信息错误");
         }
 
         // 设置保存后的 following id
-        originalFollowing.setFollowingId(saveFollowing.getId());
+        following.setFollowingId(saveFollowing.getId());
 
         // 保存用户与关注用户关系记录
         UserFollowingRelation relation = new UserFollowingRelation();
@@ -188,61 +165,37 @@ public class UserFollowingController {
         relation.setSortNo(following.getSortNo());
         if (!userFollowingRelationService.saveOrUpdate(relation)) {
             logger.error("保存用户与关注用户关系记录失败");
-            return CommonResult.failed("保存用户与关注用户关系记录失败");
+            throw new AtomicityException("保存用户与关注用户关系记录失败");
         }
 
         // 保存用户标签
         List<UserFollowingRemark> remarkList = following.getRemarkList();
         if (remarkList != null && remarkList.size() > 0) {
-            // 先查询用户标签，判断标签是否存在
-            Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("user_id", following.getUserId());
-            queryParams.put("following_id", following.getFollowingId()); // saveFollowing.getId()
-            List<UserFollowingRemark> followingRemarkList = userFollowingRemarkService.queryUserFollowingRemarkListRegularly(queryParams);
-            List<String> existingRemarkList = null;
-            if (followingRemarkList != null && followingRemarkList.size() > 0) {
-                existingRemarkList = followingRemarkList.stream().map(UserFollowingRemark::getLabelName).collect(Collectors.toList());
-            }
-
-            for (UserFollowingRemark remark : remarkList) {
-                if (remark == null || StringUtils.isBlank(remark.getLabelName())) {
-                    continue;
-                }
-                if (existingRemarkList != null && existingRemarkList.size() > 0) {
-                    // 判断标签是否已存在
-                    if (existingRemarkList.contains(remark.getLabelName().trim())) continue;
-                }
-                UserFollowingRemark followingRemark = new UserFollowingRemark();
-                followingRemark.setId(remark.getId()); // 如果有id，则是更新记录
-                followingRemark.setUserId(following.getUserId());
-                followingRemark.setFollowingId(saveFollowing.getId()); // 是关注用户表的id，标签自然是跟关注的用户对应
-                followingRemark.setLabelName(remark.getLabelName().trim());
-                if (!userFollowingRemarkService.saveOrUpdate(followingRemark)) {
-                    logger.error("用户标签保存失败");
-                    return CommonResult.failed("用户标签保存失败");
-                }
+            if (!userFollowingRemarkService.saveRemarks(remarkList, following)) {
+                logger.error("保存用户标签失败");
+                throw new AtomicityException("保存用户标签失败");
             }
         }
 
         // 如果是用户，执行一次信息同步
         if (following.getIsUser()) {
             // 获取用户信息
-            UserInfoItem userInfoItem = userFollowingService.doExcavate(originalFollowing);
+            UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
             if (userInfoItem == null) {
-                logger.error("用户信息获取失败，following id:" + originalFollowing.getFollowingId());
-                return CommonResult.failed("用户信息获取失败");
+                logger.error("获取用户信息失败，following id:" + following.getFollowingId());
+                throw new AtomicityException("获取用户信息失败");
             }
             // 更新信息，保存入库
             if (!userFollowingService.saveUserInfo(userInfoItem, saveFollowing)) {
-                logger.error("用户信息同步保存失败");
-                return CommonResult.failed("用户信息同步保存失败");
+                logger.error("保存用户信息失败");
+                throw new AtomicityException("保存用户信息失败");
             }
         }
 
         // 重新加载关注用户
-        originalFollowing = userFollowingService.getUserFollowing(params); // 注意 params 中的条件，不能被 clear
+        UserFollowingBo reloadFollowing = userFollowingService.getUserFollowing(params); // 注意 params 中的条件，不能被 clear
         UserFollowingItem followingItem = new UserFollowingItem();
-        followingItem.setUserFollowing(originalFollowing);
+        followingItem.setUserFollowing(reloadFollowing);
 
         // 重新加载用户标签
         if (remarkList != null && remarkList.size() > 0) {
@@ -253,7 +206,76 @@ public class UserFollowingController {
             followingItem.setUserFollowingRemarkList(followingRemarkList);
         }
 
+        // TODO 注意，上面用户头像文件已经上传完成了，如果下面的代码出错异常（放任何地方，只要代码异常，数据库记录会回滚，但已上传的文件不能自动撤销），
+        //  会导致头像文件成为孤立的垃圾文件，后续优化。
+        //  方案一：利用自定义全局异常捕获，加 redis 缓存，出现异常，则从缓存中取出对应用户上传的文件路径，删除
+        //  方案二：使用定时任务清理没有用户关联的头像文件
+        // 保存头像文件，放在代码最后，出异常则抛出自定义文件保存异常，数据也会回滚
+        if (!following.getIsUser()) { // 非用户
+            if (profile != null) {
+                saveFile(profile, oldFilePath);
+            }
+        }
+
         return CommonResult.success(followingItem);
+    }
+
+
+    /**
+     * 获取文件路径
+     *
+     * @param profile
+     * @return
+     */
+    private String getFilePath(MultipartFile profile) {
+        if (profile == null) {
+            return null;
+        }
+        // 上传新头像文件
+        String fileName = profile.getOriginalFilename();
+        // 获取后缀 .jpg
+        String suffixName = fileName.substring(fileName.lastIndexOf("."));
+        // 重新生成文件名
+        fileName = UUIDGenerateUtil.getUUID40() + suffixName;
+        String filePath = saveDir + fileName;
+
+        // 处理头像本地路径
+        String profileDir = filePath.substring(filePath.lastIndexOf("/images"));
+
+        return profileDir;
+    }
+
+
+    /**
+     * 保存头像文件
+     *
+     * @param profile
+     * @param oldFilePath
+     */
+    private void saveFile(MultipartFile profile, String oldFilePath) {
+        // 更新用户头像时，先删除旧头像
+        if (StringUtils.isNotBlank(oldFilePath)) {
+            String oldProfileName = oldFilePath.substring(oldFilePath.lastIndexOf("/") + 1);
+            oldFilePath = saveDir + oldProfileName;
+            File oldFile = new File(oldFilePath);
+            if (oldFile.exists() && oldFile.isFile()) {
+                if (!oldFile.delete()) {
+                    logger.error("删除用户旧头像失败");
+                    throw new FileSaveException("删除用户旧头像失败");
+                }
+            }
+        }
+
+        // 上传新头像文件
+        String filePath = getFilePath(profile);
+        File dest = new File(filePath);
+        try {
+            Files.copy(profile.getInputStream(), dest.toPath());
+            //file.transferTo(new File(filePath));
+        } catch (IOException e) {
+            logger.error("保存用户头像失败：" + e.getMessage());
+            throw new FileSaveException("保存用户头像失败");
+        }
     }
 
 
