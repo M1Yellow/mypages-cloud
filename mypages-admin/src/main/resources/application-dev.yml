@@ -47,12 +47,12 @@ spring:
       #connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   redis:
     host: 192.168.3.151
-    port: 6371
+    port: 6379
     username: default
-    password: 123456
+    password: 123456.a
     timeout: 10000 # 连接超时时间（毫秒）
     lettuce:
-      shutdown-timeout: 10000ms # 默认 100ms
+      shutdown-timeout: 10000 # 默认 100ms
       cluster:
         refresh:
           adaptive: true # 是否允许周期性更新集群拓扑视图，默认 false

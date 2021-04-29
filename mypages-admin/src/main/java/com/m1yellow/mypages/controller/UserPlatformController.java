@@ -3,6 +3,8 @@ package com.m1yellow.mypages.controller;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.m1yellow.mypages.common.api.CommonResult;
+import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.entity.UserPlatform;
 import com.m1yellow.mypages.entity.UserPlatformRelation;
 import com.m1yellow.mypages.service.UserPlatformRelationService;
@@ -15,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -38,6 +43,8 @@ public class UserPlatformController {
 
     @ApiOperation("添加/更新平台")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<UserPlatform> add(UserPlatform platform) {
 
         if (platform == null) {
@@ -47,7 +54,7 @@ public class UserPlatformController {
 
         if (!userPlatformService.saveOrUpdate(platform)) {
             logger.error("添加/更新平台失败");
-            return CommonResult.failed("添加/更新平台失败");
+            return CommonResult.failed("操作失败");
         }
 
         return CommonResult.success(platform);
@@ -56,6 +63,8 @@ public class UserPlatformController {
 
     @ApiOperation("移除平台")
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<String> remove(@RequestParam Long id) {
 
         if (id == null) {
@@ -64,16 +73,18 @@ public class UserPlatformController {
         }
 
         if (!userPlatformService.removeById(id)) {
-            logger.error("移除平台失败，id:" + id);
-            return CommonResult.failed("移除失败");
+            logger.error("移除平台失败，id: {}", id);
+            return CommonResult.failed("操作失败");
         }
 
-        return CommonResult.success("操作成功");
+        return CommonResult.success();
     }
 
 
-    @ApiOperation("移除用户平台")
+    @ApiOperation("移除用户平台关系")
     @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId) {
 
         if (userId == null || platformId == null) {
@@ -81,17 +92,15 @@ public class UserPlatformController {
             return CommonResult.failed("请求参数错误");
         }
 
-        UpdateWrapper<UserPlatformRelation> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("is_deleted", 1);
-        updateWrapper.eq("user_id", userId);
-        updateWrapper.eq("platform_id", platformId);
-
-        if (!userPlatformRelationService.update(updateWrapper)) {
-            logger.error("移除失败，platform id:" + platformId);
-            return CommonResult.failed("移除失败");
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", userId);
+        params.put("platform_id", platformId);
+        if (!userPlatformRelationService.removeByMap(params)) {
+            logger.error("移除失败，userId: {}, platformId: {}", userId, platformId);
+            return CommonResult.failed("操作失败");
         }
 
-        return CommonResult.success("操作成功");
+        return CommonResult.success();
     }
 
 }

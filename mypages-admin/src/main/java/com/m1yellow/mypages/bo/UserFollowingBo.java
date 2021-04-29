@@ -1,8 +1,5 @@
 package com.m1yellow.mypages.bo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -64,6 +61,9 @@ public class UserFollowingBo implements Serializable {
 
     @ApiModelProperty(value = "关注用户的标签列表")
     private List<UserFollowingRemark> remarkList;
+
+    @ApiModelProperty(value = "关注用户的标签列表json格式")
+    private String remarkListJson;
 
     @ApiModelProperty(value = "是否为用户，1-是用户；0-不是，默认1")
     private Boolean isUser;

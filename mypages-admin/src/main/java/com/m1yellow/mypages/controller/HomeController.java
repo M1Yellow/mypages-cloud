@@ -4,6 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.m1yellow.mypages.bo.UserFollowingBo;
 import com.m1yellow.mypages.bo.UserPlatformBo;
 import com.m1yellow.mypages.common.api.CommonResult;
+import com.m1yellow.mypages.common.aspect.WebLog;
+import com.m1yellow.mypages.common.constant.GlobalConstant;
+import com.m1yellow.mypages.common.util.GsonUtil;
+import com.m1yellow.mypages.common.util.ObjectUtil;
+import com.m1yellow.mypages.common.util.RedisUtil;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
 import com.m1yellow.mypages.entity.UserFollowingType;
 import com.m1yellow.mypages.entity.UserOpinion;
@@ -47,6 +52,8 @@ public class HomeController {
     private UserFollowingService userFollowingService;
     @Autowired
     private UserFollowingRemarkService userFollowingRemarkService;
+    @Autowired
+    private RedisUtil redisUtil;
 
 
     /*
@@ -69,11 +76,21 @@ public class HomeController {
 
     @ApiOperation("首页平台所有内容")
     @RequestMapping(value = "platformList", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
     public CommonResult<List<PlatformItem>> platformList(@RequestParam Long userId) {
 
         if (userId == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
+        }
+
+        // 先从缓存中取，没有再查数据库
+        String platformListCache = ObjectUtil.getString(redisUtil.get(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY));
+        if (platformListCache != null) {
+            List<PlatformItem> platformItemList = GsonUtil.json2Bean(platformListCache, List.class);
+            if (platformItemList != null && platformItemList.size() > 0) {
+                return CommonResult.success(platformItemList);
+            }
         }
 
         /**
@@ -106,6 +123,7 @@ public class HomeController {
             opinionQueryWrapper.eq("platform_id", platform.getPlatformId()); // 对应平台表的id
             opinionQueryWrapper.eq("opinion_type", 0); // 观点对应类型，0-平台；其他-某一类型
             opinionQueryWrapper.orderByDesc("sort_no");
+            opinionQueryWrapper.orderByAsc("id"); // TODO 注意，产生 file sort 可能会影响效率
             List<UserOpinion> platformOpinionList = userOpinionService.list(opinionQueryWrapper);
             platformItem.setPlatformOpinionList(platformOpinionList);
 
@@ -122,7 +140,7 @@ public class HomeController {
             opinionTypeIdQueryWrapper.eq("platform_id", platform.getId());
             opinionTypeIdQueryWrapper.ne("opinion_type", 0); // 0-平台的看法
             opinionTypeIdQueryWrapper.select("opinion_type");
-            //opinionTypeIdQueryWrapper.groupBy("opinion_type"); // 在代码内排序，数据库分组排序产生临时表和文件排序，影响查询效率
+            opinionTypeIdQueryWrapper.groupBy("opinion_type");
             List<UserOpinion> opinionTypeList = userOpinionService.list(opinionTypeIdQueryWrapper);
 
             // 将关注用户的类型 id 和对平台看法的类型 id 合并。业务不熟，看这里可能会懵圈，我自己都懵了。
@@ -159,6 +177,7 @@ public class HomeController {
                 typeOpinionQueryWrapper.eq("platform_id", platform.getId()); // 关联目标的id，平台id、关注类型id
                 typeOpinionQueryWrapper.eq("opinion_type", typeId); // 观点对应类型，0-平台；其他-某一类型
                 typeOpinionQueryWrapper.orderByDesc("sort_no");
+                typeOpinionQueryWrapper.orderByAsc("id");
                 List<UserOpinion> typeOpinionList = userOpinionService.list(typeOpinionQueryWrapper);
                 userFollowingTypeItem.setUserOpinionList(typeOpinionList);
 
@@ -195,6 +214,11 @@ public class HomeController {
             platformItem.setUserFollowingTypeList(userFollowingTypeList);
             platformItemList.add(platformItem);
 
+        }
+
+        // 查询完成之后，设置缓存
+        if (platformItemList != null && platformItemList.size() > 0) {
+            redisUtil.set(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY, GsonUtil.bean2Json(platformItemList));
         }
 
         return CommonResult.success(platformItemList);

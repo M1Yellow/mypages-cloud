@@ -1,8 +1,8 @@
 package com.m1yellow.mypages;
 
+import com.m1yellow.mypages.common.util.RedisUtil;
 import com.m1yellow.mypages.entity.UserBase;
 import com.m1yellow.mypages.service.UserBaseService;
-import com.m1yellow.mypages.util.RedisUtil;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

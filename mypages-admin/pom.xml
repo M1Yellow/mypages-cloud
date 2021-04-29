@@ -16,8 +16,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-admin</name>
     <description>MyPages admin</description>
-    <!--<packaging>war</packaging>--><!-- 外部 tomcat 需要 -->
-    <packaging>jar</packaging><!-- 默认内嵌 tomcat 运行 -->
+    <packaging>war</packaging><!-- 外部 tomcat 需要 -->
+    <!--<packaging>jar</packaging>--><!-- 默认内嵌 tomcat 运行 -->
 
     <dependencies>
         <!-- mypages security 安全模块 -->
@@ -80,7 +80,32 @@
 
     </dependencies>
 
+    <!--
+    maven 仓库的优先级
+    1、本地仓库
+    2、settings 里面 profile 中设置的仓库
+    3、pom 文件中的 repository
+    4、mirror 仓库
+    -->
+    <!-- TODO 这个仓库用来下载 tomcat8-maven-plugin，如果不需要这个插件，这个插件仓库地址配置可以去掉 -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>alfresco-public</id>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>alfresco-public-snapshots</id>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
+        <!-- 项目打包最终名称 -->
+        <finalName>${project-name-prod}</finalName>
         <!-- 静态资源配置 -->
         <resources>
             <resource>
@@ -111,7 +136,6 @@
         根据控制台提示，稍等一会儿，等待提示完成之后，在继续单击IDEA开发工具右侧的“Maven构造”按钮，在弹出的窗口中单击“liftCycle -> package”命令，等待控制台提示，当提示完成时，代表JAR被成功打包。
         打包成功后，控制台输出下方信息。可以根据这个控制台的提示找到JAR包的位置“Building.jar”后的值就是JAR包的地址。
         如果需要打war包，在pom文件中把项目打包方式改为war即可。
-
         -->
         <plugins>
             <plugin>
@@ -131,8 +155,45 @@
                 </configuration>
             </plugin>
 
+            <!--
+            自动部署 war 包到远程 tomcat 服务器
+
+            修改 conf/tomcat-users.xml，新增角色权限
+            <user username="tomcat" password="123456.a" roles="manager-gui,manager-script"/>
+
+            tomcat8-maven-plugin 插件可能会下载出错，手动下载，放到 maven 仓库对应目录下即可
+            https://artifacts.alfresco.com/nexus/content/repositories/public/org/apache/tomcat/maven/tomcat8-maven-plugin/3.0-r1756463/
+            E:\DevRes\mvnRepository\org\apache\tomcat\maven\tomcat8-maven-plugin\
+
+            修改完代码，启动菜单选 Update classes and resources 即可，速度较快
+            执行 maven tomcat:redeploy 重新部署，是将整个 war 替换掉原来的目录，静态资源文件也会覆盖
+            执行 maven tomcat:deploy update=true 时，静态资源可以保留。试了几次，静态资源还是清空了
+            deploy redeploy，先删除了原来的项目目录，再重新解压真个 war 包部署
+            自定义部署流程：
+
+            可能出现的问题：
+            deploy redeploy 控制台报错，war 包没有生成
+            tomcat 日志显示项目启动失败，可能是 war 不是最新的代码，执行 clear install package，再 deploy
+
+            -->
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat8-maven-plugin</artifactId>
+                <configuration>
+                    <url>http://192.168.3.151:8081/manager/text</url>
+                    <username>tomcat</username>
+                    <password>123456.a</password>
+                    <path>/mypages</path><!-- tomcat webapps 下的项目目录名称 -->
+                    <port>8081</port>
+                    <update>true</update><!-- 自动解压，重启部署 -->
+                    <uriEncoding>UTF-8</uriEncoding>
+                </configuration>
+            </plugin>
+
             <!-- 项目直接部署为 docker 镜像 -->
             <!-- 【dockerfile-maven-plugin 版本】 官方推荐 -->
+            <!-- 文件上传目录不好配置，暂时不用这种方式部署项目 -->
+            <!--
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>dockerfile-maven-plugin</artifactId>
@@ -155,6 +216,7 @@
                     <dockerfile>Dockerfile</dockerfile>
                 </configuration>
             </plugin>
+            -->
 
             <!-- 【docker-maven-plugin 版本】 -->
             <!--<plugin>

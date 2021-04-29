@@ -46,7 +46,7 @@
         -->
         <!-- jdbc 的数据库连接配置 -->
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://192.168.3.151:3306/mypage?useUnicode=true&amp;characeterEncoding=utf-8&amp;serverTimezone=UTC"
+                        connectionURL="jdbc:mysql://192.168.3.151:3306/mypages?useUnicode=true&amp;characeterEncoding=utf-8&amp;serverTimezone=UTC"
                         userId="root"
                         password="123456.a">
         </jdbcConnection>
@@ -95,9 +95,12 @@
             <!-- 配置主键生成策略 -->
             <!--<generatedKey column="id" sqlStatement="Mysql" identity="true"/>-->
         </table>
-        <table tableName="platform" domainObjectName="Platform"/>
+        <table tableName="user_base" domainObjectName="UserBase"/>
+        <table tableName="user_platform" domainObjectName="UserPlatform"/>
+        <table tableName="user_platform_relation" domainObjectName="UserPlatformRelation"/>
         <table tableName="user_opinion" domainObjectName="UserOpinion"/>
         <table tableName="user_following" domainObjectName="UserFollowing"/>
+        <table tableName="user_following_relation" domainObjectName="UserFollowingRelation"/>
         <table tableName="user_following_type" domainObjectName="UserFollowingType"/>
         <table tableName="user_following_remark" domainObjectName="UserFollowingRemark"/>
         <table tableName="check_following_update" domainObjectName="CheckFollowingUpdate"/>

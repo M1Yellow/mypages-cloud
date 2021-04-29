@@ -2,8 +2,10 @@ package com.m1yellow.mypages.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.m1yellow.mypages.bo.UserFollowingBo;
+import com.m1yellow.mypages.common.util.FileUtil;
+import com.m1yellow.mypages.common.util.ObjectUtil;
+import com.m1yellow.mypages.common.util.UUIDGenerateUtil;
 import com.m1yellow.mypages.constant.PlatformInfo;
-import com.m1yellow.mypages.controller.UserFollowingController;
 import com.m1yellow.mypages.entity.UserFollowing;
 import com.m1yellow.mypages.excavation.bo.UserInfoItem;
 import com.m1yellow.mypages.excavation.service.DataExcavateService;
@@ -47,13 +49,13 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     @Override
     public UserInfoItem doExcavate(UserFollowingBo following) {
 
-        if (following == null) {
+        if (following == null || !following.getIsUser()) {
             return null;
         }
 
         // 获取、校验用户所属平台的id
-        Long userId = getUserIdFromUrl(following.getMainPage());
-        if (userId == null || userId < 1) {
+        String userId = getUserKeyFromMainPage(following);
+        if (StringUtils.isBlank(userId)) {
             logger.error("用户主页不符合要求，following id:" + following.getFollowingId());
             return null;
         }
@@ -69,20 +71,20 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
         UserInfoItem userInfoItem = null;
 
         // 设置保存路径为 classpath 下的目录
-        saveDir = UserFollowingController.class.getResource("/").getPath() + saveDir;
+        String saveDirFullPath = FileUtil.getSaveDirFullPath(UserFollowingServiceImpl.class, saveDir);
 
         switch (PlatformInfo.getPlatformInfo(following.getPlatformId().intValue())) {
             case BILIBILI:
                 apiUrl = "https://api.bilibili.com/x/space/acc/info?mid=userId&jsonp=jsonp";
-                fromUrl = apiUrl.replace("userId", userId + "");
-                userInfoItem = dataOfBiliExcavateService.singleImageDownloadFromJson(fromUrl, saveDir, params);
+                fromUrl = apiUrl.replace("userId", userId);
+                userInfoItem = dataOfBiliExcavateService.singleImageDownloadFromJson(fromUrl, saveDirFullPath, params);
                 break;
             case WEIBO:
                 //apiUrl = "https://weibo.com/u/userId";
                 //apiUrl = "https://m.weibo.cn/api/container/getIndex?type=uid&value=userId&containerid=1005056488142313";
                 apiUrl = "https://m.weibo.cn/api/container/getIndex?type=uid&value=userId";
-                fromUrl = apiUrl.replace("userId", userId + "");
-                userInfoItem = dataOfWeiboExcavateService.singleImageDownloadFromJson(fromUrl, saveDir, params);
+                fromUrl = apiUrl.replace("userId", userId);
+                userInfoItem = dataOfWeiboExcavateService.singleImageDownloadFromJson(fromUrl, saveDirFullPath, params);
                 break;
             case DOUBAN:
 
@@ -103,19 +105,16 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
      * @param url
      * @return
      */
-    private Long getUserIdFromUrl(String url) {
+    private String getUserIdFromUrl(String url) {
         if (StringUtils.isBlank(url)) {
             return null;
         }
-        Long userId = null;
+        String userId = null;
         try {
             if (url.contains("bilibili.com")) {
-                userId = Long.getLong(url.split("/")[3]);
+                userId = url.split("/")[3];
             } else if (url.contains("m.weibo.cn")) {
-                userId = Long.getLong(url.split("/")[4]);
-            }
-            if (userId == null || userId < 1) {
-                return null;
+                userId = url.split("/")[4];
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -129,9 +128,9 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     public boolean saveUserInfo(UserInfoItem userInfoItem, UserFollowing following) {
         boolean isSuc = false;
 
-        following.setName(userInfoItem.getUserName());
-        following.setSignature(userInfoItem.getSignature());
-        following.setProfilePhoto(userInfoItem.getHeadImgPath());
+        following.setName(ObjectUtil.getString(userInfoItem.getUserName()));
+        following.setSignature(ObjectUtil.getString(userInfoItem.getSignature()));
+        following.setProfilePhoto(ObjectUtil.getString(userInfoItem.getHeadImgPath()));
 
         isSuc = saveOrUpdate(following);
 
@@ -156,5 +155,37 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     @Override
     public List<Long> queryTypeIdList(Map params) {
         return userFollowingMapper.queryTypeIdList(params);
+    }
+
+    @Override
+    public String getUserKeyFromMainPage(UserFollowingBo following) {
+        String userKey = null;
+        if (following != null && StringUtils.isNotBlank(following.getMainPage())) {
+            String[] mainPageArr = following.getMainPage().split("/");
+            if (mainPageArr.length < 2) {
+                return null;
+            }
+            if (following.getIsUser()) {
+                switch (PlatformInfo.getPlatformInfo(following.getPlatformId().intValue())) {
+                    case BILIBILI:
+                        userKey = mainPageArr[mainPageArr.length - 2];
+                        break;
+                    case WEIBO:
+                        userKey = mainPageArr[mainPageArr.length - 1];
+                        break;
+                    case DOUBAN:
+
+                        break;
+                    case ZHIHU:
+
+                        break;
+                    default:
+
+                }
+            } else { // 非用户
+                userKey = UUIDGenerateUtil.getUUID32();
+            }
+        }
+        return userKey;
     }
 }

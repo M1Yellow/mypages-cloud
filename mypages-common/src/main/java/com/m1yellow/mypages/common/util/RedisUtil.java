@@ -1,4 +1,4 @@
-package com.m1yellow.mypages.util;
+package com.m1yellow.mypages.common.util;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;

@@ -1,13 +1,16 @@
 package com.m1yellow.mypages.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.m1yellow.mypages.bo.UserFollowingBo;
 import com.m1yellow.mypages.common.api.CommonResult;
+import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.common.exception.AtomicityException;
 import com.m1yellow.mypages.common.exception.FileSaveException;
-import com.m1yellow.mypages.common.util.UUIDGenerateUtil;
+import com.m1yellow.mypages.common.util.FileUtil;
+import com.m1yellow.mypages.common.util.RedisUtil;
 import com.m1yellow.mypages.entity.UserFollowing;
 import com.m1yellow.mypages.entity.UserFollowingRelation;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
@@ -58,19 +61,25 @@ public class UserFollowingController {
     private UserFollowingRelationService userFollowingRelationService;
     @Autowired
     private UserFollowingRemarkService userFollowingRemarkService;
+    @Autowired
+    private RedisUtil redisUtil;
 
 
     /**
      * @RequestPart与@RequestParam的区别
      * @RequestPart这个注解用在multipart/form-data表单提交请求的方法上。 支持的请求方法的方式MultipartFile，属于Spring的MultipartResolver类。这个请求是通过http协议传输的。
      * @RequestParam也同样支持multipart/form-data请求。 他们最大的不同是，当请求方法的请求参数类型不再是String类型的时候。
-     * @RequestParam适用于name-valueString类型的请求域，@RequestPart适用于复杂的请求域（像JSON，XML）。 <b>添加关注用户</b>
+     * @RequestParam适用于name-valueString类型的请求域，@RequestPart适用于复杂的请求域（像JSON，XML）。
+     * @RequestParam <= 注解空缺
+     * 注意，application/json 和 multipart/form-data 不兼容。传文件，就传不了 json 对象，但可以传字符串，后台解析转换为对象
      */
 
     @ApiOperation("添加/更新关注用户")
     @Transactional //(rollbackFor = {AtomicityException.class, FileSaveException.class})
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
-    public CommonResult<UserFollowingItem> add(@RequestPart UserFollowingBo following, @RequestPart(required = false) MultipartFile profile) {
+    @WebLog
+    @DoSomethings
+    public CommonResult<UserFollowingItem> add(UserFollowingBo following, @RequestPart(required = false) MultipartFile profile) {
 
         logger.info(">>>> following/add, following: {}", following);
 
@@ -84,17 +93,17 @@ public class UserFollowingController {
             logger.error("请检查必须参数");
             return CommonResult.failed("请检查必须参数");
         }
-        if (!following.getIsUser()) { // 非用户头像不能为空
+        if (!following.getIsUser() && following.getFollowingId() == null) { // 新增的非用户头像不能为空
             if (profile == null) {
-                logger.error("非用户需要上传头像");
-                return CommonResult.failed("非用户需要上传头像");
+                logger.error("新增非用户需要上传头像");
+                return CommonResult.failed("新增非用户需要上传头像");
             }
         }
 
         // 根据关注用户id是否为空，判断是新增还是更新
         Map<String, Object> params = new HashMap<>();
-        params.put("user_id", following.getUserId());
-        params.put("following_id", following.getFollowingId());
+        params.put("userId", following.getUserId());
+        params.put("followingId", following.getFollowingId());
 
         UserFollowingBo originalFollowing = null;
         if (following.getFollowingId() == null) { // 新增
@@ -106,13 +115,21 @@ public class UserFollowingController {
         // 旧头像路径，用于删除旧头像
         String oldFilePath = originalFollowing.getProfilePhoto();
 
-        // TODO 设置保存路径为 target 下的 classpath 目录，但本地项目执行 mvn clean 之后，target 会被清理掉
-        saveDir = UserFollowingController.class.getResource("/").getPath() + saveDir;
-        // 获取新头像路径
-        String newFilePath = getFilePath(profile);
-        // 设置新头像路径
-        following.setProfilePhoto(newFilePath);
+        if (profile != null) {
+            // 获取新头像相对路径
+            String newFilePath = FileUtil.getFilePath(UserFollowingController.class, profile, saveDir, oldFilePath, true, false);
+            logger.info(">>>> init newFilePath: {}", newFilePath);
+            // 设置新头像路径
+            following.setProfilePhoto(newFilePath);
+        }
 
+        // 获取关注用户所在平台的id或标识
+        String userKey = userFollowingService.getUserKeyFromMainPage(following);
+        if (StringUtils.isBlank(userKey)) {
+            logger.error("获取关注用户所在平台标识失败");
+            throw new AtomicityException("获取关注用户所在平台标识失败");
+        }
+        following.setUserKey(userKey);
 
         // 保存关注用户
         UserFollowing saveFollowing = new UserFollowing();
@@ -127,6 +144,7 @@ public class UserFollowingController {
         */
         //BeanUtils.copyProperties(following, originalFollowing);
         BeanUtils.copyProperties(following, saveFollowing); // 属性为null也会被复制，内部类不会复制过去
+
         // 修正 id
         if (following.getFollowingId() != null && following.getFollowingId() > 0) {
             saveFollowing.setId(following.getFollowingId());
@@ -143,6 +161,7 @@ public class UserFollowingController {
             }
         }
 
+        // 保存入库
         if (!userFollowingService.saveOrUpdate(saveFollowing)) {
             logger.error("添加关注用户失败");
             throw new AtomicityException("添加关注用户失败");
@@ -168,12 +187,17 @@ public class UserFollowingController {
             throw new AtomicityException("保存用户与关注用户关系记录失败");
         }
 
-        // 保存用户标签
-        List<UserFollowingRemark> remarkList = following.getRemarkList();
-        if (remarkList != null && remarkList.size() > 0) {
-            if (!userFollowingRemarkService.saveRemarks(remarkList, following)) {
-                logger.error("保存用户标签失败");
-                throw new AtomicityException("保存用户标签失败");
+        // 解析用户标签列表
+        List<UserFollowingRemark> remarkList = null;
+        String remarkListJson = following.getRemarkListJson();
+        if (StringUtils.isNotBlank(remarkListJson)) {
+            remarkList = JSONObject.parseArray(remarkListJson, UserFollowingRemark.class);
+            // 保存用户标签
+            if (remarkList != null && remarkList.size() > 0) {
+                if (!userFollowingRemarkService.saveRemarks(remarkList, following)) {
+                    logger.error("保存用户标签失败");
+                    throw new AtomicityException("保存用户标签失败");
+                }
             }
         }
 
@@ -193,7 +217,10 @@ public class UserFollowingController {
         }
 
         // 重新加载关注用户
-        UserFollowingBo reloadFollowing = userFollowingService.getUserFollowing(params); // 注意 params 中的条件，不能被 clear
+        params.clear();
+        params.put("userId", following.getUserId());
+        params.put("followingId", following.getFollowingId());
+        UserFollowingBo reloadFollowing = userFollowingService.getUserFollowing(params);
         UserFollowingItem followingItem = new UserFollowingItem();
         followingItem.setUserFollowing(reloadFollowing);
 
@@ -213,7 +240,8 @@ public class UserFollowingController {
         // 保存头像文件，放在代码最后，出异常则抛出自定义文件保存异常，数据也会回滚
         if (!following.getIsUser()) { // 非用户
             if (profile != null) {
-                saveFile(profile, oldFilePath);
+                // saveFile 文件保存出错会抛出自定义文件保存异常，整个方法的事务回滚
+                saveFile(profile, oldFilePath, following.getProfilePhoto());
             }
         }
 
@@ -222,41 +250,17 @@ public class UserFollowingController {
 
 
     /**
-     * 获取文件路径
-     *
-     * @param profile
-     * @return
-     */
-    private String getFilePath(MultipartFile profile) {
-        if (profile == null) {
-            return null;
-        }
-        // 上传新头像文件
-        String fileName = profile.getOriginalFilename();
-        // 获取后缀 .jpg
-        String suffixName = fileName.substring(fileName.lastIndexOf("."));
-        // 重新生成文件名
-        fileName = UUIDGenerateUtil.getUUID40() + suffixName;
-        String filePath = saveDir + fileName;
-
-        // 处理头像本地路径
-        String profileDir = filePath.substring(filePath.lastIndexOf("/images"));
-
-        return profileDir;
-    }
-
-
-    /**
      * 保存头像文件
      *
      * @param profile
      * @param oldFilePath
+     * @param newFilePath
      */
-    private void saveFile(MultipartFile profile, String oldFilePath) {
+    private void saveFile(MultipartFile profile, String oldFilePath, String newFilePath) {
         // 更新用户头像时，先删除旧头像
         if (StringUtils.isNotBlank(oldFilePath)) {
-            String oldProfileName = oldFilePath.substring(oldFilePath.lastIndexOf("/") + 1);
-            oldFilePath = saveDir + oldProfileName;
+            oldFilePath = FileUtil.getFilePath(UserFollowingController.class, null, saveDir, oldFilePath, false, true);
+            logger.info(">>>> oldFilePath: {}", oldFilePath);
             File oldFile = new File(oldFilePath);
             if (oldFile.exists() && oldFile.isFile()) {
                 if (!oldFile.delete()) {
@@ -267,8 +271,9 @@ public class UserFollowingController {
         }
 
         // 上传新头像文件
-        String filePath = getFilePath(profile);
-        File dest = new File(filePath);
+        String fileFullPath = FileUtil.getFilePath(UserFollowingController.class, null, saveDir, newFilePath, false, true);
+        logger.info(">>>> saving fileFullPath: {}", fileFullPath);
+        File dest = new File(fileFullPath);
         try {
             Files.copy(profile.getInputStream(), dest.toPath());
             //file.transferTo(new File(filePath));
@@ -282,6 +287,8 @@ public class UserFollowingController {
     @ApiOperation("同步关注用户的信息")
     //@RequestMapping(value = "syncOne/{fuid}") // @PathVariable String fuid
     @RequestMapping(value = "syncOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<UserInfoItem> syncFollowingInfo(@RequestParam Long userId, @RequestParam Long fuid) {
 
         if (userId == null || fuid == null) {
@@ -323,27 +330,23 @@ public class UserFollowingController {
 
     @ApiOperation("批量同步关注用户的信息")
     @RequestMapping(value = "syncBatch", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<List<UserInfoItem>> syncFollowingInfoBatch(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
 
-        if (platformId == null) {
+        if (userId == null || platformId == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
         // 查询用户信息
-        QueryWrapper<UserFollowing> followingQueryWrapper = new QueryWrapper();
-        //followingQueryWrapper.eq("is_deleted", 0);
-        followingQueryWrapper.eq("platform_id", platformId);
-        followingQueryWrapper.eq("is_user", 1);
-        if (typeId != null) followingQueryWrapper.eq("ftype_Id", typeId);
-
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         params.put("platformId", platformId);
         if (typeId != null) params.put("typeId", typeId);
         List<UserFollowingBo> userFollowingList = userFollowingService.queryUserFollowingList(params);
 
-        if (userFollowingList == null || userFollowingList.size() <= 0) {
+        if (userFollowingList == null || userFollowingList.size() < 1) {
             logger.error("获取关注用户记录失败");
             return CommonResult.failed("获取关注用户记录失败");
         }
@@ -380,6 +383,8 @@ public class UserFollowingController {
 
     @ApiOperation("移除关注用户")
     @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long followingId) {
 
         if (userId == null || followingId == null) {
@@ -387,18 +392,28 @@ public class UserFollowingController {
             return CommonResult.failed("请求参数错误");
         }
 
+        /*
+        // 手动实现逻辑删除
         UpdateWrapper<UserFollowingRelation> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("is_deleted", 1);
         updateWrapper.eq("user_id", userId);
         updateWrapper.eq("following_id", followingId);
-
         if (!userFollowingRelationService.update(updateWrapper)) {
-            logger.error("移除失败，following id:" + followingId);
-            return CommonResult.failed("移除失败");
+            logger.error("移除失败，userId: {}, followingId: {}", userId, followingId);
+            return CommonResult.failed("操作失败");
+        }
+        */
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", userId);
+        params.put("following_id", followingId);
+        // TODO 会自动替换为逻辑删除，即执行更新语句
+        if (!userFollowingRelationService.removeByMap(params)) {
+            logger.error("移除失败，userId: {}, followingId: {}", userId, followingId);
+            return CommonResult.failed("操作失败");
         }
 
-        return CommonResult.success("操作成功");
+        return CommonResult.success();
     }
-
 
 }

@@ -63,7 +63,7 @@ public class UserBaseController {
             return CommonResult.failed("移除失败");
         }
 
-        return CommonResult.success("操作成功");
+        return CommonResult.success();
     }
 
 }

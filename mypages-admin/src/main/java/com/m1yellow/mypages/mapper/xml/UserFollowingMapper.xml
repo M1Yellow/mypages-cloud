@@ -3,10 +3,17 @@
 <mapper namespace="com.m1yellow.mypages.mapper.UserFollowingMapper">
 
     <select id="getUserFollowing" parameterType="java.util.Map" resultType="com.m1yellow.mypages.bo.UserFollowingBo">
+        <!--
+        TODO
+        这个 sql 即使指定 left join 以左表为驱动表，但实际运行时，sql 优化器根据 where 后筛选条件，发现右表的记录更少，
+        就自动以右表为驱动表了，最后导致排序字段没在驱动表，产生临时表！
+        调整：将 left join 改为 straight_join，直接手动指定左边第一个表为驱动表，避免产生 temporary 临时表。
+        结论：sql 优化器默认优化操作，并不一定适合实际场景，别太依赖优化器自动优化。
+        -->
         select ufr.id, uf.platform_id, uf.type_id, uf.user_key, uf.name, uf.main_page, uf.profile_photo,
         uf.signature, uf.is_user, uf.create_time, uf.update_time,
         ufr.user_id, ufr.following_id, ufr.is_deleted, ufr.sort_no
-        from user_following_relation ufr left join user_following uf on ufr.following_id = uf.id
+        from user_following_relation ufr straight_join user_following uf on ufr.following_id = uf.id
         where ufr.is_deleted = 0
         <if test="userId != null and userId != &quot;&quot;">
             and ufr.user_id = #{userId}
@@ -28,7 +35,7 @@
         select ufr.id, uf.platform_id, uf.type_id, uf.user_key, uf.name, uf.main_page, uf.profile_photo,
         uf.signature, uf.is_user, uf.create_time, uf.update_time,
         ufr.user_id, ufr.following_id, ufr.is_deleted, ufr.sort_no
-        from user_following_relation ufr left join user_following uf on ufr.following_id = uf.id
+        from user_following_relation ufr straight_join user_following uf on ufr.following_id = uf.id
         where ufr.is_deleted = 0
         <if test="userId != null and userId != &quot;&quot;">
             and ufr.user_id = #{userId}
@@ -39,11 +46,11 @@
         <if test="typeId != null and typeId != &quot;&quot;">
             and uf.type_id = #{typeId}
         </if>
-        order by ufr.sort_no desc
+        order by ufr.sort_no desc, ufr.following_id asc
     </select>
 
     <select id="queryTypeIdList" resultType="java.lang.Long">
-        <!-- TODO 使用之前，需要在代码中手动去重。distinct 或 group by 去重，会创建临时表，影响性能 -->
+        <!-- TODO 这个 sql 虽然使用了 left join，但是驱动表是右边的表，MySQL优化器采用了简单粗暴的解决方法：哪个表的结果集小，就以哪个表为驱动表。 -->
         select uf.type_id
         from user_following_relation ufr left join user_following uf on ufr.following_id = uf.id
         where ufr.is_deleted = 0
@@ -53,6 +60,7 @@
         <if test="platformId != null and platformId != &quot;&quot;">
             and uf.platform_id = #{platformId}
         </if>
+        group by uf.type_id
     </select>
 
 </mapper>

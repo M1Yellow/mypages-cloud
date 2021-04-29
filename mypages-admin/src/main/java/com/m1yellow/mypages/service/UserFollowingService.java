@@ -67,4 +67,11 @@ public interface UserFollowingService extends IService<UserFollowing> {
      */
     List<Long> queryTypeIdList(Map params);
 
+    /**
+     * 获取关注用户所在平台的id或标识
+     * @param following
+     * @return
+     */
+    String getUserKeyFromMainPage(UserFollowingBo following);
+
 }

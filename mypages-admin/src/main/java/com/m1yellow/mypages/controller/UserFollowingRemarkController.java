@@ -2,6 +2,8 @@ package com.m1yellow.mypages.controller;
 
 
 import com.m1yellow.mypages.common.api.CommonResult;
+import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
 import com.m1yellow.mypages.service.UserFollowingRemarkService;
 import io.swagger.annotations.ApiOperation;
@@ -9,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -30,6 +35,8 @@ public class UserFollowingRemarkController {
 
     @ApiOperation("添加/更新用户标签")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<UserFollowingRemark> add(@RequestBody UserFollowingRemark remark) {
 
         if (remark == null) {
@@ -39,28 +46,56 @@ public class UserFollowingRemarkController {
 
         if (!userFollowingRemarkService.saveOrUpdate(remark)) {
             logger.error("添加/更新标签失败");
-            return CommonResult.failed("添加/更新标签失败");
+            return CommonResult.failed("操作失败");
         }
 
         return CommonResult.success(remark);
     }
 
 
-    @ApiOperation("移除用户标签")
-    @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
-    public CommonResult<String> remove(@RequestParam Long id) {
+    @ApiOperation("移除用户单个标签")
+    @RequestMapping(value = "removeOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
+    public CommonResult<String> removeOne(@RequestParam Long userId, @RequestParam Long id) {
 
-        if (id == null) {
+        if (userId == null || id == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
-        if (!userFollowingRemarkService.removeById(id)) {
-            logger.error("移除失败，id:" + id);
-            return CommonResult.failed("移除失败");
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", userId);
+        params.put("id", id);
+        if (!userFollowingRemarkService.removeByMap(params)) {
+            logger.error("移除失败，userId: {}, id: {}", userId, id);
+            return CommonResult.failed("操作失败");
         }
 
-        return CommonResult.success("操作成功");
+        return CommonResult.success();
+    }
+
+
+    @ApiOperation("移除用户标签")
+    @RequestMapping(value = "removeBelongs", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
+    public CommonResult<String> removeBelongs(@RequestParam Long userId, @RequestParam Long followingId) {
+
+        if (userId == null || followingId == null) {
+            logger.error("请求参数错误");
+            return CommonResult.failed("请求参数错误");
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", userId);
+        params.put("following_id", followingId);
+        if (!userFollowingRemarkService.removeByMap(params)) {
+            logger.error("移除失败，userId: {}, followingId: {}", userId, followingId);
+            return CommonResult.failed("操作失败");
+        }
+
+        return CommonResult.success();
     }
 
 }

@@ -34,6 +34,7 @@
 
     <!-- 参数配置 -->
     <properties>
+        <project-name-prod>mypages</project-name-prod>
         <skipTests>true</skipTests><!-- 打包跳过测试 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -59,6 +60,7 @@
         <fastjson.version>1.2.75</fastjson.version>
         <docker-maven-plugin.version>1.2.2</docker-maven-plugin.version>
         <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>
+        <tomcat8-maven-plugin.version>3.0-r1756463</tomcat8-maven-plugin.version>
         <mypages-common.version>0.0.1-SNAPSHOT</mypages-common.version>
         <mypages-security.version>0.0.1-SNAPSHOT</mypages-security.version>
         <mypages-generator.version>0.0.1-SNAPSHOT</mypages-generator.version>
@@ -69,16 +71,10 @@
     <!-- 项目或模块自身引用的依赖 -->
     <!-- 父模块的依赖尽可能是子项目共用的 -->
     <dependencies>
-        <!-- web场景启动器 -->
+        <!-- web 启动器 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <!-- springboot单元测试 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
         <!-- tomcat 设置 -->
         <dependency>
@@ -86,6 +82,12 @@
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <!-- 打包阶段 exclude 剔除 -->
             <scope>provided</scope>
+        </dependency>
+        <!-- springboot单元测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- common-lang3 util 工具类 -->
         <dependency>
@@ -229,6 +231,12 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+            <!-- tomcat 插件 -->
+            <dependency>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat8-maven-plugin</artifactId>
+                <version>${tomcat8-maven-plugin.version}</version>
             </dependency>
 
         </dependencies>

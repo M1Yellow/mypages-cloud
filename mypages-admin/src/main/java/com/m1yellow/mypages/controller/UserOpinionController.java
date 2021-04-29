@@ -2,6 +2,8 @@ package com.m1yellow.mypages.controller;
 
 
 import com.m1yellow.mypages.common.api.CommonResult;
+import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.entity.UserOpinion;
 import com.m1yellow.mypages.service.UserOpinionService;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -33,6 +38,8 @@ public class UserOpinionController {
 
     @ApiOperation("添加/更新观点")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
+    @WebLog
+    @DoSomethings
     public CommonResult<UserOpinion> add(UserOpinion opinion) {
 
         if (opinion == null) {
@@ -42,7 +49,7 @@ public class UserOpinionController {
 
         if (!userOpinionService.saveOrUpdate(opinion)) {
             logger.error("添加/更新观点失败");
-            return CommonResult.failed("添加/更新观点失败");
+            return CommonResult.failed("操作失败");
         }
 
         return CommonResult.success(opinion);
@@ -51,19 +58,24 @@ public class UserOpinionController {
 
     @ApiOperation("移除观点")
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
-    public CommonResult<String> remove(@RequestParam Long id) {
+    @WebLog
+    @DoSomethings
+    public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long id) {
 
-        if (id == null) {
+        if (userId == null || id == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
-        if (!userOpinionService.removeById(id)) {
-            logger.error("移除失败，id:" + id);
-            return CommonResult.failed("移除失败");
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", userId);
+        params.put("id", id);
+        if (!userOpinionService.removeByMap(params)) {
+            logger.error("移除失败，userId: {}, id: {}", userId, id);
+            return CommonResult.failed("操作失败");
         }
 
-        return CommonResult.success("操作成功");
+        return CommonResult.success();
     }
 
 }
