@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 public @interface WebLog {
 
     /**
-     * 日志描述信息
+     * 描述信息
      *
      * @return
      */

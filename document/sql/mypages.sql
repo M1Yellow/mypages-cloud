@@ -11,7 +11,7 @@
  Target Server Version : 50732
  File Encoding         : 65001
 
- Date: 14/04/2021 15:34:00
+ Date: 30/04/2021 15:07:18
 */
 
 SET NAMES utf8mb4;
@@ -34,17 +34,15 @@ CREATE TABLE `user_base`  (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_name`(`user_name`) USING BTREE,
-  UNIQUE INDEX `uk_mobile`(`mobile`) USING BTREE,
-  UNIQUE INDEX `uk_email`(`email`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE
+  UNIQUE INDEX `uk_mobile`(`mobile`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_base
 -- ----------------------------
-INSERT INTO `user_base` VALUES (1, 'admin', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-14 07:41:28', '2021-04-14 07:41:28');
-INSERT INTO `user_base` VALUES (2, 'test', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-14 07:41:28', '2021-04-14 07:41:28');
-INSERT INTO `user_base` VALUES (3, 'guest', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-14 07:41:28', '2021-04-14 07:41:28');
+INSERT INTO `user_base` VALUES (1, 'admin', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-23 06:23:16', '2021-04-23 06:23:16');
+INSERT INTO `user_base` VALUES (2, 'test', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-23 06:23:16', '2021-04-23 06:23:16');
+INSERT INTO `user_base` VALUES (3, 'guest', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-23 06:23:16', '2021-04-23 06:23:16');
 
 -- ----------------------------
 -- Table structure for user_check_update
@@ -59,9 +57,7 @@ CREATE TABLE `user_check_update`  (
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_following_id`(`following_id`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE
+  INDEX `idx_userId_followingId`(`user_id`, `following_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '检查关注用户更新表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -74,92 +70,176 @@ CREATE TABLE `user_check_update`  (
 DROP TABLE IF EXISTS `user_following`;
 CREATE TABLE `user_following`  (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
-  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id',
   `platform_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联平台id',
-  `ftype_id` bigint(20) UNSIGNED NOT NULL DEFAULT 1 COMMENT '关联关注类型表id，1-默认分类',
+  `type_id` bigint(20) UNSIGNED NOT NULL DEFAULT 1 COMMENT '关联关注类型表id，1-默认分类',
+  `user_key` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '关联用户来源平台的id或标识',
   `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
-  `main_page` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '主页地址',
+  `main_page` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '主页地址',
   `profile_photo` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '形象照片（头像）',
   `signature` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '个性签名',
-  `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5。8-思想、学习；7-美食、营养；6、健身、锻炼；5-兴趣、生活；4~其他',
   `is_user` bit(1) NOT NULL DEFAULT b'1' COMMENT '是否为用户，1-是用户；0-不是，默认1',
   `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_platform_id`(`platform_id`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE,
-  INDEX `idx_sort_no`(`sort_no`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 64 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户关注表' ROW_FORMAT = DYNAMIC;
+  INDEX `idx_platformId_typeId`(`platform_id`, `type_id`) USING BTREE,
+  INDEX `idx_platformId_userKey`(`platform_id`, `user_key`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 93 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户关注表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_following
 -- ----------------------------
-INSERT INTO `user_following` VALUES (1, 1, 2, 3, '知识区', 'https://www.bilibili.com/v/technology', '/images/user-profile-photo/02a0c09a6317e16c4077df10ab3780c2906f8f24.png', '点亮好奇心，在知识海洋里乘风破浪~', 9, b'0', b'0', '2021-01-02 10:39:40', '2021-01-02 10:39:40');
-INSERT INTO `user_following` VALUES (2, 1, 2, 3, '生活区', 'https://www.bilibili.com/v/life', '/images/user-profile-photo/c1e19150b5d1e413958d45e0e62f012e3ee200af.png', '衣食住行、柴米油盐', 9, b'0', b'0', '2021-01-02 10:42:26', '2021-01-02 10:42:26');
-INSERT INTO `user_following` VALUES (3, 1, 2, 3, '所长林超', 'https://space.bilibili.com/520155988/video', '/images/user-profile-photo/bc1a14a6c811b02ef30e9e69a7eb343a677287db.jpg', '薛定谔的眨眼.看科技&商业原理 公主号其他同名~合作联系：suozhang03 ', 8, b'1', b'0', '2021-01-02 10:46:37', '2021-01-02 10:46:37');
-INSERT INTO `user_following` VALUES (4, 1, 2, 3, '无趣的二姐', 'https://space.bilibili.com/496085430/video', '/images/user-profile-photo/94a960d95f08c141b97c8cd217166221999dae35.jpg', '分享我看到的世界，文案发在公众号: 无趣的二姐', 8, b'1', b'0', '2021-01-02 10:48:07', '2021-01-02 10:48:07');
-INSERT INTO `user_following` VALUES (5, 1, 2, 3, '蜡笔和小勋', 'https://space.bilibili.com/250111460/video', '/images/user-profile-photo/8a8812e0a9bb3adda90044ef48830584e1efe7a2.jpg', '讲点有益的，拍点有趣的 I 微博@蜡笔和小勋 I 邮箱：labidakashe@163.com(蜡笔打卡社)', 8, b'1', b'0', '2021-01-02 11:19:57', '2021-01-02 11:19:57');
-INSERT INTO `user_following` VALUES (6, 1, 2, 3, '雪颖Shae', 'https://space.bilibili.com/386364189/video', '/images/user-profile-photo/ae1381713c2e5de1262c558eba55d486d9901e37.jpg', '真我心理主理人，一个你心灵成长路上的陪伴者。', 5, b'1', b'0', '2021-01-02 11:20:50', '2021-01-02 11:20:50');
-INSERT INTO `user_following` VALUES (7, 1, 2, 3, '硬核的半佛仙人', 'https://space.bilibili.com/37663924/video', '/images/user-profile-photo/aaf33dced1941af0946f37c62f4b48fcaba9c9a2.jpg', '喜欢小仙女', 8, b'1', b'0', '2021-01-02 11:23:45', '2021-01-02 11:23:45');
-INSERT INTO `user_following` VALUES (8, 1, 2, 3, '牛顿顿顿', 'https://space.bilibili.com/303740257/video', '/images/user-profile-photo/ccec7bf50aa4e269a5122c945ec5a93c67b5ff4c.jpg', '诗人，斗士，被称作：东半球第二正经の男人', 8, b'1', b'0', '2021-01-02 11:34:24', '2021-01-02 11:34:24');
-INSERT INTO `user_following` VALUES (9, 1, 2, 3, '公孙田浩', 'https://space.bilibili.com/512574759/video', '/images/user-profile-photo/54e991d0369df2dcb864c798bb9c637128c0a73d.jpg', '用数据和事实呈现另一个互联网世界', 5, b'1', b'0', '2021-01-02 11:35:25', '2021-01-02 11:35:25');
-INSERT INTO `user_following` VALUES (10, 1, 2, 3, '营养师顾中一', 'https://space.bilibili.com/387460933/video', '/images/user-profile-photo/a9a045485d2aa2e52f5a3333eccdd55b9e816bb6.jpg', '清华大学公共卫生硕士，北京营养师协会理事，科学传播副高职称，入选福布斯中国50位意见领袖榜', 7, b'1', b'0', '2021-01-02 11:36:39', '2021-01-02 11:36:39');
-INSERT INTO `user_following` VALUES (11, 1, 2, 3, '李子柒', 'https://space.bilibili.com/19577966/video', '/images/user-profile-photo/82d27965dae3b2fe9e52780c6309c7b37ad4cbf2.jpg', '李家有女，人称子柒。 新浪微博：李子柒 邮箱：liziqistyle@163.com', 7, b'1', b'0', '2021-01-02 11:37:54', '2021-01-02 11:37:54');
-INSERT INTO `user_following` VALUES (12, 1, 2, 3, '我是马小坏', 'https://space.bilibili.com/298317405/video', '/images/user-profile-photo/8f9ef20753087e89137ea8ef55b097fd44eea66f.jpg', '分享美食，更是分享对生活的一种态度，更多精彩欢迎关注头条号：我是马小坏，微信公众号：我是马小坏，微博:马小坏频道', 7, b'1', b'0', '2021-01-02 11:38:46', '2021-01-02 11:38:46');
-INSERT INTO `user_following` VALUES (13, 1, 2, 3, '帅soserious', 'https://space.bilibili.com/66391032/video', '/images/user-profile-photo/40a663bb18e9064a97901b96aaf7d84d8056e98b.jpg', '#健身路上有我陪伴❤️ 微博:帅soserious', 6, b'1', b'0', '2021-01-02 11:40:11', '2021-01-02 11:40:11');
-INSERT INTO `user_following` VALUES (14, 1, 2, 3, '曼巴yelomamba', 'https://space.bilibili.com/156858999/video', '/images/user-profile-photo/08ba8a3b8ed2b14e8d320f725d8f6468b3b482b4.jpg', '健身先健心 健身路上一起进步！ 微博同名/邮箱：daijianxiang16@163.comht', 6, b'1', b'0', '2021-01-02 11:40:43', '2021-01-02 11:40:43');
-INSERT INTO `user_following` VALUES (15, 1, 2, 3, '冰寒哥', 'https://space.bilibili.com/37889997/video', '/images/user-profile-photo/9901d2301367671e8a201068e1f1d7221ad9d339.jpg', '同济大学皮肤学在读博士，《听肌肤的话》系列作者，《药妆品》主译。无干货，不冰寒。', 5, b'1', b'0', '2021-01-02 11:42:25', '2021-01-02 11:42:25');
-INSERT INTO `user_following` VALUES (16, 1, 2, 3, '皮科医生魏小博', 'https://space.bilibili.com/456404164/video', '/images/user-profile-photo/ac989cda390065228126fe0e44db74906ca0741d.jpg', '北京某三甲医院皮肤科医生 北京大学皮肤性病学博士\n尽量不要私信问诊，实在回复不过来，大家有问题还是及时就医诊治，以免延误病情', 5, b'1', b'0', '2021-01-02 11:43:40', '2021-01-02 11:43:40');
-INSERT INTO `user_following` VALUES (17, 1, 2, 3, '深读视频', 'https://space.bilibili.com/77266891/video', '/images/user-profile-photo/ca5812ac9eee536c268ac3d8ab4dd54dfc62d3ee.jpg', '关注公众号“深读视频”~！健康、科普、动漫，撸给你看！', 5, b'1', b'0', '2021-01-02 11:45:29', '2021-01-02 11:45:29');
-INSERT INTO `user_following` VALUES (18, 1, 2, 3, '画渣花小烙', 'https://space.bilibili.com/402576555/video', '/images/user-profile-photo/8ef6037e6024c01357edad8fdcf0a1deb346a894.jpg', '努力画画，认真科普，偶尔不务正业的瞎扯，有时候太忙私信会延迟回复嗷～～！微博：@画渣花小烙', 5, b'1', b'0', '2021-01-02 11:47:06', '2021-01-02 11:47:06');
-INSERT INTO `user_following` VALUES (19, 1, 2, 3, 'Freya飞呀', 'https://space.bilibili.com/456691117/video', '/images/user-profile-photo/1be0d49467a78352f6098d811065e0353878968e.jpg', 'wb同名｜不看私信  \n偷偷收藏温暖｜慢慢提升幸福值｜勇敢用生活治愈自己\n', 5, b'1', b'0', '2021-01-02 11:47:50', '2021-01-02 11:47:50');
-INSERT INTO `user_following` VALUES (20, 1, 2, 3, '起床大萌萌', 'https://space.bilibili.com/28794030/video', '/images/user-profile-photo/235aea61e952d200ed3bbfcddd342d9eba6a5634.jpg', '感觉家里有魔法   ✨vx：pmwu01', 5, b'1', b'0', '2021-01-02 11:48:28', '2021-01-02 11:48:28');
-INSERT INTO `user_following` VALUES (21, 1, 2, 3, '丧妹有点跳', 'https://space.bilibili.com/4548018/video', '/images/user-profile-photo/5be61949369dd844cc459eab808da151d8c363d2.gif', '⋆͛微博丧妹有点跳⋆͛商务Sombie96⋆͛粉丝Stiao96⋆͛粉丝群303255550通知群61651173', 5, b'1', b'0', '2021-01-02 11:49:07', '2021-01-02 11:49:07');
-INSERT INTO `user_following` VALUES (22, 1, 2, 3, '稚晖君', 'https://space.bilibili.com/20259914/video', '/images/user-profile-photo/cb9ef82714507e6bda707dac216da94c97d70037.jpg', 'AI算法工程师/野生钢铁侠/Arduino版主/脑洞载体', 5, b'1', b'0', '2021-01-02 11:50:36', '2021-01-02 11:50:36');
-INSERT INTO `user_following` VALUES (23, 1, 2, 3, '达尔闻', 'https://space.bilibili.com/430777205/video', '/images/user-profile-photo/ab81b1454dbf711fb28d76da053a676f288a89e4.jpg', '逆天小姐姐只讲技术，不撩汉！WeChat: 达尔闻说', 5, b'1', b'0', '2021-01-02 11:51:25', '2021-01-02 11:51:25');
-INSERT INTO `user_following` VALUES (24, 1, 2, 3, 'epcdiy', 'https://space.bilibili.com/12590/video', '/images/user-profile-photo/f288604112016e93ca224c4c2c58980a6cd6ba25.png', '商务合作加VX：Im_double_cloud ，只接数码/互联网产品合作，谢绝拼多多、培训机构相关推广！粉丝总群：1021463979', 5, b'1', b'0', '2021-01-02 11:52:02', '2021-01-02 11:52:02');
-INSERT INTO `user_following` VALUES (25, 1, 3, 2, '微博热搜榜', 'https://s.weibo.com/top/summary?cate=realtimehot', '/images/user-profile-photo/1f883b5711ad41e4a0504f5d4e6beaa40dvsxvbt.png', '随时随地发现（新鲜事）新孩子', 9, b'0', b'0', '2021-01-02 12:05:12', '2021-01-02 12:05:12');
-INSERT INTO `user_following` VALUES (26, 1, 3, 2, '人民日报', 'https://m.weibo.cn/u/2803301701', '/images/user-profile-photo/a716fd45ly8gdijd1zmonj20sa0saaby.jpg', '《人民日报》法人微博 人民日报法人微博。参与、沟通、记录时代。', 5, b'1', b'0', '2021-01-02 12:06:41', '2021-01-02 12:06:41');
-INSERT INTO `user_following` VALUES (27, 1, 3, 2, '人民网', 'https://m.weibo.cn/u/2286908003', '/images/user-profile-photo/002uLDeXly8glmohn698dj60j60j6q3b02.jpg', '人民网法人微博 报道全球 传播中国', 5, b'1', b'0', '2021-01-02 12:07:23', '2021-01-02 12:07:23');
-INSERT INTO `user_following` VALUES (28, 1, 3, 2, '环球时报', 'https://m.weibo.cn/u/1974576991', '/images/user-profile-photo/0029D7FZly8glmnmyyeicj605k05k74702.jpg', '《环球时报》微博 报道多元世界    解读复杂中国', 5, b'1', b'0', '2021-01-02 12:07:58', '2021-01-02 12:07:58');
-INSERT INTO `user_following` VALUES (29, 1, 3, 2, '央视新闻', 'https://m.weibo.cn/u/2656274875', '/images/user-profile-photo/002TLsr9ly8gnsu8mh9dkj60u00u0q4c02.jpg', '中央电视台新闻中心官方微博 “央视新闻”微博是中央电视台新闻中心官方微博，是央视重大新闻、突发事件、重点报道的首发平台。', 5, b'1', b'0', '2021-01-02 12:08:38', '2021-01-02 12:08:38');
-INSERT INTO `user_following` VALUES (30, 1, 3, 2, '中国新闻网', 'https://m.weibo.cn/u/1784473157', '/images/user-profile-photo/6a5ce645ly8gdij7dw130j20u00u00uc.jpg', '中国新闻网法人微博 这里提供你不知道、想知道、不能不知道的新闻。', 5, b'1', b'0', '2021-01-02 12:09:17', '2021-01-02 12:09:17');
-INSERT INTO `user_following` VALUES (31, 1, 3, 2, '生命时报', 'https://m.weibo.cn/u/1774057271', '/images/user-profile-photo/69bdf737ly8gdi762asg1j20u00u00uc.jpg', '《生命时报》报社官方微博 人民日报主管，环球时报主办，一家具有国际视野的大众健康媒体。更多精彩关注微信“LT0385”。', 5, b'1', b'0', '2021-01-02 12:10:01', '2021-01-02 12:10:01');
-INSERT INTO `user_following` VALUES (32, 1, 3, 2, '澎湃新闻', 'https://m.weibo.cn/u/5044281310', '/images/user-profile-photo/005vnhZYly8ftjmwo0bx4j308c08cq32.jpg', '澎湃新闻，专注时政与思想的媒体开放平台 有内涵的时政新媒体', 5, b'1', b'0', '2021-01-02 12:11:17', '2021-01-02 12:11:17');
-INSERT INTO `user_following` VALUES (33, 1, 3, 2, '封面新闻', 'https://m.weibo.cn/u/1496814565', '/images/user-profile-photo/593793e5ly8gdi6sa5seej20gq0f50sm.jpg', '封面新闻华西都市报官方微博 欢迎关注封面新闻', 5, b'1', b'0', '2021-01-02 12:13:50', '2021-01-02 12:13:50');
-INSERT INTO `user_following` VALUES (34, 1, 3, 2, '财经杂志', 'https://m.weibo.cn/u/1684012053', '/images/user-profile-photo/645ffc15ly8gib1q0vevgj20u00u2403.jpg', '《财经》杂志官方微博 独立 独家 独到', 5, b'1', b'0', '2021-01-02 12:14:56', '2021-01-02 12:14:56');
-INSERT INTO `user_following` VALUES (35, 1, 3, 2, '新浪科技', 'https://m.weibo.cn/u/1642634100', '/images/user-profile-photo/61e89b74ly1gdiq06vjw9j20c60c4aac.jpg', '新浪科技官方微博 新浪科技是中国最有影响力的TMT产业资讯及数码产品服务平台。让我们带你观察世界变化，看清行业趋势！', 5, b'1', b'0', '2021-01-02 12:15:35', '2021-01-02 12:15:35');
-INSERT INTO `user_following` VALUES (36, 1, 3, 3, '李子柒', 'https://m.weibo.cn/u/2970452952', '/images/user-profile-photo/b10d83d8jw8f53xpxjlhaj20ku0kut9k.jpg', '李子柒品牌创始人 邮箱：liziqistyle@163.com', 5, b'1', b'0', '2021-01-03 09:27:55', '2021-01-03 09:27:55');
-INSERT INTO `user_following` VALUES (37, 1, 3, 3, '马小坏频道', 'https://m.weibo.cn/u/6089150236', '/images/user-profile-photo/006E5s8Aly1fnnii4uc6jj30m80m8gtc.jpg', '知名美食博主 美食视频自媒体 工作微：kjxnweixin', 5, b'1', b'0', '2021-01-03 09:54:37', '2021-01-03 09:54:37');
-INSERT INTO `user_following` VALUES (38, 1, 3, 3, '夏厨陈二十', 'https://m.weibo.cn/u/5786902874', '/images/user-profile-photo/006jDfN8ly8g51wvgien7j30ru0ruabc.jpg', '大眼互娱签约博主 知名美食博主 美食视频自媒体 我是陈二十，一个爱“夏厨”的女孩…    合作手机微信：17744495635  邮箱：bigeye.market@bigeyegroup.com', 5, b'1', b'0', '2021-01-03 09:56:48', '2021-01-03 09:56:48');
-INSERT INTO `user_following` VALUES (39, 1, 3, 3, '好煮艺', 'https://m.weibo.cn/u/3136788225', '/images/user-profile-photo/baf79701ly8fjwwtmvwtij20ku0kuwf8.jpg', '美食作家 作品《美食健康谱》美食点评团成员 美食作家，专注美食分享。关注@好煮艺，学得好厨艺。微博合作推广请联系微 信：ldtg2018', 5, b'1', b'0', '2021-01-03 09:57:45', '2021-01-03 09:57:45');
-INSERT INTO `user_following` VALUES (40, 1, 3, 3, '夏妈厨房', 'https://m.weibo.cn/u/6257740340', '/images/user-profile-photo/006PuQ7Oly8gdi6fzmux7j30u00u0mzt.jpg', '知名美食博主 微博故事红人 美食视频自媒体 微博原创视频博主 商务合作：XM16009', 5, b'1', b'0', '2021-01-03 09:58:29', '2021-01-03 09:58:29');
-INSERT INTO `user_following` VALUES (41, 1, 3, 3, '营养师张淋琳', 'https://m.weibo.cn/u/2010999701', '/images/user-profile-photo/77dd6b95ly8fz7ftj5uv6j20u00u0dj5.jpg', '一级公共营养师 美容师 健康管理师 陕西省养生协会副会长 知名健康养生博主 健康视频自媒体 原陕西省养生协会副会长，国家一级营养师，健康管理师，中医美容师，CCTV1、CCTV7、BTV生活、深圳卫视、旅游卫视、河北卫视等多家电视台特邀嘉宾！', 5, b'1', b'0', '2021-01-03 10:00:56', '2021-01-03 10:00:56');
-INSERT INTO `user_following` VALUES (42, 1, 3, 3, '本叔就是本切鸣', 'https://m.weibo.cn/u/2949338000', '/images/user-profile-photo/afcb5390jw8f4a5rbzov0j21kw2dcb29.jpg', '知名摄影博主 微博原创视频博主 男摄一枚/摄影前后期讲师/微信 ccremix 约拍 合作 请备注', 5, b'1', b'0', '2021-01-03 10:01:22', '2021-01-03 10:01:22');
-INSERT INTO `user_following` VALUES (43, 1, 3, 3, 'photoshop资源库', 'https://m.weibo.cn/u/2630646082', '/images/user-profile-photo/9ccc7942gw1enacnterhdj2050050jrk.jpg', '知名创意博主 微博知名设计美学博主 超话主持人（资源君超话） 设计！理想，让库粉们都成为设计师！', 5, b'1', b'0', '2021-01-03 10:02:20', '2021-01-03 10:02:20');
-INSERT INTO `user_following` VALUES (44, 1, 3, 3, '回形针PaperClip', 'https://m.weibo.cn/u/6414205745', '/images/user-profile-photo/00705lVnly8fm007um5jdj31jk1jk420.jpg', '泛科普视频自媒体 你的当代生活说明书。商务合作：paperclip@foxmail.com', 5, b'1', b'0', '2021-01-03 10:03:19', '2021-01-03 10:03:19');
-INSERT INTO `user_following` VALUES (45, 1, 3, 3, 'Freya飞呀', 'https://m.weibo.cn/u/7284299679', '/images/user-profile-photo/007WYb6vly8gdjbp50o3tj30e80e8gmb.jpg', '微博VLOG博主 我用尽全力过着平凡的一生♥️', 5, b'1', b'0', '2021-01-03 10:04:16', '2021-01-03 10:04:16');
-INSERT INTO `user_following` VALUES (46, 1, 3, 3, '基金小达人', 'https://m.weibo.cn/u/6054601231', '/images/user-profile-photo/006BKumzly8ftg4ak2ylmj30ro0roq59.jpg', '财经博主 微博基金合作作者 微博原创视频博主 头条文章作者 分享基金投资技巧，解答基金投资问题。', 5, b'1', b'0', '2021-01-03 10:05:08', '2021-01-03 10:05:08');
-INSERT INTO `user_following` VALUES (47, 1, 3, 3, '圖盗', 'https://m.weibo.cn/u/6032474791', '/images/user-profile-photo/006AfEgvjw8f871afe26cj30yi0xb766.jpg', '颜值博主 看看街上的帅哥美女是如何搭配衣服的 ...', 5, b'1', b'0', '2021-01-03 10:06:04', '2021-01-03 10:06:04');
-INSERT INTO `user_following` VALUES (48, 1, 3, 3, '深圳', 'https://m.weibo.cn/p/1001018008644030000000000', '/images/user-profile-photo/65ab8a79484048b5817d3898d241c596vrx97y76.jfif', '深圳周边 打卡记录', 1, b'0', b'0', '2021-01-03 10:09:19', '2021-01-03 10:09:19');
-INSERT INTO `user_following` VALUES (49, 1, 3, 3, '长沙', 'https://m.weibo.cn/p/1001018008643010000000000', '/images/user-profile-photo/24433698f26e43ec977db2036ba98adf0cfqx1y6.jfif', '长沙周边 打卡记录', 1, b'0', b'0', '2021-01-03 10:12:34', '2021-01-03 10:12:34');
-INSERT INTO `user_following` VALUES (50, 1, 3, 5, 'HeyUke_', 'https://m.weibo.cn/u/3807059740', '/images/user-profile-photo/e2eb1f1cly8gg2j0bqcakj20u00u0jwg.jpg', ' ～', 5, b'1', b'0', '2021-01-03 10:14:55', '2021-01-03 10:14:55');
-INSERT INTO `user_following` VALUES (51, 1, 3, 5, '-JinGi', 'https://m.weibo.cn/u/3176592573', '/images/user-profile-photo/bd56f4bdly8gozvnmq9chj20e80e8aam.jpg', ' 蜜蜂的膝盖', 5, b'1', b'0', '2021-01-03 10:17:20', '2021-01-03 10:17:20');
-INSERT INTO `user_following` VALUES (52, 1, 3, 5, '小赵灵长大后', 'https://m.weibo.cn/u/3802350894', '/images/user-profile-photo/e2a3452ely8g3b0o16c01j20u00u0gnz.jpg', '这个人很神秘，什么都没有写', 5, b'1', b'0', '2021-01-03 10:22:35', '2021-01-03 10:22:35');
-INSERT INTO `user_following` VALUES (53, 1, 2, 3, '陈暖央LunaSea', 'https://space.bilibili.com/217108321/dynamic', '/images/user-profile-photo/7eb2951d1ff33da1900b2423319cc899e434d82c.jpg', '一个爱健身的正经UP主，喜欢健身的关注我，不喜欢的我再想想办法~ 围脖：@陈暖央 ', 6, b'1', b'0', '2021-04-07 16:45:41', '2021-04-07 16:45:41');
-INSERT INTO `user_following` VALUES (54, 1, 2, 3, 'Topbook', 'https://space.bilibili.com/29959830/video', '/images/user-profile-photo/1f0ff00ad152f286f1dc47af2aadc0abfe221921.jpg', '让工具回归工具，让你成为你。「合作微信：yanghuaua（非全拼）」', 5, b'1', b'0', '2021-04-07 16:55:27', '2021-04-07 16:55:27');
-INSERT INTO `user_following` VALUES (55, 1, 2, 3, '杨真直', 'https://space.bilibili.com/547173382/video', '/images/user-profile-photo/8a0a9f138771c304319cda85e4506b46cc714612.jpg', '公众号/微博：杨真直。商务微信：yangzz-001', 5, b'1', b'0', '2021-04-07 16:56:25', '2021-04-07 16:56:25');
-INSERT INTO `user_following` VALUES (56, 1, 3, 3, '__雷雨_', 'https://m.weibo.cn/u/2045254855', '/images/user-profile-photo/79e81cc7ly8gky4ig7rwhj20e80e874q.jpg', '知名旅游博主 有一个taobao店 🤷‍♀️', 5, b'1', b'0', '2021-04-07 16:58:55', '2021-04-07 16:58:55');
-INSERT INTO `user_following` VALUES (57, 1, 3, 3, 'LEIYU今天不开工', 'https://m.weibo.cn/u/6488142313', '/images/user-profile-photo/00755AcFly8gmf6hdn42wj30e80e8t92.jpg', ' 淘宝店铺名：LEIYU STUDIO', 5, b'1', b'0', '2021-04-07 17:00:19', '2021-04-07 17:00:19');
-INSERT INTO `user_following` VALUES (58, 1, 3, 3, '用户刘妍汐', 'https://m.weibo.cn/u/7038906058', '/images/user-profile-photo/007Gmx0Sly8gb76xljde2j30ij0ijwef.jpg', ' 𝗠𝗼𝗱𝗲𝗹▫️𝗡𝗮𝗶𝗹𝗬𝗼𝗸𝗲▫️𝗖𝗧𝗕𝗨设计系大三在读▫️重庆女孩🌇', 5, b'1', b'0', '2021-04-07 17:06:25', '2021-04-07 17:06:25');
-INSERT INTO `user_following` VALUES (59, 1, 2, 3, '周酷仔', 'https://space.bilibili.com/36416153/video', '/images/user-profile-photo/5508d4ca1d0739bf12afd4d6e997301c5b234b71.jpg', '快乐传播机', 5, b'1', b'0', '2021-04-07 17:07:57', '2021-04-07 17:07:57');
-INSERT INTO `user_following` VALUES (60, 1, 3, 5, 'ZlzYJh', 'https://m.weibo.cn/u/6864574333', '/images/user-profile-photo/007uz3mRly8gi6f6ew8txj30e80e8glu.jpg', ' 🎊🎊🎊', 5, b'1', b'0', '2021-04-07 17:40:48', '2021-04-07 17:40:48');
-INSERT INTO `user_following` VALUES (61, 1, 3, 5, '毛然-', 'https://m.weibo.cn/u/2289940200', '/images/user-profile-photo/887db6e8ly8gfjpt338arj20e80e8q3n.jpg', '摄影博主 约拍请私信', 5, b'1', b'0', '2021-04-07 17:42:16', '2021-04-07 17:42:16');
-INSERT INTO `user_following` VALUES (62, 1, 3, 3, '丧妹有点跳', 'https://m.weibo.cn/u/2731696573', '/images/user-profile-photo/a2d261bdly8gn6iidp8esj20ru0rvjt5.jpg', '微博vlog博主 🙋2.5次元半蠢不萌的妹子一只。🏡万年宅女🎐惬意慵懒的up主🙌一个想当裁缝能唱歌的舞者🙇合作事宜请私信~', 5, b'1', b'0', '2021-04-07 17:45:30', '2021-04-07 17:45:30');
-INSERT INTO `user_following` VALUES (63, 1, 3, 3, '陈暖央', 'https://m.weibo.cn/u/2882083237', '/images/user-profile-photo/abc919a5ly8gf3n6ovy7rj20u00u0tba.jpg', '暴走的萝莉品牌创始人 知名运动博主 TMall搜索：【暴走的萝莉】，工作洽谈发邮箱：nuan@s-loli.com 【ins:chennuanyang】', 5, b'1', b'0', '2021-04-07 17:55:32', '2021-04-07 17:55:32');
+INSERT INTO `user_following` VALUES (1, 2, 3, 'v-technology', '知识区', 'https://www.bilibili.com/v/technology', '/images/user-profile-photo/02a0c09a6317e16c4077df10ab3780c2906f8f24.png', '点亮好奇心，在知识海洋里乘风破浪~', b'0', b'0', '2021-01-02 10:39:40', '2021-01-02 10:39:40');
+INSERT INTO `user_following` VALUES (2, 2, 3, 'v-life', '生活区', 'https://www.bilibili.com/v/life', '/images/user-profile-photo/c1e19150b5d1e413958d45e0e62f012e3ee200af.png', '衣食住行、柴米油盐', b'0', b'0', '2021-01-02 10:42:26', '2021-01-02 10:42:26');
+INSERT INTO `user_following` VALUES (3, 2, 3, '520155988', '所长林超', 'https://space.bilibili.com/520155988/video', '/images/user-profile-photo/bc1a14a6c811b02ef30e9e69a7eb343a677287db.jpg', '薛定谔的眨眼.看科技&商业原理 公主号其他同名~合作联系：suozhang03 ', b'1', b'0', '2021-01-02 10:46:37', '2021-01-02 10:46:37');
+INSERT INTO `user_following` VALUES (4, 2, 3, '496085430', '无趣的二姐', 'https://space.bilibili.com/496085430/video', '/images/user-profile-photo/94a960d95f08c141b97c8cd217166221999dae35.jpg', '分享我看到的世界，文案发在公众号: 无趣的二姐', b'1', b'0', '2021-01-02 10:48:07', '2021-01-02 10:48:07');
+INSERT INTO `user_following` VALUES (5, 2, 3, '250111460', '蜡笔和小勋', 'https://space.bilibili.com/250111460/video', '/images/user-profile-photo/8a8812e0a9bb3adda90044ef48830584e1efe7a2.jpg', '讲点有益的，拍点有趣的 I 微博@蜡笔和小勋 I 邮箱：labidakashe@163.com(蜡笔打卡社)', b'1', b'0', '2021-01-02 11:19:57', '2021-01-02 11:19:57');
+INSERT INTO `user_following` VALUES (6, 2, 3, '386364189', '雪颖Shae', 'https://space.bilibili.com/386364189/video', '/images/user-profile-photo/ae1381713c2e5de1262c558eba55d486d9901e37.jpg', '真我心理主理人，一个你心灵成长路上的陪伴者。', b'1', b'0', '2021-01-02 11:20:50', '2021-01-02 11:20:50');
+INSERT INTO `user_following` VALUES (7, 2, 3, '37663924', '硬核的半佛仙人', 'https://space.bilibili.com/37663924/video', '/images/user-profile-photo/aaf33dced1941af0946f37c62f4b48fcaba9c9a2.jpg', '喜欢小仙女', b'1', b'0', '2021-01-02 11:23:45', '2021-01-02 11:23:45');
+INSERT INTO `user_following` VALUES (8, 2, 3, '303740257', '牛顿顿顿', 'https://space.bilibili.com/303740257/video', '/images/user-profile-photo/ccec7bf50aa4e269a5122c945ec5a93c67b5ff4c.jpg', '诗人，斗士，被称作：东半球第二正经の男人', b'1', b'0', '2021-01-02 11:34:24', '2021-01-02 11:34:24');
+INSERT INTO `user_following` VALUES (9, 2, 3, '512574759', '公孙田浩', 'https://space.bilibili.com/512574759/video', '/images/user-profile-photo/54e991d0369df2dcb864c798bb9c637128c0a73d.jpg', '用数据和事实呈现另一个互联网世界', b'1', b'0', '2021-01-02 11:35:25', '2021-01-02 11:35:25');
+INSERT INTO `user_following` VALUES (10, 2, 3, '387460933', '营养师顾中一', 'https://space.bilibili.com/387460933/video', '/images/user-profile-photo/a9a045485d2aa2e52f5a3333eccdd55b9e816bb6.jpg', '清华大学公共卫生硕士，北京营养师协会理事，科学传播副高职称，入选福布斯中国50位意见领袖榜', b'1', b'0', '2021-01-02 11:36:39', '2021-01-02 11:36:39');
+INSERT INTO `user_following` VALUES (11, 2, 3, '19577966', '李子柒', 'https://space.bilibili.com/19577966/video', '/images/user-profile-photo/82d27965dae3b2fe9e52780c6309c7b37ad4cbf2.jpg', '李家有女，人称子柒。 新浪微博：李子柒 邮箱：liziqistyle@163.com', b'1', b'0', '2021-01-02 11:37:54', '2021-01-02 11:37:54');
+INSERT INTO `user_following` VALUES (12, 2, 3, '298317405', '我是马小坏', 'https://space.bilibili.com/298317405/video', '/images/user-profile-photo/8f9ef20753087e89137ea8ef55b097fd44eea66f.jpg', '分享美食，更是分享对生活的一种态度，更多精彩欢迎关注头条号：我是马小坏，微信公众号：我是马小坏，微博:马小坏频道', b'1', b'0', '2021-01-02 11:38:46', '2021-01-02 11:38:46');
+INSERT INTO `user_following` VALUES (13, 2, 3, '66391032', '帅soserious', 'https://space.bilibili.com/66391032/video', '/images/user-profile-photo/40a663bb18e9064a97901b96aaf7d84d8056e98b.jpg', '#健身路上有我陪伴❤️ 微博:帅soserious', b'1', b'0', '2021-01-02 11:40:11', '2021-01-02 11:40:11');
+INSERT INTO `user_following` VALUES (14, 2, 3, '156858999', '曼巴yelomamba', 'https://space.bilibili.com/156858999/video', '/images/user-profile-photo/08ba8a3b8ed2b14e8d320f725d8f6468b3b482b4.jpg', '健身先健心 健身路上一起进步！ 微博同名/邮箱：daijianxiang16@163.com', b'1', b'0', '2021-01-02 11:40:43', '2021-01-02 11:40:43');
+INSERT INTO `user_following` VALUES (15, 2, 3, '37889997', '冰寒哥', 'https://space.bilibili.com/37889997/video', '/images/user-profile-photo/9901d2301367671e8a201068e1f1d7221ad9d339.jpg', '同济大学皮肤学在读博士，《听肌肤的话》系列作者，《药妆品》主译。无干货，不冰寒。', b'1', b'0', '2021-01-02 11:42:25', '2021-01-02 11:42:25');
+INSERT INTO `user_following` VALUES (16, 2, 3, '456404164', '皮科医生魏小博', 'https://space.bilibili.com/456404164/video', '/images/user-profile-photo/ac989cda390065228126fe0e44db74906ca0741d.jpg', '北京某三甲医院皮肤科医生 北京大学皮肤性病学博士\n尽量不要私信问诊，实在回复不过来，大家有问题还是及时就医诊治，以免延误病情', b'1', b'0', '2021-01-02 11:43:40', '2021-01-02 11:43:40');
+INSERT INTO `user_following` VALUES (17, 2, 3, '77266891', '深读视频', 'https://space.bilibili.com/77266891/video', '/images/user-profile-photo/ca5812ac9eee536c268ac3d8ab4dd54dfc62d3ee.jpg', '关注公众号“深读视频”~！健康、科普、动漫，撸给你看！', b'1', b'0', '2021-01-02 11:45:29', '2021-01-02 11:45:29');
+INSERT INTO `user_following` VALUES (18, 2, 3, '402576555', '画渣花小烙', 'https://space.bilibili.com/402576555/video', '/images/user-profile-photo/8ef6037e6024c01357edad8fdcf0a1deb346a894.jpg', '努力画画，认真科普，偶尔不务正业的瞎扯，有时候太忙私信会延迟回复嗷～～！微博：@画渣花小烙', b'1', b'0', '2021-01-02 11:47:06', '2021-01-02 11:47:06');
+INSERT INTO `user_following` VALUES (19, 2, 3, '456691117', 'Freya飞呀', 'https://space.bilibili.com/456691117/video', '/images/user-profile-photo/1be0d49467a78352f6098d811065e0353878968e.jpg', 'wb同名｜不看私信  \n偷偷收藏温暖｜慢慢提升幸福值｜勇敢用生活治愈自己\n', b'1', b'0', '2021-01-02 11:47:50', '2021-01-02 11:47:50');
+INSERT INTO `user_following` VALUES (20, 2, 3, '28794030', '起床大萌萌', 'https://space.bilibili.com/28794030/video', '/images/user-profile-photo/235aea61e952d200ed3bbfcddd342d9eba6a5634.jpg', '起床迎接美好的生活吧 ✨vx：pmwu01', b'1', b'0', '2021-01-02 11:48:28', '2021-01-02 11:48:28');
+INSERT INTO `user_following` VALUES (21, 2, 3, '4548018', '丧妹有点跳', 'https://space.bilibili.com/4548018/video', '/images/user-profile-photo/5be61949369dd844cc459eab808da151d8c363d2.gif', '⋆͛微博丧妹有点跳⋆͛商务Sombie96⋆͛粉丝Stiao96⋆͛粉丝群303255550通知群61651173', b'1', b'0', '2021-01-02 11:49:07', '2021-01-02 11:49:07');
+INSERT INTO `user_following` VALUES (22, 2, 3, '20259914', '稚晖君', 'https://space.bilibili.com/20259914/video', '/images/user-profile-photo/cb9ef82714507e6bda707dac216da94c97d70037.jpg', 'AI算法工程师/野生钢铁侠/Arduino版主/脑洞载体', b'1', b'0', '2021-01-02 11:50:36', '2021-01-02 11:50:36');
+INSERT INTO `user_following` VALUES (23, 2, 3, '430777205', '达尔闻', 'https://space.bilibili.com/430777205/video', '/images/user-profile-photo/ab81b1454dbf711fb28d76da053a676f288a89e4.jpg', '逆天小姐姐只讲技术，不撩汉！WeChat: 达尔闻说', b'1', b'0', '2021-01-02 11:51:25', '2021-01-02 11:51:25');
+INSERT INTO `user_following` VALUES (24, 2, 3, '12590', 'epcdiy', 'https://space.bilibili.com/12590/video', '/images/user-profile-photo/f288604112016e93ca224c4c2c58980a6cd6ba25.png', '商务合作加VX：Im_double_cloud ，只接数码/互联网产品合作，谢绝拼多多、培训机构相关推广！粉丝总群：1021463979', b'1', b'0', '2021-01-02 11:52:02', '2021-01-02 11:52:02');
+INSERT INTO `user_following` VALUES (25, 3, 2, 'weibo-realtimehot', '微博热搜榜', 'https://s.weibo.com/top/summary?cate=realtimehot', '/images/user-profile-photo/1f883b5711ad41e4a0504f5d4e6beaa40dvsxvbt.png', '随时随地发现（新鲜事）新孩子', b'0', b'0', '2021-01-02 12:05:12', '2021-01-02 12:05:12');
+INSERT INTO `user_following` VALUES (26, 3, 2, '2803301701', '人民日报', 'https://m.weibo.cn/u/2803301701', '/images/user-profile-photo/a716fd45ly8gdijd1zmonj20sa0saaby.jpg', '《人民日报》法人微博 人民日报法人微博。参与、沟通、记录时代。', b'1', b'0', '2021-01-02 12:06:41', '2021-01-02 12:06:41');
+INSERT INTO `user_following` VALUES (27, 3, 2, '2286908003', '人民网', 'https://m.weibo.cn/u/2286908003', '/images/user-profile-photo/002uLDeXly8glmohn698dj60j60j6q3b02.jpg', '人民网法人微博 报道全球 传播中国', b'1', b'0', '2021-01-02 12:07:23', '2021-01-02 12:07:23');
+INSERT INTO `user_following` VALUES (28, 3, 2, '1974576991', '环球时报', 'https://m.weibo.cn/u/1974576991', '/images/user-profile-photo/0029D7FZly8glmnmyyeicj605k05k74702.jpg', '《环球时报》微博 报道多元世界    解读复杂中国', b'1', b'0', '2021-01-02 12:07:58', '2021-01-02 12:07:58');
+INSERT INTO `user_following` VALUES (29, 3, 2, '2656274875', '央视新闻', 'https://m.weibo.cn/u/2656274875', '/images/user-profile-photo/002TLsr9ly8gnsu8mh9dkj60u00u0q4c02.jpg', '中央电视台新闻中心官方微博 “央视新闻”微博是中央电视台新闻中心官方微博，是央视重大新闻、突发事件、重点报道的首发平台。', b'1', b'0', '2021-01-02 12:08:38', '2021-01-02 12:08:38');
+INSERT INTO `user_following` VALUES (30, 3, 2, '1784473157', '中国新闻网', 'https://m.weibo.cn/u/1784473157', '/images/user-profile-photo/6a5ce645ly8gdij7dw130j20u00u00uc.jpg', '中国新闻网法人微博 这里提供你不知道、想知道、不能不知道的新闻。', b'1', b'0', '2021-01-02 12:09:17', '2021-01-02 12:09:17');
+INSERT INTO `user_following` VALUES (31, 3, 2, '1774057271', '生命时报', 'https://m.weibo.cn/u/1774057271', '/images/user-profile-photo/69bdf737ly8gdi762asg1j20u00u00uc.jpg', '《生命时报》报社官方微博 人民日报主管，环球时报主办，一家具有国际视野的大众健康媒体。更多精彩关注微信“LT0385”。', b'1', b'0', '2021-01-02 12:10:01', '2021-01-02 12:10:01');
+INSERT INTO `user_following` VALUES (32, 3, 2, '5044281310', '澎湃新闻', 'https://m.weibo.cn/u/5044281310', '/images/user-profile-photo/005vnhZYly8ftjmwo0bx4j308c08cq32.jpg', '澎湃新闻，专注时政与思想的媒体开放平台 有内涵的时政新媒体', b'1', b'0', '2021-01-02 12:11:17', '2021-01-02 12:11:17');
+INSERT INTO `user_following` VALUES (33, 3, 2, '1496814565', '封面新闻', 'https://m.weibo.cn/u/1496814565', '/images/user-profile-photo/593793e5ly8gdi6sa5seej20gq0f50sm.jpg', '封面新闻华西都市报官方微博 欢迎关注封面新闻', b'1', b'0', '2021-01-02 12:13:50', '2021-01-02 12:13:50');
+INSERT INTO `user_following` VALUES (34, 3, 2, '1684012053', '财经杂志', 'https://m.weibo.cn/u/1684012053', '/images/user-profile-photo/645ffc15ly8gib1q0vevgj20u00u2403.jpg', '《财经》杂志官方微博 独立 独家 独到', b'1', b'0', '2021-01-02 12:14:56', '2021-01-02 12:14:56');
+INSERT INTO `user_following` VALUES (35, 3, 2, '1642634100', '新浪科技', 'https://m.weibo.cn/u/1642634100', '/images/user-profile-photo/61e89b74ly1gdiq06vjw9j20c60c4aac.jpg', '新浪科技官方微博 新浪科技是中国最有影响力的TMT产业资讯及数码产品服务平台。让我们带你观察世界变化，看清行业趋势！', b'1', b'0', '2021-01-02 12:15:35', '2021-01-02 12:15:35');
+INSERT INTO `user_following` VALUES (36, 3, 3, '2970452952', '李子柒', 'https://m.weibo.cn/u/2970452952', '/images/user-profile-photo/b10d83d8jw8f53xpxjlhaj20ku0kut9k.jpg', '李子柒品牌创始人 邮箱：liziqistyle@163.com', b'1', b'0', '2021-01-03 09:27:55', '2021-01-03 09:27:55');
+INSERT INTO `user_following` VALUES (37, 3, 3, '6089150236', '马小坏频道', 'https://m.weibo.cn/u/6089150236', '/images/user-profile-photo/006E5s8Aly1fnnii4uc6jj30m80m8gtc.jpg', '知名美食博主 美食视频自媒体 工作微：kjxnweixin', b'1', b'0', '2021-01-03 09:54:37', '2021-01-03 09:54:37');
+INSERT INTO `user_following` VALUES (38, 3, 3, '5786902874', '夏厨陈二十', 'https://m.weibo.cn/u/5786902874', '/images/user-profile-photo/006jDfN8ly8g51wvgien7j30ru0ruabc.jpg', '大眼互娱签约博主 知名美食博主 美食视频自媒体 我是陈二十，一个爱“夏厨”的女孩…    合作手机微信：17744495635  邮箱：bigeye.market@bigeyegroup.com', b'1', b'0', '2021-01-03 09:56:48', '2021-01-03 09:56:48');
+INSERT INTO `user_following` VALUES (39, 3, 3, '3136788225', '好煮艺', 'https://m.weibo.cn/u/3136788225', '/images/user-profile-photo/baf79701ly8fjwwtmvwtij20ku0kuwf8.jpg', '美食作家 作品《美食健康谱》美食点评团成员 美食作家，专注美食分享。关注@好煮艺，学得好厨艺。微博合作推广请联系微 信：ldtg2018', b'1', b'0', '2021-01-03 09:57:45', '2021-01-03 09:57:45');
+INSERT INTO `user_following` VALUES (40, 3, 3, '6257740340', '夏妈厨房', 'https://m.weibo.cn/u/6257740340', '/images/user-profile-photo/006PuQ7Oly8gdi6fzmux7j30u00u0mzt.jpg', '知名美食博主 微博故事红人 美食视频自媒体 微博原创视频博主 商务合作：XM16009', b'1', b'0', '2021-01-03 09:58:29', '2021-01-03 09:58:29');
+INSERT INTO `user_following` VALUES (41, 3, 3, '2010999701', '营养师张淋琳', 'https://m.weibo.cn/u/2010999701', '/images/user-profile-photo/77dd6b95ly8fz7ftj5uv6j20u00u0dj5.jpg', '一级公共营养师 美容师 健康管理师 陕西省养生协会副会长 知名健康养生博主 健康视频自媒体 原陕西省养生协会副会长，国家一级营养师，健康管理师，中医美容师，CCTV1、CCTV7、BTV生活、深圳卫视、旅游卫视、河北卫视等多家电视台特邀嘉宾！', b'1', b'0', '2021-01-03 10:00:56', '2021-01-03 10:00:56');
+INSERT INTO `user_following` VALUES (42, 3, 3, '2949338000', '本叔就是本切鸣', 'https://m.weibo.cn/u/2949338000', '/images/user-profile-photo/afcb5390jw8f4a5rbzov0j21kw2dcb29.jpg', '知名摄影博主 微博原创视频博主 男摄一枚/摄影前后期讲师/微信 ccremix 约拍 合作 请备注', b'1', b'0', '2021-01-03 10:01:22', '2021-01-03 10:01:22');
+INSERT INTO `user_following` VALUES (43, 3, 3, '2630646082', 'photoshop资源库', 'https://m.weibo.cn/u/2630646082', '/images/user-profile-photo/9ccc7942gw1enacnterhdj2050050jrk.jpg', '知名创意博主 微博知名设计美学博主 超话主持人（资源君超话） 设计！理想，让库粉们都成为设计师！', b'1', b'0', '2021-01-03 10:02:20', '2021-01-03 10:02:20');
+INSERT INTO `user_following` VALUES (44, 3, 3, '6414205745', '回形针PaperClip', 'https://m.weibo.cn/u/6414205745', '/images/user-profile-photo/00705lVnly8fm007um5jdj31jk1jk420.jpg', '泛科普视频自媒体 你的当代生活说明书。商务合作：paperclip@foxmail.com', b'1', b'0', '2021-01-03 10:03:19', '2021-01-03 10:03:19');
+INSERT INTO `user_following` VALUES (45, 3, 3, '7284299679', 'Freya飞呀', 'https://m.weibo.cn/u/7284299679', '/images/user-profile-photo/007WYb6vly8gdjbp50o3tj30e80e8gmb.jpg', '微博VLOG博主 我用尽全力过着平凡的一生♥️', b'1', b'0', '2021-01-03 10:04:16', '2021-01-03 10:04:16');
+INSERT INTO `user_following` VALUES (46, 3, 3, '6054601231', '基金小达人', 'https://m.weibo.cn/u/6054601231', '/images/user-profile-photo/006BKumzly8ftg4ak2ylmj30ro0roq59.jpg', '财经博主 微博基金合作作者 微博原创视频博主 头条文章作者 分享基金投资技巧，解答基金投资问题。', b'1', b'0', '2021-01-03 10:05:08', '2021-01-03 10:05:08');
+INSERT INTO `user_following` VALUES (47, 3, 3, '6032474791', '圖盗', 'https://m.weibo.cn/u/6032474791', '/images/user-profile-photo/006AfEgvjw8f871afe26cj30yi0xb766.jpg', '颜值博主 看看街上的帅哥美女是如何搭配衣服的 ...', b'1', b'0', '2021-01-03 10:06:04', '2021-01-03 10:06:04');
+INSERT INTO `user_following` VALUES (48, 3, 3, 'p-shenzhen', '深圳', 'https://m.weibo.cn/p/1001018008644030000000000', '/images/user-profile-photo/65ab8a79484048b5817d3898d241c596vrx97y76.jfif', '深圳周边 打卡记录', b'0', b'0', '2021-01-03 10:09:19', '2021-01-03 10:09:19');
+INSERT INTO `user_following` VALUES (49, 3, 3, 'p-changsha', '长沙', 'https://m.weibo.cn/p/1001018008643010000000000', '/images/user-profile-photo/24433698f26e43ec977db2036ba98adf0cfqx1y6.jfif', '长沙周边 打卡记录', b'0', b'0', '2021-01-03 10:12:34', '2021-01-03 10:12:34');
+INSERT INTO `user_following` VALUES (50, 3, 5, '3807059740', 'HeyUke_', 'https://m.weibo.cn/u/3807059740', '/images/user-profile-photo/e2eb1f1cly8gg2j0bqcakj20u00u0jwg.jpg', ' ～', b'1', b'0', '2021-01-03 10:14:55', '2021-01-03 10:14:55');
+INSERT INTO `user_following` VALUES (51, 3, 5, '3176592573', '-JinGi', 'https://m.weibo.cn/u/3176592573', '/images/user-profile-photo/bd56f4bdly8gozvnmq9chj20e80e8aam.jpg', ' 蜜蜂的膝盖', b'1', b'0', '2021-01-03 10:17:20', '2021-01-03 10:17:20');
+INSERT INTO `user_following` VALUES (52, 3, 5, '3802350894', '小赵灵长大后', 'https://m.weibo.cn/u/3802350894', '/images/user-profile-photo/e2a3452ely8g3b0o16c01j20u00u0gnz.jpg', ' ', b'1', b'0', '2021-01-03 10:22:35', '2021-01-03 10:22:35');
+INSERT INTO `user_following` VALUES (53, 2, 3, '217108321', '陈暖央LunaSea', 'https://space.bilibili.com/217108321/dynamic', '/images/user-profile-photo/7eb2951d1ff33da1900b2423319cc899e434d82c.jpg', '一个爱健身的正经UP主，喜欢健身的关注我，不喜欢的我再想想办法~ 围脖：@陈暖央 ', b'1', b'0', '2021-04-07 16:45:41', '2021-04-07 16:45:41');
+INSERT INTO `user_following` VALUES (54, 2, 3, '29959830', 'Topbook', 'https://space.bilibili.com/29959830/video', '/images/user-profile-photo/1f0ff00ad152f286f1dc47af2aadc0abfe221921.jpg', '让工具回归工具，让你成为你。「合作微信：yanghuaua（非全拼）」', b'1', b'0', '2021-04-07 16:55:27', '2021-04-07 16:55:27');
+INSERT INTO `user_following` VALUES (55, 2, 3, '547173382', '杨真直', 'https://space.bilibili.com/547173382/video', '/images/user-profile-photo/8a0a9f138771c304319cda85e4506b46cc714612.jpg', '公众号:杨真直 找我！商务微信：yangzz-001', b'1', b'0', '2021-04-07 16:56:25', '2021-04-07 16:56:25');
+INSERT INTO `user_following` VALUES (56, 3, 3, '2045254855', '__雷雨_', 'https://m.weibo.cn/u/2045254855', '/images/user-profile-photo/79e81cc7ly8gky4ig7rwhj20e80e874q.jpg', '知名旅游博主 有一个taobao店 🤷‍♀️', b'1', b'0', '2021-04-07 16:58:55', '2021-04-07 16:58:55');
+INSERT INTO `user_following` VALUES (57, 3, 3, '6488142313', 'LEIYU衣服好好看', 'https://m.weibo.cn/u/6488142313', '/images/user-profile-photo/00755AcFly8gmf6hdn42wj30e80e8t92.jpg', ' 淘宝店铺名：LEIYU STUDIO', b'1', b'0', '2021-04-07 17:00:19', '2021-04-07 17:00:19');
+INSERT INTO `user_following` VALUES (58, 3, 3, '7038906058', '用户刘妍汐', 'https://m.weibo.cn/u/7038906058', '/images/user-profile-photo/007Gmx0Sly8gb76xljde2j30ij0ijwef.jpg', ' 𝗠𝗼𝗱𝗲𝗹▫️𝗡𝗮𝗶𝗹𝗬𝗼𝗸𝗲▫️𝗖𝗧𝗕𝗨设计系大三在读▫️重庆女孩🌇', b'1', b'0', '2021-04-07 17:06:25', '2021-04-07 17:06:25');
+INSERT INTO `user_following` VALUES (59, 2, 3, '36416153', '周酷仔', 'https://space.bilibili.com/36416153/video', '/images/user-profile-photo/5508d4ca1d0739bf12afd4d6e997301c5b234b71.jpg', '快乐传播机', b'1', b'0', '2021-04-07 17:07:57', '2021-04-07 17:07:57');
+INSERT INTO `user_following` VALUES (60, 3, 5, '6864574333', 'ZlzYJh', 'https://m.weibo.cn/u/6864574333', '/images/user-profile-photo/007uz3mRly8gi6f6ew8txj30e80e8glu.jpg', ' 🎊🎊🎊', b'1', b'0', '2021-04-07 17:40:48', '2021-04-07 17:40:48');
+INSERT INTO `user_following` VALUES (61, 3, 5, '2289940200', '毛然-', 'https://m.weibo.cn/u/2289940200', '/images/user-profile-photo/887db6e8ly8gfjpt338arj20e80e8q3n.jpg', '摄影博主 约拍请私信', b'1', b'0', '2021-04-07 17:42:16', '2021-04-07 17:42:16');
+INSERT INTO `user_following` VALUES (62, 3, 3, '2731696573', '丧妹有点跳', 'https://m.weibo.cn/u/2731696573', '/images/user-profile-photo/a2d261bdly8gn6iidp8esj20ru0rvjt5.jpg', '微博vlog博主 🙋2.5次元半蠢不萌的妹子一只。🏡万年宅女🎐惬意慵懒的up主🙌一个想当裁缝能唱歌的舞者🙇合作事宜请私信~', b'1', b'0', '2021-04-07 17:45:30', '2021-04-07 17:45:30');
+INSERT INTO `user_following` VALUES (63, 3, 3, '2882083237', '陈暖央', 'https://m.weibo.cn/u/2882083237', '/images/user-profile-photo/abc919a5ly8gf3n6ovy7rj20u00u0tba.jpg', '暴走的萝莉品牌创始人 知名运动博主 TMall搜索：【暴走的萝莉】，工作洽谈发邮箱：nuan@s-loli.com 【ins:chennuanyang】', b'1', b'0', '2021-04-07 17:55:32', '2021-04-07 17:55:32');
+INSERT INTO `user_following` VALUES (64, 3, 5, '3920631851', '张饱饱baby', 'https://m.weibo.cn/u/3920631851', '/images/user-profile-photo/004hkzrBly8gnxtmbnfodj60u00u0ack02.jpg', '健身撰稿人 一位爱美妆的专业健身辣妹，关注我一起来健身变美吧！商务合作加VX：zxhdy13', b'1', b'0', '2021-04-20 16:54:55', '2021-04-20 16:54:55');
+INSERT INTO `user_following` VALUES (65, 3, 5, '1958509675', '豆豆波波茶是九九的最爱呀QAQ', 'https://m.weibo.cn/u/1958509675', '/images/user-profile-photo/74bc7c6bly8gorpnyk8xhj20u00u0q44.jpg', ' 看到优秀的人总是不由自主的自卑撒！！！', b'1', b'0', '2021-04-20 17:08:55', '2021-04-20 17:08:55');
+
+-- ----------------------------
+-- Table structure for user_following_relation
+-- ----------------------------
+DROP TABLE IF EXISTS `user_following_relation`;
+CREATE TABLE `user_following_relation`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id',
+  `following_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联关注用户id',
+  `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5。8-思想、学习；7-美食、营养；6、健身、锻炼；5-兴趣、生活；4~其他',
+  `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_where`(`user_id`, `following_id`, `is_deleted`) USING BTREE,
+  INDEX `idx_where_order`(`user_id`, `is_deleted`, `sort_no`, `following_id`) USING BTREE COMMENT '索引用于筛选和排序'
+) ENGINE = InnoDB AUTO_INCREMENT = 97 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户与关注用户关联表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_following_relation
+-- ----------------------------
+INSERT INTO `user_following_relation` VALUES (1, 1, 1, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (2, 1, 2, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (3, 1, 3, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (4, 1, 4, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (5, 1, 5, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (6, 1, 6, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (7, 1, 7, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (8, 1, 8, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (9, 1, 9, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (10, 1, 10, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (11, 1, 11, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (12, 1, 12, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (13, 1, 13, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (14, 1, 14, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (15, 1, 15, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (16, 1, 16, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (17, 1, 17, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (18, 1, 18, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (19, 1, 19, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (20, 1, 20, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (21, 1, 21, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (22, 1, 22, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (23, 1, 23, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (24, 1, 24, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (25, 1, 25, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (26, 1, 26, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (27, 1, 27, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (28, 1, 28, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (29, 1, 29, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (30, 1, 30, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (31, 1, 31, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (32, 1, 32, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (33, 1, 33, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (34, 1, 34, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (35, 1, 35, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (36, 1, 36, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (37, 1, 37, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (38, 1, 38, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (39, 1, 39, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (40, 1, 40, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (41, 1, 41, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (42, 1, 42, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (43, 1, 43, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (44, 1, 44, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (45, 1, 45, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (46, 1, 46, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (47, 1, 47, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (48, 1, 48, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (49, 1, 49, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (50, 1, 50, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (51, 1, 51, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (52, 1, 52, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (53, 1, 53, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (54, 1, 54, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (55, 1, 55, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (56, 1, 56, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (57, 1, 57, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (58, 1, 58, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (59, 1, 59, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (60, 1, 60, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (61, 1, 61, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (62, 1, 62, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (63, 1, 63, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (64, 1, 64, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
+INSERT INTO `user_following_relation` VALUES (65, 1, 65, 5, b'0', '2021-04-23 06:15:56', '2021-04-23 06:15:56');
 
 -- ----------------------------
 -- Table structure for user_following_remark
@@ -168,18 +248,15 @@ DROP TABLE IF EXISTS `user_following_remark`;
 CREATE TABLE `user_following_remark`  (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
   `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id',
-  `following_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户关注表的id',
+  `following_id` bigint(20) UNSIGNED NOT NULL COMMENT '注意是用户关系表的id',
   `label_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '备注/标签',
   `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5',
   `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_following_id`(`following_id`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE,
-  INDEX `idx_sort_no`(`sort_no`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 153 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户关注备注（便签）表' ROW_FORMAT = DYNAMIC;
+  INDEX `idx_where_order`(`user_id`, `following_id`, `sort_no`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 248 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户关注备注（标签）表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_following_remark
@@ -335,7 +412,16 @@ INSERT INTO `user_following_remark` VALUES (148, 1, 62, '分享', 5, b'0', '2021
 INSERT INTO `user_following_remark` VALUES (149, 1, 62, 'ASMR', 5, b'0', '2021-04-07 17:45:30', '2021-04-07 17:45:30');
 INSERT INTO `user_following_remark` VALUES (150, 1, 63, '健身', 5, b'0', '2021-04-07 17:55:32', '2021-04-07 17:55:32');
 INSERT INTO `user_following_remark` VALUES (151, 1, 63, '身材', 5, b'0', '2021-04-07 17:55:32', '2021-04-07 17:55:32');
-INSERT INTO `user_following_remark` VALUES (152, 1, 63, '生活', 5, b'0', '2021-04-07 17:55:32', '2021-04-07 17:55:32');
+INSERT INTO `user_following_remark` VALUES (152, 1, 63, '时尚', 5, b'0', '2021-04-07 17:55:32', '2021-04-07 17:55:32');
+INSERT INTO `user_following_remark` VALUES (153, 1, 63, '生活', 5, b'0', '2021-04-20 17:09:37', '2021-04-20 17:09:37');
+INSERT INTO `user_following_remark` VALUES (154, 1, 64, '健身', 5, b'0', '2021-04-20 17:09:40', '2021-04-20 17:09:40');
+INSERT INTO `user_following_remark` VALUES (155, 1, 64, '身材', 5, b'0', '2021-04-20 17:13:02', '2021-04-20 17:13:02');
+INSERT INTO `user_following_remark` VALUES (156, 1, 64, '时尚', 5, b'0', '2021-04-20 17:14:49', '2021-04-20 17:14:49');
+INSERT INTO `user_following_remark` VALUES (157, 1, 64, '生活', 5, b'0', '2021-04-20 17:14:51', '2021-04-20 17:14:51');
+INSERT INTO `user_following_remark` VALUES (158, 1, 65, '凌佳慧', 5, b'0', '2021-04-20 17:14:54', '2021-04-20 17:14:54');
+INSERT INTO `user_following_remark` VALUES (159, 1, 65, '青春', 5, b'0', '2021-04-20 17:25:45', '2021-04-20 17:25:45');
+INSERT INTO `user_following_remark` VALUES (160, 1, 65, '单纯', 5, b'0', '2021-04-20 17:25:46', '2021-04-20 17:25:46');
+INSERT INTO `user_following_remark` VALUES (161, 1, 65, '可爱', 5, b'0', '2021-04-20 17:25:49', '2021-04-20 17:25:49');
 
 -- ----------------------------
 -- Table structure for user_following_type
@@ -350,9 +436,7 @@ CREATE TABLE `user_following_type`  (
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE,
-  INDEX `idx_sort_no`(`sort_no`) USING BTREE
+  INDEX `idx_where_order`(`user_id`, `sort_no`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户关注分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -380,43 +464,40 @@ CREATE TABLE `user_opinion`  (
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_target_id`(`platform_id`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE,
-  INDEX `idx_sort_no`(`sort_no`) USING BTREE
+  INDEX `idx_where_order`(`user_id`, `platform_id`, `opinion_type`, `sort_no`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户观点看法表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_opinion
 -- ----------------------------
-INSERT INTO `user_opinion` VALUES (1, 1, 1, 0, '>其中对各个平台的观点看法仅仅是个人观点，可能有些片面、过激，或是认知错误，不理会便是了，做好自己的事已不易。', 10, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (2, 1, 1, 0, '时间和健康是你最宝贵的财富，工作、生活要做的就是将它们变现。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (3, 1, 1, 0, '**你看到的不一定是真的**，有可能是别人刻意想让你看到的；你想看到的大多数在萌芽阶段就被扼杀和谐了，或者被劣质内容冲刷掉了。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (4, 1, 1, 0, '少看一些跟自己不搭界的东西，偌大的世界，互联网拉近了人类的距离，但人的圈子和阶层背景却非常现实和残酷。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (5, 1, 1, 0, '不要废话连篇，言简意赅，长篇大论自己都看不下去，想法总结再多依然可能控制不住自己的行为，不努力拼搏，哪来的经济能力成家立业。', 7, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (6, 1, 2, 0, '众多up主在各自专长的领域发光发热，百家齐放、争奇斗艳。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (7, 1, 2, 0, 'b站目前土壤环境很不错，犹如蓬勃生机的热带雨林。自媒体恰饭前景不错，各行业都有较为优秀的人做up主，优质内容也相对较多，内容丰富反而更要控制逛b站的时间，否则，你的业余时间就被b站收割了，“时间就是金钱”，这句话是真的。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (8, 1, 2, 0, '鱼龙混杂，内容水平参差不齐，好为人师的“野路子”、“半吊子”很多，当然大神们曾经也是小白，不懂别装懂装逼，虚心学习成长，这样的小up会更有魅力和发展空间。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (9, 1, 2, 0, '优质的一手资料教程基本都收费，你能免费看到的几乎都是一两年甚至更久之前的“老掉牙”的资料了，免费内容要么质量不高，要么加入广告营销，有的甚至**精心设计各种套路**（话术、剧本暗流涌动）让你购买付费内容。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (10, 1, 2, 0, '警惕“广告叫卖式”的up，“林子大了什么鸟都有”，一部分店铺拍一些自己工作场景视频，内容展示“我很厉害，很牛逼，我的产品质量高服务品质有保障，有什么需求来找我就行了！”，说白了就是利用b站平台做生意的，b站之后可能发展商家入驻业务（B2C），还有内容搜索业务，“你感兴趣的都在b站”，会不会再出现一个“百度一下，你就SD”呢？', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (11, 1, 2, 0, '每个人工作生活的时间精力都有限，事分轻重缓急，==即使内容很优质且看着都有用，但并不一定是你当下最迫切需要的==。完成主线目标任务，中间每间隔一两个小时，可以适当休息十分钟左右，放松大脑，调整压抑情绪，但辅线就尽量不要是技术学习内容了，压力过大达不到放松效果，反而还影响主线任务。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (12, 1, 2, 0, '经常看到一些大UP主都说自己某某大学毕业，或者逆袭名校上岸，名校光环有效吗？有！但是否能走得长远，还得是活到老学到老，社会、人生是一辈子的大学。不盲目、不自卑、不好高骛远，结合自身实际条件，踏实走好每一步，高楼大厦固然宏伟壮阔，但空中楼阁容易崩塌！', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (13, 1, 3, 0, '知道为什么现在的年轻人大都喜欢玩游戏吗？看看这几年评分高的电影、电视剧有几部啊？资本娱乐一个圈，矮子里面挑高个，硬凑生给，资本投喂（💩），为了圈快钱，捧造流量，造假热度...完全对不上观众的口味，不看吧，娱乐消遣的内容全都一个样，看吧，真的是==浪费生命==。上头政策管制约束只是一个框架，框架内部同样可以精彩纷呈，波澜壮阔。也不排除有各家对手职业买黑，毕竟市场蛋糕就这么大，竞争十分激烈。但观众用户都不是傻子，我想要的你没有，还一个劲地生给硬塞，投喂垃圾内容，脱离用户需求，还想吸引、留住用户？', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (14, 1, 3, 0, '明星、网红、广告商、企业机构营销宣传的重点场所。2020年06月中旬热搜整顿后，加入了政府平台干预。以前只有渣浪和资本投喂娱乐八卦内容，现在又多了一个党媒官媒投喂政治民生内容。鸡毛蒜皮、屁大点事都能显示“沸”。资本买热搜、撤热搜手段越来越熟练，不想让你看到的，一眨眼的功夫就能把“爆”、“沸”的热度撤得无影无踪。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (15, 1, 3, 0, '“成也明星、败也明星”，明星评论全是控评，发布内容不是广告宣传就是自拍照片，因为有各家粉丝和各种营销号天天盯着，明星言论举止越来越谨慎，明星粉丝的距离拉得越来越远！只要年长一点的粉丝都逐渐清醒过来，脱离虚幻追星娱乐圈，不再愿意被资本当作韭菜割了。最后导致粉丝群体低龄化，“小-中-高-大”学生群体占大多数。步入社会开始工作的年轻人都或多或少的遭受了社会上残忍的“毒打”，沦为“社畜”，自己的生活都过不好，谁还管你什么明星私生活？！', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (16, 1, 3, 0, '关于”娱乐至死“，**至死的不是娱乐，而是人自身**。生活娱乐到处都是，酒吧、KTV、会所、电影院、游乐场、游戏、直播等等，哪个不是娱乐？青少年、年轻人追星荒废学业事业，不能把所有问题都归咎于娱乐明星，玩游戏一样也耽误学业。拿刀杀人的不是刀，而是人。把刀具管制了，就不会出现事故了？问题的重点在于人本身，从关注人自身的问题分析和行动，才能从本质上有效解决问题。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (17, 1, 3, 0, '“娱乐至死”、“追星荒废学业”、“玩游戏耽误学业”，等系列问题，从人身上寻找根本原因，是什么原因导致他们不停地沉迷娱乐、追星、玩游戏？家庭不和睦、家人关爱缺失导致孩子心理和性格上出现缺爱、孤僻的问题；父母亲戚长辈有没有做好榜样，家长自己各种行为不检点，自己做不到的事情，却把所有的期望要求一股脑强压在孩子的身上，不去聆听孩子的心声，缺乏有效沟通，不尊重孩子的想法。我是父母，你是孩子，你就得听话。缺乏关爱、陪伴、聆听、交流、尊重，还强制要求孩子做这做那，结果必然导致矛盾越来越恶化！孩子得不到父母的关爱和陪伴，就想要从其他地方寻找，虚幻的网络世界里，无数缺乏家长指引的孩子沉迷其中，数月数年，难以自拔。直到经历重大沉痛打击，才开始唤醒他们的内心，逐渐走出虚拟世界，追寻现实生活中的美好。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (18, 1, 3, 0, '为什么头部的名人明星经常被黑？==肉被他们吃了，汤也被他们喝了，骨头剩菜被他们宠物吃了，让其他人吃什么啊==？！少占用些资源吧，把`一九/二八法则`降到`三七/四六/五五法则`，你手上的资源已经堆不下了，让几个给后辈年轻人不行吗？非要让绝大部分人眼睁睁地看着你”吃好喝好“、”盆满钵满“？', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (19, 1, 3, 5, '微博、抖音、豆瓣等公众平台发视频、照片、美食、游玩的活跃人群，绝大部分都是还在上学（高中/大学）的年轻人。他们心智、思想还一直停留在学校这个封闭的环境里，还没真正体会到社会上的人情冷暖，校园里的单纯美好，毕业步入社会却成了最致命的弱点，轻易相信他人，容易上当受骗；坚信努力肯定会有回报，却没想到被上司公司压榨劳动力；渴望憧憬美好烂漫爱情，却被现实生活一次次打击。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (20, 1, 3, 5, '学业、工作、生活稳定，家人、朋友常聚，一切都按正常人生轨道进行的人群，他们根本不会在虚拟的社交平台花费时间精力，以弥补现实的缺失。**现实中越缺什么，在社交平台就越渴望得到什么**。缺爱、缺朋友，导致内心空虚孤独，现实生活得不到，肯定会到虚拟的世界寻求可能的机会或心灵的慰藉。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (21, 1, 3, 6, '局宣、广告、自拍。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (22, 1, 3, 6, '更博缓慢，半个月才更新。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (23, 1, 3, 6, '没啥互动，粉丝只是`韭菜`和`工具人`？', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (24, 1, 4, 0, '有些兴趣小组还是很不错的，相互交流学习；个别“垃圾场”的污染扩散程度也需要保持清醒头脑和独立思考，避免被“洗脑”带节奏。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (25, 1, 4, 0, '小组内的成员是因为相同的兴趣爱好聚在一起，“物以类聚，人以群分”，跟贴吧一样，用户量不是很大，用户群里也偏年轻。跟某音5+亿用户相比，db的百十万，就像是一包盐里的一小粒。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (26, 1, 4, 0, '兴趣小组、贴吧、论坛，基本上都是相似的一类人，就好比你走进了一个行为习惯“疯癫”的村落，你以为自己是正常的，他们也以为自己是正常的，如果你选择留下，肯定避免不了主动或者被动疯癫化（即使是假装）。要么你就离开，别对着他们指手画脚，在他们眼中你才是疯癫的异类。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (27, 1, 4, 0, '可能出现各种NC、YY、显微镜ju人、营销、引战、带节奏。优质有看点、知识、情感分享内容被大量劣质内容、虚假营销内容淹没。想看的看不到，不想看的到处都是，像暴风式洗脑一般，待久了很大可能就被同化了。一个正常人在一群不正常的人里面，正常人反而是不正常的。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
-INSERT INTO `user_opinion` VALUES (28, 1, 5, 0, '**矮个子男生没人要吗？身高在择偶标准中有多重要**？有看到很多对男生 160+ 的情侣，每次看到都很有正能量。', 5, b'0', '2021-04-14 07:38:15', '2021-04-14 07:38:15');
+INSERT INTO `user_opinion` VALUES (1, 1, 1, 0, '>其中对各个平台的观点看法仅仅是个人观点，可能有些片面、过激，或是认知错误，不理会便是了，做好自己的事已不易。', 10, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (2, 1, 1, 0, '时间和健康是你最宝贵的财富，工作、生活要做的就是将它们变现。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (3, 1, 1, 0, '**你看到的不一定是真的**，有可能是别人刻意想让你看到的；你想看到的大多数在萌芽阶段就被扼杀和谐了，或者被劣质内容冲刷掉了。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (4, 1, 1, 0, '少看一些跟自己不搭界的东西，偌大的世界，互联网拉近了人类的距离，但人的圈子和阶层背景却非常现实和残酷。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (5, 1, 1, 0, '不要废话连篇，言简意赅，长篇大论自己都看不下去，想法总结再多依然可能控制不住自己的行为，不努力拼搏，哪来的经济能力成家立业。', 7, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (6, 1, 2, 0, '众多up主在各自专长的领域发光发热，百家齐放、争奇斗艳。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (7, 1, 2, 0, 'b站目前土壤环境很不错，犹如蓬勃生机的热带雨林。自媒体恰饭前景不错，各行业都有较为优秀的人做up主，优质内容也相对较多，内容丰富反而更要控制逛b站的时间，否则，你的业余时间就被b站收割了，“时间就是金钱”，这句话是真的。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (8, 1, 2, 0, '鱼龙混杂，内容水平参差不齐，好为人师的“野路子”、“半吊子”很多，当然大神们曾经也是小白，不懂别装懂装逼，虚心学习成长，这样的小up会更有魅力和发展空间。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (9, 1, 2, 0, '优质的一手资料教程基本都收费，你能免费看到的几乎都是一两年甚至更久之前的“老掉牙”的资料了，免费内容要么质量不高，要么加入广告营销，有的甚至**精心设计各种套路**（话术、剧本暗流涌动）让你购买付费内容。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (10, 1, 2, 0, '警惕“广告叫卖式”的up，“林子大了什么鸟都有”，一部分店铺拍一些自己工作场景视频，内容展示“我很厉害，很牛逼，我的产品质量高服务品质有保障，有什么需求来找我就行了！”，说白了就是利用b站平台做生意的，b站之后可能发展商家入驻业务（B2C），还有内容搜索业务，“你感兴趣的都在b站”，会不会再出现一个“百度一下，你就SD”呢？', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (11, 1, 2, 0, '每个人工作生活的时间精力都有限，事分轻重缓急，==即使内容很优质且看着都有用，但并不一定是你当下最迫切需要的==。完成主线目标任务，中间每间隔一两个小时，可以适当休息十分钟左右，放松大脑，调整压抑情绪，但辅线就尽量不要是技术学习内容了，压力过大达不到放松效果，反而还影响主线任务。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (12, 1, 2, 0, '经常看到一些大UP主都说自己某某大学毕业，或者逆袭名校上岸，名校光环有效吗？有！但是否能走得长远，还得是活到老学到老，社会、人生是一辈子的大学。不盲目、不自卑、不好高骛远，结合自身实际条件，踏实走好每一步，高楼大厦固然宏伟壮阔，但空中楼阁容易崩塌！', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (13, 1, 3, 0, '知道为什么现在的年轻人大都喜欢玩游戏吗？看看这几年评分高的电影、电视剧有几部啊？资本娱乐一个圈，矮子里面挑高个，硬凑生给，资本投喂（💩），为了圈快钱，捧造流量，造假热度...完全对不上观众的口味，不看吧，娱乐消遣的内容全都一个样，看吧，真的是==浪费生命==。上头政策管制约束只是一个框架，框架内部同样可以精彩纷呈，波澜壮阔。也不排除有各家对手职业买黑，毕竟市场蛋糕就这么大，竞争十分激烈。但观众用户都不是傻子，我想要的你没有，还一个劲地生给硬塞，投喂垃圾内容，脱离用户需求，还想吸引、留住用户？', 1, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (14, 1, 3, 0, '明星、网红、广告商、企业机构营销宣传的重点场所。2020年06月中旬热搜整顿后，加入了政府平台干预。以前只有渣浪和资本投喂娱乐八卦内容，现在又多了一个党媒官媒投喂政治民生内容。鸡毛蒜皮、屁大点事都能显示“沸”。资本买热搜、撤热搜手段越来越熟练，不想让你看到的，一眨眼的功夫就能把“爆”、“沸”的热度撤得无影无踪。', 7, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (15, 1, 3, 0, '“成也明星、败也明星”，明星评论全是控评，发布内容不是广告宣传就是自拍照片，因为有各家粉丝和各种营销号天天盯着，明星言论举止越来越谨慎，明星粉丝的距离拉得越来越远！只要年长一点的粉丝都逐渐清醒过来，脱离虚幻追星娱乐圈，不再愿意被资本当作韭菜割了。最后导致粉丝群体低龄化，“小-中-高-大”学生群体占大多数。步入社会开始工作的年轻人都或多或少的遭受了社会上残忍的“毒打”，沦为“社畜”，自己的生活都过不好，谁还管你什么明星私生活？！', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (16, 1, 3, 0, '关于”娱乐至死“，**至死的不是娱乐，而是人自身**。生活娱乐到处都是，酒吧、KTV、会所、电影院、游乐场、游戏、直播等等，哪个不是娱乐？青少年、年轻人追星荒废学业事业，不能把所有问题都归咎于娱乐明星，玩游戏一样也耽误学业。拿刀杀人的不是刀，而是人。把刀具管制了，就不会出现事故了？问题的重点在于人本身，从关注人自身的问题分析和行动，才能从本质上有效解决问题。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (17, 1, 3, 0, '“娱乐至死”、“追星荒废学业”、“玩游戏耽误学业”，等系列问题，从人身上寻找根本原因，是什么原因导致他们不停地沉迷娱乐、追星、玩游戏？家庭不和睦、家人关爱缺失导致孩子心理和性格上出现缺爱、孤僻的问题；父母亲戚长辈有没有做好榜样，家长自己各种行为不检点，自己做不到的事情，却把所有的期望要求一股脑强压在孩子的身上，不去聆听孩子的心声，缺乏有效沟通，不尊重孩子的想法。我是父母，你是孩子，你就得听话。缺乏关爱、陪伴、聆听、交流、尊重，还强制要求孩子做这做那，结果必然导致矛盾越来越恶化！孩子得不到父母的关爱和陪伴，就想要从其他地方寻找，虚幻的网络世界里，无数缺乏家长指引的孩子沉迷其中，数月数年，难以自拔。直到经历重大沉痛打击，才开始唤醒他们的内心，逐渐走出虚拟世界，追寻现实生活中的美好。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (18, 1, 3, 0, '为什么头部的名人明星经常被黑？==肉被他们吃了，汤也被他们喝了，骨头剩菜被他们宠物吃了，让其他人吃什么啊==？！少占用些资源吧，把`一九/二八法则`降到`三七/四六/五五法则`，你手上的资源已经堆不下了，让几个给后辈年轻人不行吗？非要让绝大部分人眼睁睁地看着你”吃好喝好“、”盆满钵满“？', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (19, 1, 3, 5, '微博、抖音、豆瓣等公众平台发视频、照片、美食、游玩的活跃人群，绝大部分都是还在上学（高中/大学）的年轻人。他们心智、思想还一直停留在学校这个封闭的环境里，还没真正体会到社会上的人情冷暖，校园里的单纯美好，毕业步入社会却成了最致命的弱点，轻易相信他人，容易上当受骗；坚信努力肯定会有回报，却没想到被上司公司压榨劳动力；渴望憧憬美好烂漫爱情，却被现实生活一次次打击。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (20, 1, 3, 5, '学业、工作、生活稳定，家人、朋友常聚，一切都按正常人生轨道进行的人群，他们根本不会在虚拟的社交平台花费时间精力，以弥补现实的缺失。**现实中越缺什么，在社交平台就越渴望得到什么**。缺爱、缺朋友，导致内心空虚孤独，现实生活得不到，肯定会到虚拟的世界寻求可能的机会或心灵的慰藉。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (21, 1, 3, 6, '局宣、广告、自拍。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (22, 1, 3, 6, '更博缓慢，半个月才更新。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (23, 1, 3, 6, '没啥互动，粉丝只是`韭菜`和`工具人`？', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (24, 1, 4, 0, '有些兴趣小组还是很不错的，相互交流学习；个别“垃圾场”的污染扩散程度也需要保持清醒头脑和独立思考，避免被“洗脑”带节奏。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (25, 1, 4, 0, '小组内的成员是因为相同的兴趣爱好聚在一起，“物以类聚，人以群分”，跟贴吧一样，用户量不是很大，用户群里也偏年轻。跟某音5+亿用户相比，db的百十万，就像是一包盐里的一小粒。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (26, 1, 4, 0, '兴趣小组、贴吧、论坛，基本上都是相似的一类人，就好比你走进了一个行为习惯“疯癫”的村落，你以为自己是正常的，他们也以为自己是正常的，如果你选择留下，肯定避免不了主动或者被动疯癫化（即使是假装）。要么你就离开，别对着他们指手画脚，在他们眼中你才是疯癫的异类。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (27, 1, 4, 0, '可能出现各种NC、YY、显微镜ju人、营销、引战、带节奏。优质有看点、知识、情感分享内容被大量劣质内容、虚假营销内容淹没。想看的看不到，不想看的到处都是，像暴风式洗脑一般，待久了很大可能就被同化了。一个正常人在一群不正常的人里面，正常人反而是不正常的。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
+INSERT INTO `user_opinion` VALUES (28, 1, 5, 0, '**矮个子男生没人要吗？身高在择偶标准中有多重要**？有看到很多对男生 160+ 的情侣，每次看到都很有正能量。', 5, b'0', '2021-04-17 04:03:49', '2021-04-17 04:03:49');
 
 -- ----------------------------
 -- Table structure for user_platform
@@ -424,29 +505,51 @@ INSERT INTO `user_opinion` VALUES (28, 1, 5, 0, '**矮个子男生没人要吗�
 DROP TABLE IF EXISTS `user_platform`;
 CREATE TABLE `user_platform`  (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
-  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '平台名称',
-  `main_page` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台主页',
-  `platform_logo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台logo',
-  `platform_long_logo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台长logo',
-  `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5',
+  `name_en` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '平台英文名称',
+  `main_page` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台主页',
+  `platform_logo` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台logo',
+  `platform_long_logo` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '平台长logo',
   `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_update_time`(`update_time`) USING BTREE,
-  INDEX `idx_sort_no`(`sort_no`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE
+  PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '社交媒体平台表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_platform
 -- ----------------------------
-INSERT INTO `user_platform` VALUES (1, 1, '前言', '/', '/images/platform-logo/mypages-logo.png', '/images/platform-logo/mypages-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `user_platform` VALUES (2, 1, 'B站', 'https://www.bilibili.com', '/images/platform-logo/bilibili-logo.png', '/images/platform-logo/bilibili-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `user_platform` VALUES (3, 1, '微博', 'https://weibo.com', '/images/platform-logo/weibo-logo.png', '/images/platform-logo/weibo-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `user_platform` VALUES (4, 1, '豆瓣', 'https://www.douban.com', '/images/platform-logo/douban-logo.png', '/images/platform-logo/douban-long-logo-2.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
-INSERT INTO `user_platform` VALUES (5, 1, '知乎', 'https://www.zhihu.com', '/images/platform-logo/zhihu-logo.png', '/images/platform-logo/zhihu-long-logo.png', 5, b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (1, '前言', 'mypages', '/', '/images/platform-logo/mypages-logo.png', '/images/platform-logo/mypages-long-logo.png', b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (2, 'B站', 'bilibili', 'https://www.bilibili.com', '/images/platform-logo/bilibili-logo.png', '/images/platform-logo/bilibili-long-logo.png', b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (3, '微博', 'weibo', 'https://weibo.com', '/images/platform-logo/weibo-logo.png', '/images/platform-logo/weibo-long-logo.png', b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (4, '豆瓣', 'douban', 'https://www.douban.com', '/images/platform-logo/douban-logo.png', '/images/platform-logo/douban-long-logo-2.png', b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+INSERT INTO `user_platform` VALUES (5, '知乎', 'zhihu', 'https://www.zhihu.com', '/images/platform-logo/zhihu-logo.png', '/images/platform-logo/zhihu-long-logo.png', b'0', '2021-01-02 08:49:04', '2021-01-02 08:49:04');
+
+-- ----------------------------
+-- Table structure for user_platform_relation
+-- ----------------------------
+DROP TABLE IF EXISTS `user_platform_relation`;
+CREATE TABLE `user_platform_relation`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id',
+  `platform_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联平台id',
+  `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5',
+  `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_where_order`(`user_id`, `sort_no`) USING BTREE,
+  INDEX `idx_userId_platformId`(`user_id`, `platform_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户与平台关联表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of user_platform_relation
+-- ----------------------------
+INSERT INTO `user_platform_relation` VALUES (1, 1, 1, 5, b'0', '2021-04-23 06:17:48', '2021-04-23 06:17:48');
+INSERT INTO `user_platform_relation` VALUES (2, 1, 2, 5, b'0', '2021-04-23 06:17:48', '2021-04-23 06:17:48');
+INSERT INTO `user_platform_relation` VALUES (3, 1, 3, 5, b'0', '2021-04-23 06:17:48', '2021-04-23 06:17:48');
+INSERT INTO `user_platform_relation` VALUES (4, 1, 4, 5, b'0', '2021-04-23 06:17:48', '2021-04-23 06:17:48');
+INSERT INTO `user_platform_relation` VALUES (5, 1, 5, 5, b'0', '2021-04-23 06:17:48', '2021-04-23 06:17:48');
 
 -- ----------------------------
 -- Function structure for f_test_empty

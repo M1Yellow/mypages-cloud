@@ -2,7 +2,7 @@ package com.m1yellow.mypages.controller;
 
 
 import com.m1yellow.mypages.common.api.CommonResult;
-import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.DoCache;
 import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.entity.UserOpinion;
 import com.m1yellow.mypages.service.UserOpinionService;
@@ -39,7 +39,7 @@ public class UserOpinionController {
     @ApiOperation("添加/更新观点")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<UserOpinion> add(UserOpinion opinion) {
 
         if (opinion == null) {
@@ -59,7 +59,7 @@ public class UserOpinionController {
     @ApiOperation("移除观点")
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long id) {
 
         if (userId == null || id == null) {

@@ -6,7 +6,7 @@ import com.m1yellow.mypages.bo.UserPlatformBo;
 import com.m1yellow.mypages.common.api.CommonResult;
 import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.common.constant.GlobalConstant;
-import com.m1yellow.mypages.common.util.GsonUtil;
+import com.m1yellow.mypages.common.util.FastJsonUtil;
 import com.m1yellow.mypages.common.util.ObjectUtil;
 import com.m1yellow.mypages.common.util.RedisUtil;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
@@ -17,6 +17,7 @@ import com.m1yellow.mypages.vo.home.PlatformItem;
 import com.m1yellow.mypages.vo.home.UserFollowingItem;
 import com.m1yellow.mypages.vo.home.UserFollowingTypeItem;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,12 +86,9 @@ public class HomeController {
         }
 
         // 先从缓存中取，没有再查数据库
-        String platformListCache = ObjectUtil.getString(redisUtil.get(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY));
-        if (platformListCache != null) {
-            List<PlatformItem> platformItemList = GsonUtil.json2Bean(platformListCache, List.class);
-            if (platformItemList != null && platformItemList.size() > 0) {
-                return CommonResult.success(platformItemList);
-            }
+        List<PlatformItem> platformListFromCache = getPlatformListFromCache(userId);
+        if (platformListFromCache != null && platformListFromCache.size() > 0) {
+            return CommonResult.success(platformListFromCache);
         }
 
         /**
@@ -218,10 +216,34 @@ public class HomeController {
 
         // 查询完成之后，设置缓存
         if (platformItemList != null && platformItemList.size() > 0) {
-            redisUtil.set(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY, GsonUtil.bean2Json(platformItemList));
+            redisUtil.set(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY + userId, FastJsonUtil.bean2Json(platformItemList));
         }
 
         return CommonResult.success(platformItemList);
+    }
+
+
+    /**
+     * 从缓存中获取首页数据
+     *
+     * @param userId
+     * @return
+     */
+    private List<PlatformItem> getPlatformListFromCache(Long userId) {
+        List<PlatformItem> platformItemList = null;
+        String platformListCache;
+        if (userId != null) { // 用户已登录，根据用户id取缓存
+            platformListCache = ObjectUtil.getString(redisUtil.get(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY + userId));
+        } else { // TODO 用户没登录，默认显示的首页数据
+            platformListCache = ObjectUtil.getString(redisUtil.get(GlobalConstant.HOME_PLATFORM_LIST_DEFAULT_CACHE_KEY));
+        }
+        if (StringUtils.isNotBlank(platformListCache)) {
+            // gson 对层层嵌套的复杂对象，由于序列化泛型擦除，类型对应不上，会导致页面解析不了！
+            // fastJson debug 能对应上类型，页面也能解析对应类型
+            platformItemList = FastJsonUtil.json2List(platformListCache, PlatformItem.class);
+        }
+
+        return platformItemList;
     }
 
 }

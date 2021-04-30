@@ -2,7 +2,7 @@ package com.m1yellow.mypages.controller;
 
 
 import com.m1yellow.mypages.common.api.CommonResult;
-import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.DoCache;
 import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.entity.UserFollowingType;
 import com.m1yellow.mypages.service.UserFollowingTypeService;
@@ -39,7 +39,7 @@ public class UserFollowingTypeController {
     @ApiOperation("添加/更新类型")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<UserFollowingType> add(UserFollowingType type) {
 
         if (type == null) {
@@ -59,7 +59,7 @@ public class UserFollowingTypeController {
     @ApiOperation("移除分类类型")
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long id) {
 
         if (userId == null || id == null) {

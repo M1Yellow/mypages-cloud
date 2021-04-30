@@ -2,7 +2,7 @@ package com.m1yellow.mypages.controller;
 
 
 import com.m1yellow.mypages.common.api.CommonResult;
-import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.DoCache;
 import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
 import com.m1yellow.mypages.service.UserFollowingRemarkService;
@@ -36,7 +36,7 @@ public class UserFollowingRemarkController {
     @ApiOperation("添加/更新用户标签")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<UserFollowingRemark> add(@RequestBody UserFollowingRemark remark) {
 
         if (remark == null) {
@@ -56,7 +56,7 @@ public class UserFollowingRemarkController {
     @ApiOperation("移除用户单个标签")
     @RequestMapping(value = "removeOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<String> removeOne(@RequestParam Long userId, @RequestParam Long id) {
 
         if (userId == null || id == null) {
@@ -79,7 +79,7 @@ public class UserFollowingRemarkController {
     @ApiOperation("移除用户标签")
     @RequestMapping(value = "removeBelongs", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<String> removeBelongs(@RequestParam Long userId, @RequestParam Long followingId) {
 
         if (userId == null || followingId == null) {

@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD})
 @Documented
 @Order(Ordered.LOWEST_PRECEDENCE)
-public @interface DoSomethings {
+public @interface DoCache {
 
     /**
      * 描述信息

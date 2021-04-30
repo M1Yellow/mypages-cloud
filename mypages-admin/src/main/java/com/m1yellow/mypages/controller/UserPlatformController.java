@@ -3,7 +3,7 @@ package com.m1yellow.mypages.controller;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.m1yellow.mypages.common.api.CommonResult;
-import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.DoCache;
 import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.entity.UserPlatform;
 import com.m1yellow.mypages.entity.UserPlatformRelation;
@@ -44,7 +44,7 @@ public class UserPlatformController {
     @ApiOperation("添加/更新平台")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<UserPlatform> add(UserPlatform platform) {
 
         if (platform == null) {
@@ -64,7 +64,7 @@ public class UserPlatformController {
     @ApiOperation("移除平台")
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<String> remove(@RequestParam Long id) {
 
         if (id == null) {
@@ -84,7 +84,7 @@ public class UserPlatformController {
     @ApiOperation("移除用户平台关系")
     @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId) {
 
         if (userId == null || platformId == null) {

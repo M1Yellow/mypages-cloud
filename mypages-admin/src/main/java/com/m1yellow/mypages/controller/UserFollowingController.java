@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.m1yellow.mypages.bo.UserFollowingBo;
 import com.m1yellow.mypages.common.api.CommonResult;
-import com.m1yellow.mypages.common.aspect.DoSomethings;
+import com.m1yellow.mypages.common.aspect.DoCache;
 import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.common.exception.AtomicityException;
 import com.m1yellow.mypages.common.exception.FileSaveException;
@@ -65,20 +65,27 @@ public class UserFollowingController {
     private RedisUtil redisUtil;
 
 
-    /**
-     * @RequestPart与@RequestParam的区别
-     * @RequestPart这个注解用在multipart/form-data表单提交请求的方法上。 支持的请求方法的方式MultipartFile，属于Spring的MultipartResolver类。这个请求是通过http协议传输的。
-     * @RequestParam也同样支持multipart/form-data请求。 他们最大的不同是，当请求方法的请求参数类型不再是String类型的时候。
-     * @RequestParam适用于name-valueString类型的请求域，@RequestPart适用于复杂的请求域（像JSON，XML）。
-     * @RequestParam <= 注解空缺
-     * 注意，application/json 和 multipart/form-data 不兼容。传文件，就传不了 json 对象，但可以传字符串，后台解析转换为对象
-     */
+    /*
+    // TODO 技术知识点回顾记录，温故而知新
+    @RequestPart与@RequestParam的区别
+    @RequestPart这个注解用在multipart/form-data表单提交请求的方法上。 支持的请求方法的方式MultipartFile，属于Spring的MultipartResolver类。这个请求是通过http协议传输的。
+    @RequestParam也同样支持multipart/form-data请求。 他们最大的不同是，当请求方法的请求参数类型不再是String类型的时候。
+    @RequestParam适用于name-valueString类型的请求域，@RequestPart适用于复杂的请求域（像JSON，XML）。
+    @RequestParam <= 注解空缺
+    注意，application/json 和 multipart/form-data 不兼容。传文件，就传不了 json 对象，但可以传字符串，后台解析转换为对象
+
+    @Transactional 失效的场景？
+    https://juejin.cn/post/6844904096747503629
+    https://blog.csdn.net/weixin_41816847/article/details/105995453
+
+    */
+
 
     @ApiOperation("添加/更新关注用户")
     @Transactional //(rollbackFor = {AtomicityException.class, FileSaveException.class})
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<UserFollowingItem> add(UserFollowingBo following, @RequestPart(required = false) MultipartFile profile) {
 
         logger.info(">>>> following/add, following: {}", following);
@@ -149,7 +156,7 @@ public class UserFollowingController {
         if (following.getFollowingId() != null && following.getFollowingId() > 0) {
             saveFollowing.setId(following.getFollowingId());
         } else {
-            // 确认同平台、同用户标识是否已经有关注的用户，如果有，直接用这个用户id
+            // 确认同平台、同用户（id）标识是否已经有关注的用户（别人的关注也可以），如果有，直接用这个用户id
             if (saveFollowing.getPlatformId() != null && StringUtils.isNotBlank(saveFollowing.getUserKey())) {
                 QueryWrapper<UserFollowing> existedFollowingWrapper = new QueryWrapper<>();
                 existedFollowingWrapper.eq("platform_id", saveFollowing.getPlatformId());
@@ -175,6 +182,18 @@ public class UserFollowingController {
 
         // 设置保存后的 following id
         following.setFollowingId(saveFollowing.getId());
+
+        // 新增保存用户与关注用户关系之前，先根据 userId 和 followingId 判断是否已经存在记录
+        // 为什么不跟上面的检查关注用户是否存在一起校验？因为已存在的关注用户可以时其他用户关注的啊，别人的关注
+        if (following.getId() == null) {
+            QueryWrapper<UserFollowingRelation> existedRelationWrapper = new QueryWrapper<>();
+            existedRelationWrapper.eq("user_id", following.getUserId());
+            existedRelationWrapper.eq("following_id", following.getFollowingId());
+            UserFollowingRelation existedRelation = userFollowingRelationService.getOne(existedRelationWrapper);
+            if (existedRelation != null && existedRelation.getId() != null) {
+                following.setId(existedRelation.getId());
+            }
+        }
 
         // 保存用户与关注用户关系记录
         UserFollowingRelation relation = new UserFollowingRelation();
@@ -235,7 +254,7 @@ public class UserFollowingController {
 
         // TODO 注意，上面用户头像文件已经上传完成了，如果下面的代码出错异常（放任何地方，只要代码异常，数据库记录会回滚，但已上传的文件不能自动撤销），
         //  会导致头像文件成为孤立的垃圾文件，后续优化。
-        //  方案一：利用自定义全局异常捕获，加 redis 缓存，出现异常，则从缓存中取出对应用户上传的文件路径，删除
+        //  方案一：自定义文件保存异常，把保存文件方法放在数据操作之后，一旦文件保存出错，抛出异常，整个方法事务回滚，数据和文件都不会生效
         //  方案二：使用定时任务清理没有用户关联的头像文件
         // 保存头像文件，放在代码最后，出异常则抛出自定义文件保存异常，数据也会回滚
         if (!following.getIsUser()) { // 非用户
@@ -288,7 +307,7 @@ public class UserFollowingController {
     //@RequestMapping(value = "syncOne/{fuid}") // @PathVariable String fuid
     @RequestMapping(value = "syncOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<UserInfoItem> syncFollowingInfo(@RequestParam Long userId, @RequestParam Long fuid) {
 
         if (userId == null || fuid == null) {
@@ -331,7 +350,7 @@ public class UserFollowingController {
     @ApiOperation("批量同步关注用户的信息")
     @RequestMapping(value = "syncBatch", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<List<UserInfoItem>> syncFollowingInfoBatch(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
 
         if (userId == null || platformId == null) {
@@ -384,7 +403,7 @@ public class UserFollowingController {
     @ApiOperation("移除关注用户")
     @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoSomethings
+    @DoCache
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long followingId) {
 
         if (userId == null || followingId == null) {
