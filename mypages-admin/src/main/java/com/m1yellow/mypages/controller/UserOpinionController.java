@@ -4,11 +4,14 @@ package com.m1yellow.mypages.controller;
 import com.m1yellow.mypages.common.api.CommonResult;
 import com.m1yellow.mypages.common.aspect.DoCache;
 import com.m1yellow.mypages.common.aspect.WebLog;
+import com.m1yellow.mypages.common.util.CheckParamUtil;
+import com.m1yellow.mypages.dto.UserOpinionDto;
 import com.m1yellow.mypages.entity.UserOpinion;
 import com.m1yellow.mypages.service.UserOpinionService;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,19 +43,21 @@ public class UserOpinionController {
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
     @DoCache
-    public CommonResult<UserOpinion> add(UserOpinion opinion) {
+    public CommonResult<UserOpinion> add(UserOpinionDto opinion) {
 
-        if (opinion == null) {
-            logger.error("请求参数错误");
-            return CommonResult.failed("请求参数错误");
-        }
+        CheckParamUtil.validate(opinion);
 
-        if (!userOpinionService.saveOrUpdate(opinion)) {
+        UserOpinion saveOpinion = new UserOpinion();
+        BeanUtils.copyProperties(opinion, saveOpinion);
+        if (!userOpinionService.saveOrUpdate(saveOpinion)) {
             logger.error("添加/更新观点失败");
             return CommonResult.failed("操作失败");
         }
 
-        return CommonResult.success(opinion);
+        // 重新加载对象
+        UserOpinion reloadOpinion = userOpinionService.getById(saveOpinion.getId());
+
+        return CommonResult.success(reloadOpinion);
     }
 
 

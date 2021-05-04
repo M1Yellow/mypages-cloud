@@ -1,7 +1,7 @@
 package com.m1yellow.mypages.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.m1yellow.mypages.bo.UserPlatformBo;
+import com.m1yellow.mypages.dto.UserPlatformDto;
 import com.m1yellow.mypages.entity.UserPlatform;
 import com.m1yellow.mypages.mapper.UserPlatformMapper;
 import com.m1yellow.mypages.service.UserPlatformService;
@@ -31,12 +31,12 @@ public class UserPlatformServiceImpl extends ServiceImpl<UserPlatformMapper, Use
     }
 
     @Override
-    public UserPlatformBo getUserPlatform(Map params) {
+    public UserPlatformDto getUserPlatform(Map params) {
         return userPlatformMapper.getUserPlatform(params);
     }
 
     @Override
-    public List<UserPlatformBo> queryUserPlatformList(Map params) {
+    public List<UserPlatformDto> queryUserPlatformList(Map params) {
         return userPlatformMapper.queryUserPlatformList(params);
     }
 }

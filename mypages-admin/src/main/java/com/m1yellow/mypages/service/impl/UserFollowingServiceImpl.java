@@ -1,7 +1,7 @@
 package com.m1yellow.mypages.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.m1yellow.mypages.bo.UserFollowingBo;
+import com.m1yellow.mypages.dto.UserFollowingDto;
 import com.m1yellow.mypages.common.util.FileUtil;
 import com.m1yellow.mypages.common.util.ObjectUtil;
 import com.m1yellow.mypages.common.util.UUIDGenerateUtil;
@@ -47,7 +47,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
 
 
     @Override
-    public UserInfoItem doExcavate(UserFollowingBo following) {
+    public UserInfoItem doExcavate(UserFollowingDto following) {
 
         if (following == null || !following.getIsUser()) {
             return null;
@@ -73,7 +73,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
         // 设置保存路径为 classpath 下的目录
         String saveDirFullPath = FileUtil.getSaveDirFullPath(UserFollowingServiceImpl.class, saveDir);
 
-        switch (PlatformInfo.getPlatformInfo(following.getPlatformId().intValue())) {
+        switch (PlatformInfo.getPlatformInfoByUrl(following.getMainPage())) {
             case BILIBILI:
                 apiUrl = "https://api.bilibili.com/x/space/acc/info?mid=userId&jsonp=jsonp";
                 fromUrl = apiUrl.replace("userId", userId);
@@ -99,31 +99,6 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     }
 
 
-    /**
-     * 从用户主页中取 userId
-     *
-     * @param url
-     * @return
-     */
-    private String getUserIdFromUrl(String url) {
-        if (StringUtils.isBlank(url)) {
-            return null;
-        }
-        String userId = null;
-        try {
-            if (url.contains("bilibili.com")) {
-                userId = url.split("/")[3];
-            } else if (url.contains("m.weibo.cn")) {
-                userId = url.split("/")[4];
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return null;
-        }
-        return userId;
-    }
-
-
     @Override
     public boolean saveUserInfo(UserInfoItem userInfoItem, UserFollowing following) {
         boolean isSuc = false;
@@ -143,12 +118,12 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     }
 
     @Override
-    public UserFollowingBo getUserFollowing(Map params) {
+    public UserFollowingDto getUserFollowing(Map params) {
         return userFollowingMapper.getUserFollowing(params);
     }
 
     @Override
-    public List<UserFollowingBo> queryUserFollowingList(Map params) {
+    public List<UserFollowingDto> queryUserFollowingList(Map params) {
         return userFollowingMapper.queryUserFollowingList(params);
     }
 
@@ -158,7 +133,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
     }
 
     @Override
-    public String getUserKeyFromMainPage(UserFollowingBo following) {
+    public String getUserKeyFromMainPage(UserFollowingDto following) {
         String userKey = null;
         if (following != null && StringUtils.isNotBlank(following.getMainPage())) {
             String[] mainPageArr = following.getMainPage().split("/");
@@ -166,7 +141,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
                 return null;
             }
             if (following.getIsUser()) {
-                switch (PlatformInfo.getPlatformInfo(following.getPlatformId().intValue())) {
+                switch (PlatformInfo.getPlatformInfoByUrl(following.getMainPage())) {
                     case BILIBILI:
                         userKey = mainPageArr[mainPageArr.length - 2];
                         break;

@@ -1,7 +1,7 @@
 package com.m1yellow.mypages.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.m1yellow.mypages.bo.UserFollowingBo;
+import com.m1yellow.mypages.dto.UserFollowingDto;
 import com.m1yellow.mypages.entity.UserFollowing;
 
 import java.util.List;
@@ -17,9 +17,9 @@ import java.util.Map;
  */
 public interface UserFollowingMapper extends BaseMapper<UserFollowing> {
 
-    UserFollowingBo getUserFollowing(Map params);
+    UserFollowingDto getUserFollowing(Map params);
 
-    List<UserFollowingBo> queryUserFollowingList(Map params);
+    List<UserFollowingDto> queryUserFollowingList(Map params);
 
     List<Long> queryTypeIdList(Map params);
 

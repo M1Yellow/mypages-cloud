@@ -1,10 +1,8 @@
 package com.m1yellow.mypages.common.exception;
 
 import com.m1yellow.mypages.common.api.CommonResult;
+import com.m1yellow.mypages.common.api.ResultCode;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,6 +14,30 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * 统一处理参数校验错误异常（controller 请求接口参数数据绑定异常）
+     *
+     * @param e
+     * @return
+     */
+    @ResponseBody
+    @ExceptionHandler(BindException.class)
+    public CommonResult processValidException(BindException e) {
+        return CommonResult.failed(ResultCode.VALIDATE_FAILED, e.getMessage());
+    }
+
+    /**
+     * 统一处理参数校验错误异常
+     *
+     * @param e
+     * @return
+     */
+    @ResponseBody
+    @ExceptionHandler(IllegalArgumentException.class)
+    public CommonResult processValidException(IllegalArgumentException e) {
+        return CommonResult.failed(ResultCode.VALIDATE_FAILED, e.getMessage());
+    }
+
     @ResponseBody
     @ExceptionHandler(value = ApiException.class)
     public CommonResult handle(ApiException e) {
@@ -25,6 +47,12 @@ public class GlobalExceptionHandler {
         return CommonResult.failed(e.getMessage());
     }
 
+    /**
+     * 自定义文件保存异常，文件保存失败，抛出此异常，可以让方法中的数据库操作回滚
+     *
+     * @param e
+     * @return
+     */
     @ResponseBody
     @ExceptionHandler(value = FileSaveException.class)
     public CommonResult handle(FileSaveException e) {
@@ -34,6 +62,12 @@ public class GlobalExceptionHandler {
         return CommonResult.failed(e.getMessage());
     }
 
+    /**
+     * 自定义方法原子性操作异常，整个方法中途操作失败，可手动抛出此异常，中断操作，保证原子性
+     *
+     * @param e
+     * @return
+     */
     @ResponseBody
     @ExceptionHandler(value = AtomicityException.class)
     public CommonResult handle(AtomicityException e) {
@@ -43,31 +77,4 @@ public class GlobalExceptionHandler {
         return CommonResult.failed(e.getMessage());
     }
 
-    @ResponseBody
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public CommonResult handleValidException(MethodArgumentNotValidException e) {
-        BindingResult bindingResult = e.getBindingResult();
-        String message = null;
-        if (bindingResult.hasErrors()) {
-            FieldError fieldError = bindingResult.getFieldError();
-            if (fieldError != null) {
-                message = fieldError.getField() + fieldError.getDefaultMessage();
-            }
-        }
-        return CommonResult.validateFailed(message);
-    }
-
-    @ResponseBody
-    @ExceptionHandler(value = BindException.class)
-    public CommonResult handleValidException(BindException e) {
-        BindingResult bindingResult = e.getBindingResult();
-        String message = null;
-        if (bindingResult.hasErrors()) {
-            FieldError fieldError = bindingResult.getFieldError();
-            if (fieldError != null) {
-                message = fieldError.getField() + fieldError.getDefaultMessage();
-            }
-        }
-        return CommonResult.validateFailed(message);
-    }
 }

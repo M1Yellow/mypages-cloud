@@ -1,6 +1,6 @@
 package com.m1yellow.mypages.service;
 
-import com.m1yellow.mypages.bo.UserPlatformBo;
+import com.m1yellow.mypages.dto.UserPlatformDto;
 import com.m1yellow.mypages.entity.UserPlatform;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -30,7 +30,7 @@ public interface UserPlatformService extends IService<UserPlatform> {
      * @param params 参数封装 map
      * @return
      */
-    UserPlatformBo getUserPlatform(Map params);
+    UserPlatformDto getUserPlatform(Map params);
 
     /**
      * 自定义查询列表
@@ -38,6 +38,6 @@ public interface UserPlatformService extends IService<UserPlatform> {
      * @param params
      * @return
      */
-    List<UserPlatformBo> queryUserPlatformList(Map params);
+    List<UserPlatformDto> queryUserPlatformList(Map params);
 
 }

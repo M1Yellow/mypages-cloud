@@ -1,7 +1,7 @@
 package com.m1yellow.mypages.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.m1yellow.mypages.bo.UserFollowingBo;
+import com.m1yellow.mypages.dto.UserFollowingDto;
 import com.m1yellow.mypages.entity.UserFollowing;
 import com.m1yellow.mypages.excavation.bo.UserInfoItem;
 
@@ -24,7 +24,7 @@ public interface UserFollowingService extends IService<UserFollowing> {
      * @param following
      * @return
      */
-    UserInfoItem doExcavate(UserFollowingBo following);
+    UserInfoItem doExcavate(UserFollowingDto following);
 
     /**
      * 保存同步用户信息
@@ -49,7 +49,7 @@ public interface UserFollowingService extends IService<UserFollowing> {
      * @param params 参数封装 map
      * @return
      */
-    UserFollowingBo getUserFollowing(Map params);
+    UserFollowingDto getUserFollowing(Map params);
 
     /**
      * 自定义查询列表
@@ -57,7 +57,7 @@ public interface UserFollowingService extends IService<UserFollowing> {
      * @param params
      * @return
      */
-    List<UserFollowingBo> queryUserFollowingList(Map params);
+    List<UserFollowingDto> queryUserFollowingList(Map params);
 
     /**
      * 获取关注用户的类型 id 列表
@@ -72,6 +72,6 @@ public interface UserFollowingService extends IService<UserFollowing> {
      * @param following
      * @return
      */
-    String getUserKeyFromMainPage(UserFollowingBo following);
+    String getUserKeyFromMainPage(UserFollowingDto following);
 
 }

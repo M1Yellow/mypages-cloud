@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.m1yellow.mypages.mapper.UserPlatformMapper">
 
-    <select id="getUserPlatform" resultType="com.m1yellow.mypages.bo.UserPlatformBo">
+    <select id="getUserPlatform" resultType="com.m1yellow.mypages.dto.UserPlatformDto">
         select up.name, up.name_en, up.main_page, up.platform_logo, up.platform_long_logo,
         upr.id, upr.user_id, upr.platform_id, upr.sort_no, upr.is_deleted, upr.create_time, upr.update_time
-        from user_platform_relation upr left join user_platform up
+        from user_platform_relation upr straight_join user_platform up
         on upr.platform_id = up.id
         where upr.is_deleted = 0
         <if test="userId != null and userId != &quot;&quot;">
@@ -18,10 +18,10 @@
         limit 1
     </select>
 
-    <select id="queryUserPlatformList" resultType="com.m1yellow.mypages.bo.UserPlatformBo">
+    <select id="queryUserPlatformList" resultType="com.m1yellow.mypages.dto.UserPlatformDto">
         select up.name, up.name_en, up.main_page, up.platform_logo, up.platform_long_logo,
         upr.id, upr.user_id, upr.platform_id, upr.sort_no, upr.is_deleted, upr.create_time, upr.update_time
-        from user_platform_relation upr left join user_platform up
+        from user_platform_relation upr straight_join user_platform up
         on upr.platform_id = up.id
         where upr.is_deleted = 0
         <if test="userId != null and userId != &quot;&quot;">

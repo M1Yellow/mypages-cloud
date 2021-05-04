@@ -4,6 +4,8 @@
 Define the homepage of your interest.
 
 
+
+
 ## 前言
 这个项目只是个人兴趣驱动，用于运用及熟练各大主流技术框架。
 目前整合的技术不多，业务功能也还未完全实现，但是会一直完善下去。
@@ -16,12 +18,14 @@ Define the homepage of your interest.
 憎恶了首页动态穿插垃圾广告？厌倦了大数据个性推荐？担心沉迷浪费宝贵时间？
 试一下自定义社交主页，`简洁`、`清静`、`原味`，不错过有品质的用户内容，不被无关繁杂内容扰乱视野和思绪。
 
-一个由兴趣而诞生的小白练手项目。人生苦短，技术除了用于工作，也可以改变和丰富生活。
+
 
 
 ## 项目介绍
 mypages 项目是一个致力于聚合多社交平台用户主页的小型应用。后端基于 SpringBoot + MyBatisPlus 实现，使用 Docker 部署项目及数据库。
 主要业务功能包括，平台管理、平台观点管理、关注用户管理、用户类型管理、用户标签管理、检查用户内容更新、同步用户头像昵称等。
+
+
 
 
 ## 目录结构
@@ -83,10 +87,14 @@ mypages -- 项目目录
 ```
 
 
+
 ## 项目演示
+
 由于是前后端分离项目，目前后端项目只提供接口服务。
 
 前端主页效果预览：[传送门](https://github.com/M1Yellow/mypages-web) 。
+
+
 
 
 ## 技术应用
@@ -105,7 +113,10 @@ mypages -- 项目目录
 | Lombok               | 简化对象封装工具    | https://github.com/rzwitserloot/lombok         |
 | Swagger-UI           | 文档生成工具        | https://github.com/swagger-api/swagger-ui      |
 
+
+
 ### 开发环境
+
 | 工具          | 版本号 | 下载                                                         |
 | ------------- | ------ | ------------------------------------------------------------ |
 | JDK           | 1.8    | https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html |
@@ -115,7 +126,10 @@ mypages -- 项目目录
 | RabbitMQ      | 3.7.14 | http://www.rabbitmq.com/download.html                        |
 | Nginx         | 1.19   | http://nginx.org/en/download.html                            |
 
+
+
 ### 开发工具
+
 | 工具          | 说明                | 官网                                            |
 | ------------- | ------------------- | ----------------------------------------------- |
 | IDEA          | 开发IDE             | https://www.jetbrains.com/idea/download         |
@@ -126,7 +140,9 @@ mypages -- 项目目录
 | Typora        | Markdown编辑器      | https://typora.io/                              |
 
 
+
 ## 部署运行
+
 1. 下载并安装开发环境和工具
 2. 克隆项目到本地，用 IDEA 打开项目
 3. 配置 Maven 并下载项目依赖

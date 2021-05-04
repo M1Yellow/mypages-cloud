@@ -1,14 +1,14 @@
 package com.m1yellow.mypages.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.m1yellow.mypages.bo.UserFollowingBo;
-import com.m1yellow.mypages.bo.UserPlatformBo;
 import com.m1yellow.mypages.common.api.CommonResult;
 import com.m1yellow.mypages.common.aspect.WebLog;
 import com.m1yellow.mypages.common.constant.GlobalConstant;
 import com.m1yellow.mypages.common.util.FastJsonUtil;
 import com.m1yellow.mypages.common.util.ObjectUtil;
 import com.m1yellow.mypages.common.util.RedisUtil;
+import com.m1yellow.mypages.dto.UserFollowingDto;
+import com.m1yellow.mypages.dto.UserPlatformDto;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
 import com.m1yellow.mypages.entity.UserFollowingType;
 import com.m1yellow.mypages.entity.UserOpinion;
@@ -99,7 +99,7 @@ public class HomeController {
         // 查询平台表，获取平台数据
         Map<String, Object> platformQueryParams = new HashMap<>();
         platformQueryParams.put("userId", userId);
-        List<UserPlatformBo> PlatformList = userPlatformService.queryUserPlatformList(platformQueryParams);
+        List<UserPlatformDto> PlatformList = userPlatformService.queryUserPlatformList(platformQueryParams);
 
         if (PlatformList == null || PlatformList.size() <= 0) { // 平台表数据异常
             logger.error("平台表数据异常");
@@ -109,7 +109,7 @@ public class HomeController {
         // TODO 获取内容代码太长，后续需抽取封装。太长对不熟悉业务的人非常不友好。
         // >>>> 首页平台内容数据封装 >>>>
         List<PlatformItem> platformItemList = new ArrayList<>();
-        for (UserPlatformBo platform : PlatformList) {
+        for (UserPlatformDto platform : PlatformList) {
             PlatformItem platformItem = new PlatformItem();
             // 平台基础信息封装
             platformItem.setPlatformBaseInfo(platform);
@@ -184,11 +184,11 @@ public class HomeController {
                 params.put("userId", userId);
                 params.put("platformId", platform.getId());
                 params.put("typeId", typeId);
-                List<UserFollowingBo> typeFollowingList = userFollowingService.queryUserFollowingList(params);
+                List<UserFollowingDto> typeFollowingList = userFollowingService.queryUserFollowingList(params);
 
                 // 用户列表封装对象添加对应的标签 List<UserFollowing> 转换为 List<UserFollowingItem>
                 List<UserFollowingItem> userFollowingItemList = new ArrayList<>();
-                for (UserFollowingBo userFollowing : typeFollowingList) {
+                for (UserFollowingDto userFollowing : typeFollowingList) {
                     UserFollowingItem userFollowingItem = new UserFollowingItem();
                     userFollowingItem.setUserFollowing(userFollowing);
 
@@ -216,7 +216,8 @@ public class HomeController {
 
         // 查询完成之后，设置缓存
         if (platformItemList != null && platformItemList.size() > 0) {
-            redisUtil.set(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY + userId, FastJsonUtil.bean2Json(platformItemList));
+            redisUtil.set(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY + userId, FastJsonUtil.bean2Json(platformItemList),
+                    GlobalConstant.HOME_PLATFORM_LIST_CACHE_TIME);
         }
 
         return CommonResult.success(platformItemList);

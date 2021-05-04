@@ -3,7 +3,7 @@ package com.m1yellow.mypages.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.m1yellow.mypages.bo.UserFollowingBo;
+import com.m1yellow.mypages.dto.UserFollowingDto;
 import com.m1yellow.mypages.entity.UserFollowingRemark;
 import com.m1yellow.mypages.mapper.UserFollowingRemarkMapper;
 import com.m1yellow.mypages.service.UserFollowingRemarkService;
@@ -44,7 +44,7 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
 
     @Override
     @Transactional // 多条修改 sql 需要开启事务
-    public boolean saveRemarks(List<UserFollowingRemark> remarkList, UserFollowingBo following) {
+    public boolean saveRemarks(List<UserFollowingRemark> remarkList, UserFollowingDto following) {
 
         logger.info(">>>> saveRemarks, remarkList={}, following={}", remarkList, following);
 
@@ -83,15 +83,13 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
 
             if (existedRemarkList != null && existedRemarkList.size() > 0) {
                 for (UserFollowingRemark existedRemark : existedRemarkList) {
-                    // 判断标签是否已存在：标签存在，且添加的 remark id 为 null，则不重复添加
+                    // 判断标签是否已存在：标签存在，且添加的 remark id 为 null，则执行修改，不重复添加
                     if (existedRemark.getLabelName().trim().equals(remark.getLabelName().trim()) && remark.getId() == null) {
 
-                        // 已经存在的，也算本次成功保存，总不能把已存在的删掉吧
-                        savedRemarkIdList.add(existedRemark.getId());
-
-                        logger.info(">>>> save remark: userId={}, followingId={}, remark is already existed: {}",
+                        remark.setId(existedRemark.getId());
+                        logger.info(">>>> save remark: userId={}, followingId={}, remark is already existed: {}, do update.",
                                 following.getUserId(), following.getFollowingId(), remark.getLabelName());
-                        continue;
+                        break;
                     }
                 }
             }
