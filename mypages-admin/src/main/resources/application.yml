@@ -8,3 +8,21 @@ spring:
       enabled: true # 开启文件上传
       max-file-size: 3MB # 限制文件上传大小
       max-request-size: 10MB # 单次请求上传大小
+
+
+# JWT
+secure:
+  ignored:
+    urls: # 安全路径白名单
+      - /swagger-ui.html
+      - /swagger-resources/**
+      - /swagger/**
+      - /**/v2/api-docs
+      - /webjars/springfox-swagger-ui/**
+      - /public/**
+      - /actuator/**
+      - /druid/**
+      - /home/**
+      - /user/login
+      - /user/logout
+      - /user/register

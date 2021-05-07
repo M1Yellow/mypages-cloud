@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.m1yellow.mypages</groupId>
+        <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- 通用功能模块 -->
-    <groupId>com.m1yellow.mypages</groupId>
+    <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-common</name>
@@ -61,6 +61,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <!-- hutool 工具类集合 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

@@ -11,7 +11,7 @@
  Target Server Version : 50732
  File Encoding         : 65001
 
- Date: 04/05/2021 21:55:55
+ Date: 07/05/2021 21:24:58
 */
 
 SET NAMES utf8mb4;
@@ -29,6 +29,7 @@ CREATE TABLE `user_base`  (
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
   `profile_photo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '形象照片（头像）',
   `gender` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '性别，1-男；0-女，默认1',
+  `lock_time` datetime NULL DEFAULT NULL COMMENT '锁定时间，null-未锁定；当前时间之前-锁定；当前时间之后-待锁定',
   `is_deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '本条数据是否已删除，1-是；0-否，默认0',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -40,9 +41,9 @@ CREATE TABLE `user_base`  (
 -- ----------------------------
 -- Records of user_base
 -- ----------------------------
-INSERT INTO `user_base` VALUES (1, 'admin', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-23 06:23:16', '2021-04-23 06:23:16');
-INSERT INTO `user_base` VALUES (2, 'test', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-23 06:23:16', '2021-04-23 06:23:16');
-INSERT INTO `user_base` VALUES (3, 'guest', '123456', NULL, NULL, NULL, 1, b'0', '2021-04-23 06:23:16', '2021-04-23 06:23:16');
+INSERT INTO `user_base` VALUES (1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', NULL, NULL, NULL, 1, NULL, b'0', '2021-04-23 06:23:16', '2021-05-07 07:29:04');
+INSERT INTO `user_base` VALUES (2, 'test', 'e10adc3949ba59abbe56e057f20f883e', NULL, NULL, NULL, 1, NULL, b'0', '2021-04-23 06:23:16', '2021-05-07 07:29:06');
+INSERT INTO `user_base` VALUES (3, 'guest', 'e10adc3949ba59abbe56e057f20f883e', NULL, NULL, NULL, 1, NULL, b'0', '2021-04-23 06:23:16', '2021-05-07 07:29:09');
 
 -- ----------------------------
 -- Table structure for user_check_update

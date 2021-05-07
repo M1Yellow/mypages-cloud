@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.m1yellow.mypages</groupId>
+        <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- 后台接口服务模块 -->
-    <groupId>com.m1yellow.mypages</groupId>
+    <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-admin</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-admin</name>
@@ -22,17 +22,17 @@
     <dependencies>
         <!-- mypages security 安全模块 -->
         <dependency>
-            <groupId>com.m1yellow.mypages</groupId>
+            <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-security</artifactId>
         </dependency>
         <!-- mypages generator 代码生成器模块 -->
         <dependency>
-            <groupId>com.m1yellow.mypages</groupId>
+            <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-generator</artifactId>
         </dependency>
         <!-- mypages excavation 数据挖掘模块 -->
         <dependency>
-            <groupId>com.m1yellow.mypages</groupId>
+            <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-excavation</artifactId>
         </dependency>
 

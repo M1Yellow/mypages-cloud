@@ -62,9 +62,9 @@ spring:
 
 mybatis-plus:
   # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
-  mapper-locations: classpath:com/m1yellow/mypages/mapper/xml/*.xml
+  mapper-locations: classpath:cn/m1yellow/mypages/mapper/xml/*.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: com.m1yellow.mypages.entity
+  typeAliasesPackage: cn.m1yellow.mypages.entity
   global-config:
     banner: false
     # 数据库相关配置
@@ -117,6 +117,14 @@ logging:
 
 # Class.getClassLoader().getResource(String path)
 # 该方法中的参数path不能以“/“开头，path表示的是从classpath下获取资源
+
+
+# jwt 配置
+jwt:
+  tokenHeader: Authorization # JWT存储的请求头
+  base64Secret: REczZmVGcjdARTZSVGc3IzhSOUo= # JWT加解密使用的密钥
+  expiration: 600 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
+  tokenStart: 'Bearer' # JWT负载中拿到开头，getter 方法会添加一个空格
 
 
 # 用户头像保存位置

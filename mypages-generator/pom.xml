@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.m1yellow.mypages</groupId>
+        <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <!-- 代码生成模块 -->
-    <groupId>com.m1yellow.mypages</groupId>
+    <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-generator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-generator</name>
@@ -21,7 +21,7 @@
     <dependencies>
         <!-- mypages common 通用模块 -->
         <dependency>
-            <groupId>com.m1yellow.mypages</groupId>
+            <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-common</artifactId>
         </dependency>
 

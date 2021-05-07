@@ -61,7 +61,7 @@
 
         <!-- targetPackage：生成的实体类所在的包 -->
         <!-- targetProject：生成的实体类所在的硬盘位置 -->
-        <javaModelGenerator targetPackage="com.m1yellow.model"
+        <javaModelGenerator targetPackage="cn.m1yellow.model"
                             targetProject="src/main/java">
             <!-- 是否允许子包 -->
             <property name="enableSubPackages" value="false"/>
@@ -75,7 +75,7 @@
         </javaModelGenerator>
 
         <!-- targetPackage 和 targetProject：生成的 mapper 文件的包和位置 -->
-        <sqlMapGenerator targetPackage="com.m1yellow.mapper"
+        <sqlMapGenerator targetPackage="cn.m1yellow.mapper"
                          targetProject="src/main/resources">
             <!-- 针对数据库的一个配置，是否把 schema 作为子包名 -->
             <property name="enableSubPackages" value="true"/>
@@ -83,7 +83,7 @@
 
         <!-- targetPackage 和 targetProject：生成的 interface 文件的包和位置 -->
         <javaClientGenerator type="XMLMAPPER"
-                             targetPackage="com.m1yellow.dao.mapper" targetProject="src/main/java">
+                             targetPackage="cn.m1yellow.dao.mapper" targetProject="src/main/java">
             <!-- 针对 oracle 数据库的一个配置，是否把 schema 作为子包名 -->
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
