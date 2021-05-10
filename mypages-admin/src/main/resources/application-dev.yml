@@ -21,9 +21,9 @@ spring:
       connection-test-query: select 1 # 用于测试连接是否可用的查询语句
       pool-name: HikariPool-admin # 连接池的用户定义名称，主要出现在日志记录和JMX管理控制台中以识别池和池配置
       read-only: false # 从池中获取的连接是否默认处于只读模式
-    # druid 连接池配置
-    # Spring Boot 默认是不注入这些属性值的，需要自己绑定
-    #druid:
+      # druid 连接池配置
+      # Spring Boot 默认是不注入这些属性值的，需要自己绑定
+      #druid:
       #initialSize: 5
       #minIdle: 5
       #maxActive: 20
@@ -62,9 +62,9 @@ spring:
 
 mybatis-plus:
   # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
-  mapper-locations: classpath:cn/m1yellow/mypages/mapper/xml/*.xml
+  mapper-locations: classpath:cn/m1yellow/mypages/mapper/xml/*.xml,classpath:cn/m1yellow/mypages/god/mapper/xml/*.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: cn.m1yellow.mypages.entity
+  typeAliasesPackage: cn.m1yellow.mypages.entity,cn.m1yellow.mypages.god.entity
   global-config:
     banner: false
     # 数据库相关配置
@@ -123,8 +123,29 @@ logging:
 jwt:
   tokenHeader: Authorization # JWT存储的请求头
   base64Secret: REczZmVGcjdARTZSVGc3IzhSOUo= # JWT加解密使用的密钥
-  expiration: 600 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
+  expiration: 1800 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
   tokenStart: 'Bearer' # JWT负载中拿到开头，getter 方法会添加一个空格
+
+
+# spring security 不过滤资源路径列表。注意，自定义属性不建议直接放到 spring 的配置下面
+# 注意，"/" 加与不加是有区别的，单独匹配的
+secure:
+  ignored:
+    urls:
+      - /swagger-ui.html
+      - /swagger-resources/**
+      - /swagger/**
+      - /**/v2/api-docs
+      - /webjars/springfox-swagger-ui/**
+      - /favicon.ico
+      - /public/**
+      - /druid/**
+      - /home
+      - /home/
+      - /user/login
+      - /user/logout
+      - /user/register
+      - /error
 
 
 # 用户头像保存位置

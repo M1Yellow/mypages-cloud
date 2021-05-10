@@ -30,6 +30,7 @@
         <module>mypages-excavation</module>
         <module>mypages-security</module>
         <module>mypages-generator</module>
+        <module>mypages-god</module>
     </modules>
 
     <!-- 参数配置 -->
@@ -71,6 +72,7 @@
         <mypages-security.version>0.0.1-SNAPSHOT</mypages-security.version>
         <mypages-generator.version>0.0.1-SNAPSHOT</mypages-generator.version>
         <mypages-excavation.version>0.0.1-SNAPSHOT</mypages-excavation.version>
+        <mypages-god.version>0.0.1-SNAPSHOT</mypages-god.version>
 
     </properties>
 
@@ -167,6 +169,12 @@
                 <groupId>cn.m1yellow.mypages</groupId>
                 <artifactId>mypages-excavation</artifactId>
                 <version>${mypages-excavation.version}</version>
+            </dependency>
+            <!-- mypages god 用户信息模块 -->
+            <dependency>
+                <groupId>cn.m1yellow.mypages</groupId>
+                <artifactId>mypages-god</artifactId>
+                <version>${mypages-god.version}</version>
             </dependency>
 
             <!-- mysql 连接驱动 -->

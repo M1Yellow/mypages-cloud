@@ -1,34 +1,51 @@
-package cn.m1yellow.mypages.bo;
+package cn.m1yellow.mypages.security.bo;
 
-import cn.m1yellow.mypages.entity.UserBase;
+import cn.m1yellow.mypages.god.entity.SysRole;
+import cn.m1yellow.mypages.god.entity.UserBase;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
- * 用户信息详情封装对象
+ * 自定义 SecurityUser 实现 spring security 的 UserDetails 认证用户详情
  */
-public class UserBaseDetails implements UserDetails {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class SecurityUser implements UserDetails {
 
-    private UserBase userBase;
+    /**
+     * 用户
+     */
+    private transient UserBase userBase;
 
-    public UserBase getUserBase() {
-        return userBase;
-    }
+    /**
+     * 角色
+     */
+    private transient List<SysRole> roleList;
 
-    public void setUserBase(UserBase userBase) {
-        this.userBase = userBase;
-    }
-
-    public UserBaseDetails(UserBase userBase) {
-        this.userBase = userBase;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(this.roleList)) {
+            for (SysRole role : this.roleList) {
+                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.getCode()); // role.getCode() like admin
+                authorities.add(authority);
+            }
+        }
+        return authorities;
     }
 
     @Override
@@ -69,4 +86,5 @@ public class UserBaseDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@MapperScan("cn.m1yellow.mypages.mapper")
+@MapperScan({"cn.m1yellow.mypages.mapper", "cn.m1yellow.mypages.god.mapper"})
 @EnableTransactionManagement
 @Configuration
 public class MyBatisPlusConfig {

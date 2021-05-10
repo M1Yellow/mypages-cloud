@@ -31,7 +31,8 @@
         limit 1
     </select>
 
-    <select id="queryUserFollowingList" parameterType="java.util.Map" resultType="cn.m1yellow.mypages.dto.UserFollowingDto">
+    <select id="queryUserFollowingList" parameterType="java.util.Map"
+            resultType="cn.m1yellow.mypages.dto.UserFollowingDto">
         select ufr.id, uf.user_key, uf.name, uf.main_page, uf.profile_photo,
         uf.signature, uf.is_user, uf.create_time, uf.update_time,
         ufr.user_id, ufr.following_id, ufr.platform_id, ufr.type_id, ufr.is_deleted, ufr.sort_no
@@ -47,7 +48,21 @@
             and ufr.type_id = #{typeId}
         </if>
         order by ufr.sort_no desc, ufr.following_id asc
+        <if test="pageSize != null and pageSize &gt; 0">
+            limit #{pageNo}, #{pageSize}
+        </if>
     </select>
+
+    <!--
+    TODO 在XML中，需要转义的字符有：
+    &　　　&amp;
+    <　　　&lt;
+　　 >　　　&gt;
+　　 ＂　　　&quot;
+　　 ＇　　　&apos;
+    严格来说，在 XML 中只有 ”<” 和 ”&” 是非法的，其它三个都是可以合法存在的
+    也可以使用 <![CDATA[]]> 包含需转义的字符
+    -->
 
     <select id="queryTypeIdList" resultType="java.lang.Long">
         select ufr.type_id

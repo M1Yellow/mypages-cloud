@@ -12,6 +12,8 @@ import java.util.Collections;
 
 /**
  * WebCorsConfiguration 跨域配置
+ * 注意：如果使用了 Spring Security，跨域配置会失效，因为请求被 Spring Security 拦截了。
+ * 在 Spring Security web 配置中，开始跨域支持即可
  */
 @Configuration
 public class WebCorsConfiguration implements WebMvcConfigurer {
@@ -33,7 +35,7 @@ public class WebCorsConfiguration implements WebMvcConfigurer {
                 "Access-Control-Allow-Origin",
                 "Access-Control-Allow-Credentials"
         ));
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", config); // /** 表示本应用的所有方法都会去处理跨域请求
         return new CorsFilter(source);
     }
 

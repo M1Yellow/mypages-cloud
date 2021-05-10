@@ -58,13 +58,24 @@ spring:
           adaptive: true # 是否允许周期性更新集群拓扑视图，默认 false
           dynamic-refresh-sources: true # 是否允许动态刷新拓扑资源，默认 true
           period: 30 # 更新集群拓扑视图周期，默认 60 秒
+  security:
+    auth:
+      ignored:
+        urls: # 不过滤路径列表
+          - /favicon.ico
+          - /public/**
+          - /druid/**
+          - /home/**
+          - /user/login
+          - /user/logout
+          - /user/register
 
 
 mybatis-plus:
   # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
-  mapper-locations: classpath:com/m1yellow/mypages/mapper/xml/*.xml
+  mapper-locations: classpath:cn/m1yellow/mypages/mapper/xml/*.xml,classpath:cn/m1yellow/mypages/god/mapper/xml/*.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: cn.m1yellow.mypages.entity
+  typeAliasesPackage: cn.m1yellow.mypages.entity,cn.m1yellow.mypages.god.entity
   global-config:
     banner: false
     # 数据库相关配置
@@ -105,6 +116,21 @@ jwt:
   base64Secret: RTV0QFRJcTdVakQyTEdpSzBhQiM= # JWT加解密使用的密钥
   expiration: 1800 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
   tokenStart: 'Bearer'  # JWT负载中拿到开头，getter 方法会添加一个空格
+
+
+# spring security 不过滤资源路径列表
+secure:
+  ignored:
+    urls:
+      - /favicon.ico
+      - /public/**
+      - /druid/**
+      - /home
+      - /home/
+      - /user/login
+      - /user/logout
+      - /user/register
+      - /error
 
 
 # 用户头像保存位置

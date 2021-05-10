@@ -19,10 +19,10 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- mypages common 通用模块 -->
+        <!-- mypages god 用户信息模块 -->
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
-            <artifactId>mypages-common</artifactId>
+            <artifactId>mypages-god</artifactId>
         </dependency>
         <!-- SpringSecurity -->
         <dependency>

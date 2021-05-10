@@ -1,7 +1,7 @@
 package cn.m1yellow.mypages.controller;
 
-import com.alibaba.fastjson.JSON;
 import cn.m1yellow.mypages.common.api.CommonResult;
+import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +28,7 @@ public class TestController {
 
 
     @ApiOperation("测试文件路径")
+    //@PreAuthorize("hasPermission('/testPath', 'admin')")
     @RequestMapping(value = "testPath", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     public CommonResult<String> testPath(HttpServletRequest request) {
 

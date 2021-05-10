@@ -19,23 +19,11 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- mypages security 安全模块 -->
+        <!-- mypages common 通用模块 -->
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
-            <artifactId>mypages-security</artifactId>
+            <artifactId>mypages-common</artifactId>
         </dependency>
-
-        <!-- mysql 连接驱动 -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <!-- mybatis-plus 引入后就不用加 mybatis 的依赖了 -->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

@@ -11,11 +11,144 @@
  Target Server Version : 50732
  File Encoding         : 65001
 
- Date: 07/05/2021 21:24:58
+ Date: 10/05/2021 18:19:11
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for sys_permission
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_permission`;
+CREATE TABLE `sys_permission`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `url` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '权限路径',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '权限名',
+  `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '权限描述',
+  `is_deleted` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_url`(`url`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '权限表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_permission
+-- ----------------------------
+INSERT INTO `sys_permission` VALUES (1, '/following/add', '添加关注', '添加关注用户', 0, '2021-05-08 09:57:34', '2021-05-08 10:05:11');
+INSERT INTO `sys_permission` VALUES (2, '/following/removeRelation', '移除关注', '移除关注用户', 0, '2021-05-08 09:58:07', '2021-05-08 10:05:13');
+INSERT INTO `sys_permission` VALUES (3, '/following/syncOne', '同步用户信息', '同步关注用户信息', 0, '2021-05-08 09:58:43', '2021-05-08 10:05:01');
+INSERT INTO `sys_permission` VALUES (4, '/following/syncBatch', '批量同步用户信息', '批量同步关注用户信息', 0, '2021-05-08 10:01:16', '2021-05-08 10:05:04');
+INSERT INTO `sys_permission` VALUES (5, '/remark/add', '添加标签', '添加标签', 0, '2021-05-08 10:02:38', '2021-05-08 10:02:38');
+INSERT INTO `sys_permission` VALUES (6, '/remark/removeBelongs', '移除所有标签', '移除用户所有标签', 0, '2021-05-08 10:03:08', '2021-05-08 10:03:49');
+INSERT INTO `sys_permission` VALUES (7, '/remark/removeOne', '移除单个标签', '移除用户单个标签', 0, '2021-05-08 10:03:35', '2021-05-08 10:03:51');
+INSERT INTO `sys_permission` VALUES (8, '/type/add', '添加类型', '添加类型', 0, '2021-05-08 10:05:47', '2021-05-08 10:05:47');
+INSERT INTO `sys_permission` VALUES (9, '/type/remove', '移除类型', '移除类型', 0, '2021-05-08 10:06:09', '2021-05-08 10:06:09');
+INSERT INTO `sys_permission` VALUES (10, '/type/list', '类型列表', '获取类型列表', 0, '2021-05-08 10:06:34', '2021-05-08 10:06:34');
+INSERT INTO `sys_permission` VALUES (11, '/opinion/add', '添加观点', '添加观点', 0, '2021-05-08 10:06:58', '2021-05-08 10:06:58');
+INSERT INTO `sys_permission` VALUES (12, '/opinion/remove', '移除观点', '移除观点', 0, '2021-05-08 10:07:16', '2021-05-08 10:07:16');
+INSERT INTO `sys_permission` VALUES (13, '/platform/add', '添加平台', '添加平台', 0, '2021-05-08 10:07:38', '2021-05-08 10:07:38');
+INSERT INTO `sys_permission` VALUES (14, '/platform/remove', '移除平台', '移除平台', 0, '2021-05-08 10:07:54', '2021-05-08 10:07:54');
+INSERT INTO `sys_permission` VALUES (15, '/platform/list', '平台列表', '获取平台列表', 0, '2021-05-08 10:08:15', '2021-05-08 10:21:31');
+INSERT INTO `sys_permission` VALUES (16, '/platform-relation/add', '添加用户平台关联', '添加用户平台关联', 0, '2021-05-08 10:09:02', '2021-05-08 10:09:44');
+INSERT INTO `sys_permission` VALUES (17, '/platform-relation/remove', '移除用户平台关联', '移除用户平台关联', 0, '2021-05-08 10:09:34', '2021-05-08 10:09:34');
+INSERT INTO `sys_permission` VALUES (18, '/platform/baseList', '平台基础列表', '平台基础列表', 0, '2021-05-08 15:01:00', '2021-05-08 15:01:24');
+
+-- ----------------------------
+-- Table structure for sys_role
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_role`;
+CREATE TABLE `sys_role`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色代码，英文，用于程序业务处理',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色名，用于页面显示',
+  `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色描述，用于补充提示说明',
+  `count` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '用于统计对应该角色的用户数量，目前暂未使用',
+  `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '角色状态，0-正常；1-禁用，默认0',
+  `sort_no` tinyint(3) UNSIGNED NOT NULL DEFAULT 5 COMMENT '优先级由低到高：1-10，默认5',
+  `is_deleted` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_code`(`code`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_role
+-- ----------------------------
+INSERT INTO `sys_role` VALUES (1, 'admin', '系统管理员', '技术负责人或主管领导', 0, 0, 5, 0, '2021-05-08 09:32:39', '2021-05-08 09:36:24');
+INSERT INTO `sys_role` VALUES (2, 'user', '平台用户', '普通平台用户', 0, 0, 5, 0, '2021-05-08 10:10:57', '2021-05-08 10:10:57');
+
+-- ----------------------------
+-- Table structure for sys_role_permission
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_role_permission`;
+CREATE TABLE `sys_role_permission`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `role_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联角色id',
+  `permission_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联权限id',
+  `is_deleted` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 47 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色权限关联表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_role_permission
+-- ----------------------------
+INSERT INTO `sys_role_permission` VALUES (1, 1, 1, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (2, 1, 2, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (3, 1, 3, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (4, 1, 4, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (5, 1, 5, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (6, 1, 6, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (7, 1, 7, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (8, 1, 8, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (9, 1, 9, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (10, 1, 10, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (11, 1, 11, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (12, 1, 12, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (13, 1, 13, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (14, 1, 14, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (15, 1, 15, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (16, 1, 16, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (17, 1, 17, 0, '2021-05-08 10:15:56', '2021-05-08 10:15:56');
+INSERT INTO `sys_role_permission` VALUES (32, 2, 1, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (33, 2, 2, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (34, 2, 3, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (35, 2, 4, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (36, 2, 5, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (37, 2, 6, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (38, 2, 7, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (39, 2, 8, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (40, 2, 9, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (41, 2, 10, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (42, 2, 11, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (43, 2, 12, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (44, 2, 15, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (45, 2, 16, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+INSERT INTO `sys_role_permission` VALUES (46, 2, 17, 0, '2021-05-08 10:21:23', '2021-05-08 10:21:23');
+
+-- ----------------------------
+-- Table structure for sys_user_role
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_user_role`;
+CREATE TABLE `sys_user_role`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '表id',
+  `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联用户id',
+  `role_id` bigint(20) UNSIGNED NOT NULL COMMENT '关联角色id',
+  `is_deleted` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '本条数据是否已删除，1-是；0-否，默认0',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户角色关联表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_user_role
+-- ----------------------------
+INSERT INTO `sys_user_role` VALUES (1, 1, 1, 0, '2021-05-08 10:12:07', '2021-05-08 10:12:07');
+INSERT INTO `sys_user_role` VALUES (2, 2, 2, 0, '2021-05-08 10:12:16', '2021-05-08 10:12:16');
 
 -- ----------------------------
 -- Table structure for user_base

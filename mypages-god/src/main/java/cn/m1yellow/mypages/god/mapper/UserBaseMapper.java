@@ -1,6 +1,6 @@
-package cn.m1yellow.mypages.mapper;
+package cn.m1yellow.mypages.god.mapper;
 
-import cn.m1yellow.mypages.entity.UserBase;
+import cn.m1yellow.mypages.god.entity.UserBase;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author M1Yellow
- * @since 2021-04-13
+ * @since 2021-05-07
  */
 public interface UserBaseMapper extends BaseMapper<UserBase> {
 

@@ -19,63 +19,28 @@
     <packaging>war</packaging><!-- 外部 tomcat 需要 -->
     <!--<packaging>jar</packaging>--><!-- 默认内嵌 tomcat 运行 -->
 
+
+    <!--
+    依赖关系
+    admin
+    -excavation
+     -common
+    -security
+     -god 用户数据操作相关依赖（mybatis-plus）
+      -generator 数据库连接操作相关依赖（mysql连接驱动）
+       -common
+    -->
+
     <dependencies>
         <!-- mypages security 安全模块 -->
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-security</artifactId>
         </dependency>
-        <!-- mypages generator 代码生成器模块 -->
-        <dependency>
-            <groupId>cn.m1yellow.mypages</groupId>
-            <artifactId>mypages-generator</artifactId>
-        </dependency>
         <!-- mypages excavation 数据挖掘模块 -->
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-excavation</artifactId>
-        </dependency>
-
-        <!-- mysql 连接驱动 -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <!-- druid-spring-boot-starter -->
-        <!--
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-starter</artifactId>
-        </dependency>
-        -->
-        <!-- mybatis-plus 引入后就不用加 mybatis 的依赖了 -->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-        </dependency>
-        <!-- spring boot redis 缓存引入 在 common 模块引用了 -->
-        <!--
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        -->
-        <!-- lettuce pool 缓存连接池 -->
-        <!--
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
-        </dependency>
-        -->
-        <!-- httpclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-        <!-- jsoup 解析 html 页面 -->
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
         </dependency>
 
     </dependencies>
@@ -88,6 +53,7 @@
     4、mirror 仓库
     -->
     <!-- TODO 这个仓库用来下载 tomcat8-maven-plugin，如果不需要这个插件，这个插件仓库地址配置可以去掉 -->
+    <!--
     <pluginRepositories>
         <pluginRepository>
             <id>alfresco-public</id>
@@ -102,6 +68,7 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+    -->
 
     <build>
         <!-- 项目打包最终名称 -->
@@ -176,6 +143,9 @@
             tomcat 日志显示项目启动失败，可能是 war 不是最新的代码，执行 clear install package，再 deploy
 
             -->
+
+            <!--
+            TODO 不好用，每次都是重新部署，上传在 classpath 的图片会被清除
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat8-maven-plugin</artifactId>
@@ -183,12 +153,13 @@
                     <url>http://192.168.3.151:8081/manager/text</url>
                     <username>tomcat</username>
                     <password>123456.a</password>
-                    <path>/mypages</path><!-- tomcat webapps 下的项目目录名称 -->
+                    <path>/mypages</path>&lt;!&ndash; tomcat webapps 下的项目目录名称 &ndash;&gt;
                     <port>8081</port>
-                    <update>true</update><!-- 自动解压，重启部署 -->
+                    <update>true</update>&lt;!&ndash; 自动解压，重启部署 &ndash;&gt;
                     <uriEncoding>UTF-8</uriEncoding>
                 </configuration>
             </plugin>
+            -->
 
             <!-- 项目直接部署为 docker 镜像 -->
             <!-- 【dockerfile-maven-plugin 版本】 官方推荐 -->

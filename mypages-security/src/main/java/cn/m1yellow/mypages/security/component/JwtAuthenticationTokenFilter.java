@@ -1,17 +1,21 @@
 package cn.m1yellow.mypages.security.component;
 
+import cn.m1yellow.mypages.security.config.IgnoreUrlsConfig;
 import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
 import cn.m1yellow.mypages.security.util.JwtTokenUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -33,12 +37,36 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
-    JwtSecurityProperties jwtSecurityProperties;
+    private JwtSecurityProperties jwtSecurityProperties;
+    @Autowired
+    private IgnoreUrlsConfig ignoreUrlsConfig;
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
+
+        /**
+         * HttpMethod: GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE
+         * OPTIONS请求方法的主要用途有两个：
+         * 1、获取服务器支持的HTTP请求方法，所以可以用来探测。
+         * 2、用来验证接口功能，也就是提前验证一下。
+         */
+        // OPTIONS 请求直接放行
+        if (request.getMethod().equals(HttpMethod.OPTIONS.toString())) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // 白名单请求直接放行
+        PathMatcher pathMatcher = new AntPathMatcher();
+        String uri = request.getRequestURI();
+        for (String path : ignoreUrlsConfig.getUrls()) {
+            if (pathMatcher.match(path, uri)) {
+                chain.doFilter(request, response);
+                return;
+            }
+        }
 
         // 获取 auth 标识：Authorization
         String authHeader = request.getHeader(jwtSecurityProperties.getTokenHeader());
@@ -64,6 +92,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 }
             }
         }
+
+        // 放行，继续往下执行
         chain.doFilter(request, response);
     }
 }

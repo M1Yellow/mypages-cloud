@@ -16,15 +16,15 @@ public class MpCodeGenerator {
 
     /** 数据库表 */
     private static final String[] TABLES = {
-            "user_base",
-            "user_platform",
-            "user_platform_relation",
-            "user_following",
-            "user_following_relation",
-            "user_following_type",
-            "user_following_remark",
-            "user_opinion",
-            "user_check_update"
+            //"user_base",
+            "user_platform"
+            ,"user_platform_relation"
+            ,"user_following"
+            ,"user_following_relation"
+            ,"user_following_type"
+            ,"user_following_remark"
+            ,"user_opinion"
+            ,"user_check_update"
     };
 
     // 数据库连接信息

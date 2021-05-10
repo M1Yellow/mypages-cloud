@@ -1,5 +1,7 @@
 package cn.m1yellow.mypages.common.api;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 通用返回对象
  * Created by macro on 2019/4/19.
@@ -26,6 +28,7 @@ public class CommonResult<T> {
         this.message = message;
         this.data = data;
     }
+
 
     /**
      * 成功返回结果
@@ -62,6 +65,14 @@ public class CommonResult<T> {
         return new CommonResult<T>(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), null);
     }
 
+
+    /**
+     * 失败返回结果，默认
+     */
+    public static <T> CommonResult<T> failed() {
+        return failed(ResultCode.FAILED);
+    }
+
     /**
      * 失败返回结果
      *
@@ -71,15 +82,6 @@ public class CommonResult<T> {
         return new CommonResult<T>(errorCode.getCode(), errorCode.getMessage(), null);
     }
 
-    /**
-     * 失败返回结果
-     *
-     * @param errorCode 错误码
-     * @param message   错误信息
-     */
-    public static <T> CommonResult<T> failed(IErrorCode errorCode, String message) {
-        return new CommonResult<T>(errorCode.getCode(), message, null);
-    }
 
     /**
      * 失败返回结果
@@ -92,13 +94,17 @@ public class CommonResult<T> {
 
     /**
      * 失败返回结果
+     *
+     * @param errorCode 错误码
+     * @param message   错误信息
      */
-    public static <T> CommonResult<T> failed() {
-        return failed(ResultCode.FAILED);
+    public static <T> CommonResult<T> failed(IErrorCode errorCode, String message) {
+        return new CommonResult<T>(errorCode.getCode(), message, null);
     }
 
+
     /**
-     * 参数验证失败返回结果
+     * 参数验证失败返回结果，默认
      */
     public static <T> CommonResult<T> validateFailed() {
         return failed(ResultCode.VALIDATE_FAILED);
@@ -110,22 +116,77 @@ public class CommonResult<T> {
      * @param message 提示信息
      */
     public static <T> CommonResult<T> validateFailed(String message) {
+        if (StringUtils.isBlank(message)) {
+            message = ResultCode.VALIDATE_FAILED.getMessage();
+        }
         return new CommonResult<T>(ResultCode.VALIDATE_FAILED.getCode(), message, null);
     }
 
+
     /**
-     * 未登录返回结果
+     * 未登录返回结果，默认
      */
-    public static <T> CommonResult<T> unauthorized(String message) {
+    public static <T> CommonResult<T> unauthorized() {
         return new CommonResult<T>(ResultCode.UNAUTHORIZED.getCode(), ResultCode.UNAUTHORIZED.getMessage(), null);
     }
 
     /**
-     * 未授权返回结果
+     * 未登录返回结果，可传信息
      */
-    public static <T> CommonResult<T> forbidden(String message) {
+    public static <T> CommonResult<T> unauthorized(String message) {
+        if (StringUtils.isBlank(message)) {
+            message = ResultCode.UNAUTHORIZED.getMessage();
+        }
+        return new CommonResult<T>(ResultCode.UNAUTHORIZED.getCode(), ResultCode.UNAUTHORIZED.getMessage(), null);
+    }
+
+
+    /**
+     * 未授权返回结果，默认
+     */
+    public static <T> CommonResult<T> forbidden() {
         return new CommonResult<T>(ResultCode.FORBIDDEN.getCode(), ResultCode.FORBIDDEN.getMessage(), null);
     }
+
+    /**
+     * 未授权返回结果，可传信息
+     */
+    public static <T> CommonResult<T> forbidden(String message) {
+        if (StringUtils.isBlank(message)) {
+            message = ResultCode.FORBIDDEN.getMessage();
+        }
+        return new CommonResult<T>(ResultCode.FORBIDDEN.getCode(), message, null);
+    }
+
+
+    /**
+     * 资源未找到返回结果，默认
+     */
+    public static <T> CommonResult<T> notFoundFailed() {
+        return failed(ResultCode.NOT_FOUND);
+    }
+
+    /**
+     * 资源未找到返回结果，可传信息
+     */
+    public static <T> CommonResult<T> notFoundFailed(String message) {
+        return new CommonResult<T>(ResultCode.NOT_FOUND.getCode(), message, null);
+    }
+
+    /**
+     * 资源未找到返回结果，可传结果
+     */
+    public static <T> CommonResult<T> notFoundFailed(T data) {
+        return new CommonResult<T>(ResultCode.NOT_FOUND.getCode(), ResultCode.NOT_FOUND.getMessage(), data);
+    }
+
+    /**
+     * 资源未找到返回结果，可传信息和结果
+     */
+    public static <T> CommonResult<T> notFoundFailed(String message, T data) {
+        return new CommonResult<T>(ResultCode.NOT_FOUND.getCode(), message, data);
+    }
+
 
     public long getCode() {
         return code;

@@ -1,8 +1,8 @@
-package cn.m1yellow.mypages.service;
+package cn.m1yellow.mypages.god.service;
 
-import cn.m1yellow.mypages.entity.UserBase;
+
+import cn.m1yellow.mypages.god.entity.UserBase;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * <p>
@@ -15,9 +15,4 @@ import org.springframework.security.core.userdetails.UserDetails;
 public interface UserBaseService extends IService<UserBase> {
 
     UserBase getByUserName(String userName);
-
-    UserDetails loadUserByUsername(String userName);
-
-    String login(String userName, String password);
-
 }

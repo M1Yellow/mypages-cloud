@@ -8,8 +8,34 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * 全局异常处理
- * Created by macro on 2020/2/27.
+ * <b>全局异常处理</b>
+ * TODO @ControllerAdvice + @ExceptionHandler 不能处理 404 异常、Servlet Filter 中的异常
+ * 如果要调整 404 错误返回数据，则使用 ErrorController，
+ * 但是，ErrorController 也是全局异常捕获，优先级更高，且跟这个业务重复了
+ * <br>
+ * 实践方案：
+ * ErrorController 捕获全局代码异常
+ * ExceptionHandler 处理自定义异常
+ * <br>
+ * <b>使用@ExceptionHandler 为什么无法处理404错误/异常？</b>
+ * 因为SpringMVC优先处理（Try Catch）掉了资源映射不存在的404类错误/异常，虽然在响应信息注入了404的HttpStatus通信信息，
+ * 但木有了异常，肯定不会进入@ExceptionHandler 的处理逻辑。
+ * <br>
+ * <b>使用@ExceptionHandler + 抛出异常 是否可取？</b>
+ * 通过取消资源目录映射来解决无404问题是不可取的，属于越俎代庖的做法。
+ * spring.mvc.throw-exception-if-no-handler-found=true
+ * spring.resources.add-mappings=false
+ * <br>
+ * <b>为什么推荐ErrorController 替代 @ExceptionHandler ?</b>
+ * 使用ErrorController可以处理 全部错误/异常 。
+ * 使用ErrorController+ErrorInfoBuilder 在单个方法里面可以针对不同的Exception来添加详细的错误信息，
+ * 具体做法：拓展ErrorInfoBuilder的getErrorInfo方法来添加错误信息（例如：ex instanceof NullPointerException Set xxx）。
+ * <br>
+ * ExceptionHandler 能对应每个异常处理业务
+ * ErrorController 不太清楚是否能细分异常处理
+ * <br>
+ * 局部异常处理 @Controller + @ExceptionHandler
+ * 全局异常处理 @ControllerAdvice + @ExceptionHandler
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {

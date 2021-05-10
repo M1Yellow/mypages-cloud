@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用于配置白名单资源路径
- * Created by macro on 2018/11/5.
+ * 配置白名单资源路径
  * //@ConfigurationProperties 报错
  * 有以下几种解决方法：
  * 增加注解 @ConfigurationPropertiesScan
@@ -20,8 +19,8 @@ import java.util.List;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "secure.ignored")
 @Configuration
+@ConfigurationProperties(prefix = "secure.ignored")
 public class IgnoreUrlsConfig {
 
     private List<String> urls = new ArrayList<>();

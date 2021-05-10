@@ -1,8 +1,6 @@
 package cn.m1yellow.mypages;
 
 import cn.m1yellow.mypages.common.util.RedisUtil;
-import cn.m1yellow.mypages.entity.UserBase;
-import cn.m1yellow.mypages.service.UserBaseService;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +11,6 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 @SpringBootTest
 class MypagesAdminApplicationTests {
@@ -24,8 +21,6 @@ class MypagesAdminApplicationTests {
     private DataSource dataSource;
     @Resource
     private RedisUtil redisUtil;
-    @Resource
-    private UserBaseService userBaseService;
 
 
     @Test
@@ -65,12 +60,6 @@ class MypagesAdminApplicationTests {
 
         redisUtil.set("mykey", "测试 redis 序列化是否乱码1111");
         logger.info(redisUtil.get("mykey").toString());
-    }
-
-    @Test
-    void testUserBase() {
-        List<UserBase> userBaseList = userBaseService.list();
-        System.out.println(userBaseList);
     }
 
 }
