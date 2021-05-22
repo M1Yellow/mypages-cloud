@@ -21,4 +21,6 @@ public interface UserFollowingRemarkService extends IService<UserFollowingRemark
 
     boolean saveRemarks(List<UserFollowingRemark> remarkList, UserFollowingDto followingBo);
 
+    int getRemarkCount(Long userId, Long followingId);
+
 }

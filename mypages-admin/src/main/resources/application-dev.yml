@@ -123,7 +123,7 @@ logging:
 jwt:
   tokenHeader: Authorization # JWT存储的请求头
   base64Secret: REczZmVGcjdARTZSVGc3IzhSOUo= # JWT加解密使用的密钥
-  expiration: 1800 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
+  expiration: 7200 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
   tokenStart: 'Bearer' # JWT负载中拿到开头，getter 方法会添加一个空格
 
 
@@ -138,7 +138,9 @@ secure:
       - /**/v2/api-docs
       - /webjars/springfox-swagger-ui/**
       - /favicon.ico
-      - /public/**
+      - /**/images/**
+      - /**/css/**
+      - /**/js/**
       - /druid/**
       - /home
       - /home/

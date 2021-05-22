@@ -48,7 +48,7 @@ public class UserFollowingRelationDto implements Serializable {
     private Long platformId;
 
     @NotNull(message = "分类类型id不能为空")
-    @Min(value = 1L, message = "请检查类型id是否正确")
+    @Min(value = 0L, message = "请检查类型id是否正确") // TODO 类型为0，表示默认分类
     @ApiModelProperty(value = "关联关注类型表id，1-默认分类，用于变更类型")
     private Long typeId;
 

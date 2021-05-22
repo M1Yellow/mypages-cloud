@@ -1,22 +1,28 @@
 package cn.m1yellow.mypages.controller;
 
 
-import cn.m1yellow.mypages.god.entity.UserBase;
-import cn.m1yellow.mypages.god.service.UserBaseService;
-import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import cn.m1yellow.mypages.common.aspect.WebLog;
+import cn.m1yellow.mypages.common.constant.GlobalConstant;
+import cn.m1yellow.mypages.common.util.FastJsonUtil;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.common.util.RedisUtil;
+import cn.m1yellow.mypages.god.entity.UserBase;
+import cn.m1yellow.mypages.god.service.UserBaseService;
+import cn.m1yellow.mypages.security.bo.SecurityUser;
+import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
 import cn.m1yellow.mypages.security.util.JwtTokenUtil;
+import cn.m1yellow.mypages.vo.home.UserInfoDetail;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,6 +54,8 @@ public class UserBaseController {
     private JwtSecurityProperties jwtSecurityProperties;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private RedisUtil redisUtil;
 
 
     @ApiOperation("添加/更新用户")
@@ -60,9 +68,28 @@ public class UserBaseController {
             return CommonResult.failed("请求参数错误");
         }
 
+        // 是否新增
+        boolean isNew = true;
+        if (userBase.getId() != null) {
+            isNew = false;
+        }
+
+        // 去字符串字段两边空格
+        ObjectUtil.stringFiledTrim(userBase);
+
         if (!userBaseService.saveOrUpdate(userBase)) {
             logger.error("添加/更新用户失败");
             return CommonResult.failed("添加/更新用户失败");
+        }
+
+        // 更新用户信息，需要清理缓存
+        if (!isNew) {
+            String cacheKey = GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userBase.getId();
+            redisUtil.del(cacheKey);
+            logger.info(">>>> user base info update 删除用户信息缓存，cache key: {}", cacheKey);
+            cacheKey = GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userBase.getUserName();
+            redisUtil.del(cacheKey);
+            logger.info(">>>> user base info update 删除用户信息缓存，cache key: {}", cacheKey);
         }
 
         return CommonResult.success(userBase);
@@ -74,6 +101,12 @@ public class UserBaseController {
     @WebLog
     public CommonResult<Map<String, String>> login(@RequestParam String userName, @RequestParam String password) {
 
+        /**
+         * TODO 关于参数校验的想法
+         * 适当放过一些参数校验，每个参数都校验，然后都要加上错误信息，代码会显得很臃肿，让人感觉很浅显，全是参数校验
+         * 其实，直接不校验，传入不合适的参数，程序自然报错，有时候报错也是一种日志，同样便于排查问题，简洁原始之美
+         */
+
         if (StringUtils.isBlank(userName) || StringUtils.isBlank(password)) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
@@ -81,16 +114,16 @@ public class UserBaseController {
 
         String token = null;
         try {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+            SecurityUser userDetails = (SecurityUser) userDetailsService.loadUserByUsername(userName);
             // 这里的 password 是客户端加密后的
             //if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            if (!password.equals(userDetails.getPassword())) {
+            if (userDetails == null || !password.equals(userDetails.getPassword())) {
                 throw new BadCredentialsException("用户名或密码错误");
             }
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             token = jwtTokenUtil.generateToken(userDetails);
-        } catch (AuthenticationException e) {
+        } catch (Exception e) {
             logger.warn("登录异常: {}", e.getMessage());
         }
         if (StringUtils.isBlank(token)) {
@@ -102,6 +135,61 @@ public class UserBaseController {
         tokenMap.put("tokenStart", jwtSecurityProperties.getTokenStart());
         tokenMap.put("tokenHeader", jwtSecurityProperties.getTokenHeader());
         return CommonResult.success(tokenMap);
+    }
+
+
+    @ApiOperation("获取用户信息详情")
+    @RequestMapping(value = "detail", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    public CommonResult<UserInfoDetail> getUserInfoDetail(@RequestParam(required = false) Long userId, @RequestParam(required = false) String userName) {
+        if (userId == null && StringUtils.isBlank(userName)) {
+            logger.error("请求参数错误");
+            return CommonResult.failed("请求参数错误");
+        }
+
+        // 先从缓存中获取
+        String cacheStr = null;
+        if (userId != null) {
+            cacheStr = ObjectUtil.getString(redisUtil.get(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userId));
+        }
+        if (StringUtils.isBlank(cacheStr) && StringUtils.isNotBlank(userName)) {
+            cacheStr = ObjectUtil.getString(redisUtil.get(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userName));
+        }
+        if (StringUtils.isNotBlank(cacheStr)) {
+            UserInfoDetail userInfoDetail = FastJsonUtil.json2Bean(cacheStr, UserInfoDetail.class);
+            if (userInfoDetail != null) {
+                return CommonResult.success(userInfoDetail);
+            }
+        }
+
+        UserInfoDetail userInfoDetail = new UserInfoDetail();
+        UserBase userBase = null;
+        if (userId != null) {
+            userBase = userBaseService.getById(userId);
+        } else if (StringUtils.isNotBlank(userName)) {
+            QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
+            userBaseQueryWrapper.eq("user_name", userName);
+            userBase = userBaseService.getOne(userBaseQueryWrapper);
+        }
+        if (userBase != null) {
+            BeanUtils.copyProperties(userBase, userInfoDetail);
+            // 补充 userId，userInfoDetail 中的 id 和 userId 都表示用户id，迎合使用习惯
+            if (userInfoDetail != null) {
+                userInfoDetail.setUserId(userBase.getId());
+            }
+        }
+        // 设置默认头像
+        if (StringUtils.isBlank(userInfoDetail.getProfilePhoto())) {
+            userInfoDetail.setProfilePhoto(GlobalConstant.USER_DEFAULT_PROFILE_PHOTO_PATH);
+        }
+
+        // 设置缓存
+        if (userInfoDetail != null) {
+            redisUtil.set(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userInfoDetail.getUserId(), FastJsonUtil.bean2Json(userInfoDetail));
+            redisUtil.set(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userInfoDetail.getUserName(), FastJsonUtil.bean2Json(userInfoDetail));
+        }
+
+        return CommonResult.success(userInfoDetail);
     }
 
 

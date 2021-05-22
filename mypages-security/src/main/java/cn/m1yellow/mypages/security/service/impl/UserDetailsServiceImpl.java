@@ -6,7 +6,6 @@ import cn.m1yellow.mypages.god.service.SysUserRoleService;
 import cn.m1yellow.mypages.god.service.UserBaseService;
 import cn.m1yellow.mypages.security.bo.SecurityUser;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public SecurityUser loadUserByUsername(String username) throws UsernameNotFoundException {
         if (StringUtils.isBlank(username)) {
             return null;
         }

@@ -5,7 +5,8 @@ Define the homepage of your interest.
 
 
 ## 前言
-这个项目是个人兴趣驱动，用于运用及熟练各大主流技术框架。
+这个项目是个人兴趣驱动，主要用于在业余休息的时候，只用花少量的时间，就能快捷有效地查看和了解自己感兴趣领域的信息动态。
+与此同时，也能运用及熟练各大主流技术框架，提升技术水平。
 目前整合的技术不多，业务功能也还在完善和更新。
 
 
@@ -16,13 +17,13 @@ Define the homepage of your interest.
 - 可曾想过自定义`社交主页`？
 <br>
 
-你是否也怀念`简洁`、`纯粹`、`清静`的美好？不想错过有品质的用户内容？不想被无关繁杂内容扰乱视野和思绪？<br>
-现在，有一个致力于追求极简社交体验，及获取有效、有品质信息资源的项目破土萌芽了，如果你也有同样的想法和兴趣，志同道合的朋友，来~~喝两杯~~一起交流开发啊！
+你是否也怀念`简洁`、`纯粹`、`清静`的美好？不想错过有品质的用户内容？不想被无关繁杂内容扰乱视线和思绪？<br>
+现在，有一个致力于**追求极简社交体验**，及**获取有效、有品质信息资源**的项目破土萌芽了，如果你也有同样的想法和兴趣，志同道合的朋友，来~~喝两杯~~一起交流开发啊！
 
 
 ## 项目介绍
-**mypages** 项目是一个致力于聚合多社交平台用户主页的小型单页应用。<br>
-主要业务功能包括，平台管理、平台观点管理、关注用户管理、用户类型管理、用户标签管理、检查用户内容更新、同步用户头像昵称等。
+**mypages** 项目是一个致力于聚合多社交平台用户主页的小型单页应用。
+主要为平台管理、平台观点管理、关注用户管理、用户类型管理、用户标签管理、检查用户内容更新、同步用户头像昵称等业务功能提供 restful 接口支持。
 
 
 ## 目录结构
@@ -67,7 +68,7 @@ mypages -- 项目目录
 │   │           └── cn
 │   │               └── m1yellow
 │   │                   └── mypages
-│   │                       ├── MpCodeGenerator.java -- MyBatisPlus Generator 代码生成器
+│   │                       ├── MpCodeGenerator.java -- MyBatisPlus Generator 代码生成
 │   │                       ├── MypagesAdminApplicationTests.java -- 项目测试类
 │   │                       └── MyTest.java -- 自定义测试类
 │   ├── docker-compose.yml
@@ -91,7 +92,7 @@ mypages -- 项目目录
 │   │       └── java
 │   ├── pom.xml
 │   └── README.md
-├── mypages-god -- “用户是上帝”——用户模块
+├── mypages-god -- 用户模块
 │   ├── src
 │   │   ├── main
 │   │   │   ├── java
@@ -124,7 +125,7 @@ mypages -- 项目目录
 | 技术                 | 说明                       | 官网                                            |
 | -------------------- | ------------------------- | ---------------------------------------------- |
 | SpringBoot           | 容器+MVC框架 `2.4.3`       | https://spring.io/projects/spring-boot/         |
-| SpringSecurity       | 认证鉴权框架 `2.4.3`      | https://spring.io/projects/spring-security/       |
+| Spring Security      | 认证权限框架 `2.4.3`        | https://spring.io/projects/spring-security/       |
 | MyBatisPlus          | ORM、分页、代码生成 `3.4.2`  | https://baomidou.com/                          |
 | MySQL 	           | 关系型数据库 `5.7`          | https://www.mysql.com/                         |
 | Redis	               | 数据缓存中间件 `6.2.3`       | https://redis.io/download/                    |
@@ -144,7 +145,7 @@ mypages -- 项目目录
 | JDK           | Java开发环境 `1.8`             | https://www.oracle.com/technetwork/java/javase/downloads/ |
 | Maven         | 项目构建、jar包管理 `3.6.3`     | https://maven.apache.org/                        |
 | IDEA          | 日常开发工作环境 `2021.3`       | https://www.jetbrains.com/idea/download/         |
-| Xshell + Xftp | 远程服务器连接管理工具 `6.0`     | https://www.netsarang.com/en/xshell-download/    |
+| Xshell+Xftp   | 远程服务器连接管理工具 `6.0`     | https://www.netsarang.com/en/xshell-download/    |
 | Navicat       | 数据库连接管理工具 `15.0`       | https://www.navicat.com/en/download/navicat-premium/ |
 | ProcessOn     | 流程图绘制工具 `web`           | https://www.processon.com/                       |
 | Postman       | API接口调试工具 `latest`       | https://www.postman.com/                          |
@@ -160,11 +161,11 @@ mypages -- 项目目录
 6. 从入口启动类启动项目
 
 
-> **初始数据说明**<br>
-> 其中对各个平台的观点看法仅仅是个人观点，可能有些片面、过激，或是认知错误，不理会便是了，做好自己的事已不易。
+> **初始-数据-说明**<br>
+> 其中对各个平台的观点看法仅仅是个人观点，可能有些片面、偏激，或是认知错误，不理会便是了，做好自己的事已不易。
 
 
 ## 项目参考
-| 作者           | 项目名               | 项目地址                                         | 说明                            |
+| 项目           | 作者                 | 项目地址                                         | 说明                            |
 | ------------- | ------------------- | ----------------------------------------------- | ------------------------------ |
-| macrozheng    | mall                | https://github.com/macrozheng/mall/             | 代码结构、文档规范，期待后续更新     |
+| mall          | macrozheng          | https://github.com/macrozheng/mall/             | 代码结构、文档规范，期待后续更新     |

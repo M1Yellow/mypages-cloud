@@ -1,11 +1,12 @@
 package cn.m1yellow.mypages.common.aspect;
 
+import cn.m1yellow.mypages.common.api.ResultCode;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -58,17 +59,41 @@ public class DoCacheAspect {
     }
 
     /**
-     * 在切点之后织入
+     * 方法执行返回，执行切面任务，注意，如果方法抛异常，是没有返回的，这个方法不会执行。不过正好“曲线救国”，达到出现异常不处理缓存的目的
      *
-     * @throws Throwable
+     * @param joinPoint
+     * @param rtv
      */
-    @After("DoCache()")
-    public void doAfter(JoinPoint joinPoint) throws Throwable {
+    @AfterReturning(returning = "rtv", pointcut = "DoCache()")
+    public void doAfterReturning(JoinPoint joinPoint, Object rtv) {
 
         Boolean isException = localExceptionFlag.get();
         localExceptionFlag.remove();
         if (isException != null && isException) {
             logger.info(">>>> 方法出现异常，不进行缓存操作");
+            return;
+        }
+
+        // 从返回结果中取 code
+        Long code = null;
+        try {
+            Field field = rtv.getClass().getDeclaredField("code");
+            if (field != null) {
+                // 设置对象的访问权限，保证对 private 的属性的访问
+                field.setAccessible(true);
+                Object codeObj = field.get(rtv);
+                field.setAccessible(false);
+                if (codeObj != null) {
+                    code = Long.parseLong(ObjectUtil.getString(codeObj));
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+
+        if (code != null && !code.equals(ResultCode.SUCCESS.getCode())) {
+            // TODO 方法未执行成功，不操作缓存
+            logger.info(">>>> 方法未执行成功，不进行缓存操作");
             return;
         }
 
@@ -122,6 +147,7 @@ public class DoCacheAspect {
                     // 设置对象的访问权限，保证对 private 的属性的访问
                     field.setAccessible(true);
                     Object returnObj = field.get(obj);
+                    field.setAccessible(false);
                     if (returnObj == null) continue;
                     userId = Long.parseLong(ObjectUtil.getString(returnObj));
                     if (userId != null && userId > 0) {
@@ -129,7 +155,7 @@ public class DoCacheAspect {
                     }
                 } catch (Exception e) {
                     logger.error(e.getMessage());
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
 
             }

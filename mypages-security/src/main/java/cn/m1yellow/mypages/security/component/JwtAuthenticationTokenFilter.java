@@ -1,5 +1,6 @@
 package cn.m1yellow.mypages.security.component;
 
+import cn.m1yellow.mypages.security.bo.SecurityUser;
 import cn.m1yellow.mypages.security.config.IgnoreUrlsConfig;
 import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
 import cn.m1yellow.mypages.security.util.JwtTokenUtil;
@@ -7,10 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,7 @@ import java.io.IOException;
 /**
  * JWT 登录验证过滤器
  */
+@Order(1) // 数值越小，越先执行
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
@@ -81,7 +84,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
             if (StringUtils.isNotBlank(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 // spring security 用户详情对象封装
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                SecurityUser userDetails = (SecurityUser) userDetailsService.loadUserByUsername(username);
                 // 验证用户 token
                 if (jwtTokenUtil.validateUserToken(authToken, userDetails)) {
                     // spring security 用户名和密码校验规则

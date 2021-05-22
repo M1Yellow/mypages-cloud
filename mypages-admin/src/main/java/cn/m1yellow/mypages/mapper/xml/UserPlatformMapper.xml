@@ -8,10 +8,10 @@
         from user_platform_relation upr straight_join user_platform up
         on upr.platform_id = up.id
         where upr.is_deleted = 0
-        <if test="userId != null and userId != &quot;&quot;">
+        <if test="userId != null">
             and upr.user_id = #{userId}
         </if>
-        <if test="platformId != null and platformId != &quot;&quot;">
+        <if test="platformId != null">
             and upr.platform_id = #{platformId}
         </if>
         order by upr.sort_no desc
@@ -24,9 +24,12 @@
         from user_platform_relation upr straight_join user_platform up
         on upr.platform_id = up.id
         where upr.is_deleted = 0
-        <if test="userId != null and userId != &quot;&quot;">
+        <if test="userId != null">
             and upr.user_id = #{userId}
         </if>
         order by upr.sort_no desc
+        <if test="pageSize != null and pageSize &gt; 0">
+            limit #{pageNo}, #{pageSize}
+        </if>
     </select>
 </mapper>

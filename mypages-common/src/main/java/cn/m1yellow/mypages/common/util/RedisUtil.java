@@ -260,6 +260,16 @@ public class RedisUtil {
         }
     }
 
+
+    /**
+     * 获取指定 key 下的所有字段
+     * @param key
+     * @return
+     */
+    public Set<Object> hkeys(String key) {
+        return redisTemplate.opsForHash().keys(key);
+    }
+
     /**
      * 删除hash表中的值
      *
@@ -268,6 +278,20 @@ public class RedisUtil {
      */
     public void hdel(String key, Object... item) {
         redisTemplate.opsForHash().delete(key, item);
+    }
+
+    /**
+     * 手动实现删除 hash 指定 key 下的所有字段和值
+     * @param key
+     */
+    public void hdelall(String key) {
+        Set<Object> keys = hkeys(key);
+        if (keys != null && keys.size() > 0) {
+            for (Object field : keys) {
+                if (field == null) continue;
+                hdel(key, field + "");
+            }
+        }
     }
 
     /**

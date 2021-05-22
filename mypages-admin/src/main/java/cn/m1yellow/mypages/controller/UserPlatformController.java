@@ -62,6 +62,9 @@ public class UserPlatformController {
         // 纠正id
         savePlatform.setId(platform.getPlatformId());
 
+        // 去字符串字段两边空格
+        ObjectUtil.stringFiledTrim(savePlatform);
+
         if (!userPlatformService.saveOrUpdate(savePlatform)) {
             logger.error("添加/更新平台失败");
             return CommonResult.failed("操作失败");

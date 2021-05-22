@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
  * </p>
  *
  * @author M1Yellow
- * @since 2021-05-07
+ * @since 2021-05-15
  */
 @Data
 @AllArgsConstructor
@@ -35,6 +35,9 @@ public class UserFollowingType implements Serializable {
 
     @ApiModelProperty(value = "关联用户id")
     private Long userId;
+
+    @ApiModelProperty(value = "关联平台id")
+    private Long platformId;
 
     @ApiModelProperty(value = "关注者所属的类型")
     private String typeName;

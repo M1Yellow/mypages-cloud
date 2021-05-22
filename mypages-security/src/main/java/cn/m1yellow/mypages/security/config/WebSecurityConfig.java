@@ -82,18 +82,41 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .headers()
                 .frameOptions()
-                .disable()
+                .disable() // 相当于 header 参数 "X-Frame-Options", "DENY"
                 // 开启后端跨域请求支持
                 .and()
                 .cors()
+                .and()
+                .headers().cacheControl().disable() // 关掉默认缓存配置
+                //.headers().defaultsDisabled() // 关掉默认缓存配置，这种方式启动会报错
                 // 自定义认证失败处理类
                 .and()
                 .exceptionHandling()
                 .accessDeniedHandler(jwtAccessDeniedHandler)
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                // 自定义认证拦截器（JWT 用户名和密码校验过滤器）
+                // 自定义认证过滤器（JWT 用户名和密码校验过滤器）
                 .and()
                 .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+        /**
+         * TODO 添加自定义的 headers 设置，但是如果 spring security 默认配置存在，不会覆盖，先把默认配置禁用
+         * 注意，addHeaderWriter 这种方式会把所有请求的响应都加上 header 配置，导致普通接口请求响应也会被浏览器缓存，一个接口的结果也缓存？就离谱
+         * 缓存使用自定义 Filter 过滤器的形式，根据不同请求，添加 header 参数，自定义过滤器 AddResponseHeaderFilter
+         */
+
+        /*
+        httpSecurity.headers().addHeaderWriter(new StaticHeadersWriter(
+                Arrays.asList(
+                        //new Header("Access-Control-Allow-Origin", "http://192.168.10.118:8070"),
+                        new Header(Headers.ACCESS_CONTROL_ALLOW_ORIGIN.getHeadName(), Headers.ACCESS_CONTROL_ALLOW_ORIGIN.getHeadValues()),
+                        new Header(Headers.ACCESS_CONTROL_ALLOW_CREDENTIALS.getHeadName(), Headers.ACCESS_CONTROL_ALLOW_CREDENTIALS.getHeadValues()),
+                        new Header(Headers.ACCESS_CONTROL_ALLOW_METHODS.getHeadName(), Headers.ACCESS_CONTROL_ALLOW_METHODS.getHeadValues()),
+                        new Header(Headers.ACCESS_CONTROL_MAX_AGE.getHeadName(), Headers.ACCESS_CONTROL_MAX_AGE.getHeadValues()),
+                        new Header(Headers.CACHE_CONTROL_ALLOW_CACHED.getHeadName(), Headers.CACHE_CONTROL_ALLOW_CACHED.getHeadValues())
+                )
+        ));
+        */
 
         /*
         // 有动态权限配置时添加动态权限校验过滤器
@@ -103,7 +126,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         }
         */
 
-        // url权限认证处理
+        // url 动态权限认证处理
         registry.withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
             @Override
             public <O extends FilterSecurityInterceptor> O postProcess(O o) {

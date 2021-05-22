@@ -57,9 +57,12 @@ class MypagesAdminApplicationTests {
         // RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
         // connection.flushDb();
         // connection.flushAll();
+        //redisUtil.set("mykey", "测试 redis 序列化是否乱码1111");
+        //logger.info(redisUtil.get("mykey").toString());
 
-        redisUtil.set("mykey", "测试 redis 序列化是否乱码1111");
-        logger.info(redisUtil.get("mykey").toString());
+        System.out.println(redisUtil.hkeys("page_1_3_9"));
+        redisUtil.hdelall("page_1_3_9");
+
     }
 
 }

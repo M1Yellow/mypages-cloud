@@ -2,15 +2,17 @@ package cn.m1yellow.mypages.security.util;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.security.bo.SecurityUser;
 import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -23,8 +25,9 @@ public class JwtTokenUtil implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
 
-    private static final String CLAIM_KEY_USERNAME = "sub";
-    private static final String CLAIM_KEY_CREATED = "created";
+    private static final String CLAIM_KEY_USER_ID = "sub";
+    private static final String CLAIM_KEY_USERNAME = "username";
+    private static final String CLAIM_KEY_IAT = "iat";
 
 
     @Autowired
@@ -54,10 +57,11 @@ public class JwtTokenUtil implements InitializingBean {
     /**
      * 根据用户信息生成 token
      */
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(SecurityUser userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put(CLAIM_KEY_USER_ID, userDetails.getUserId());
         claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
-        claims.put(CLAIM_KEY_CREATED, new Date());
+        claims.put(CLAIM_KEY_IAT, DateUtil.currentSeconds());
         return generateToken(claims);
     }
 
@@ -91,11 +95,25 @@ public class JwtTokenUtil implements InitializingBean {
         String username;
         try {
             Claims claims = getClaimsFromToken(token);
-            username = claims.getSubject();
+            username = ObjectUtil.getString(claims.get(CLAIM_KEY_USERNAME));
         } catch (Exception e) {
             username = null;
         }
         return username;
+    }
+
+    /**
+     * 从 token 中获取登录用户id
+     */
+    public Long getUserIdFromToken(String token) {
+        Long userId;
+        try {
+            Claims claims = getClaimsFromToken(token);
+            userId = Long.parseLong(claims.getSubject());
+        } catch (Exception e) {
+            userId = null;
+        }
+        return userId;
     }
 
     /**
@@ -104,9 +122,13 @@ public class JwtTokenUtil implements InitializingBean {
      * @param token       客户端传入的token
      * @param userDetails 从数据库中查询出来的用户信息
      */
-    public boolean validateUserToken(String token, UserDetails userDetails) {
+    public boolean validateUserToken(String token, SecurityUser userDetails) {
+        Long userId = getUserIdFromToken(token);
         String username = getUserNameFromToken(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        if (userId == null || userId < 1 || StringUtils.isBlank(username)) {
+            return false;
+        }
+        return userId.equals(userDetails.getUserId()) && username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     /**
@@ -151,7 +173,7 @@ public class JwtTokenUtil implements InitializingBean {
         if (tokenRefreshJustBefore(token, 30 * 60)) {
             return token;
         } else {
-            claims.put(CLAIM_KEY_CREATED, new Date());
+            claims.put(CLAIM_KEY_IAT, new Date());
             return generateToken(claims);
         }
     }
@@ -164,7 +186,7 @@ public class JwtTokenUtil implements InitializingBean {
      */
     private boolean tokenRefreshJustBefore(String token, int time) {
         Claims claims = getClaimsFromToken(token);
-        Date created = claims.get(CLAIM_KEY_CREATED, Date.class);
+        Date created = claims.get(CLAIM_KEY_IAT, Date.class);
         Date refreshDate = new Date();
         // 刷新时间在创建时间的指定时间内
         if (refreshDate.after(created) && refreshDate.before(DateUtil.offsetSecond(created, time))) {

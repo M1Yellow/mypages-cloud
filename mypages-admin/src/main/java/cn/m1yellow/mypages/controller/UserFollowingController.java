@@ -1,17 +1,17 @@
 package cn.m1yellow.mypages.controller;
 
 
-import cn.m1yellow.mypages.constant.PlatformInfo;
-import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import cn.m1yellow.mypages.common.aspect.DoCache;
 import cn.m1yellow.mypages.common.aspect.WebLog;
+import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.exception.AtomicityException;
 import cn.m1yellow.mypages.common.exception.FileSaveException;
 import cn.m1yellow.mypages.common.util.CheckParamUtil;
 import cn.m1yellow.mypages.common.util.CommonUtil;
 import cn.m1yellow.mypages.common.util.FileUtil;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.constant.PlatformInfo;
 import cn.m1yellow.mypages.dto.UserFollowingDto;
 import cn.m1yellow.mypages.entity.UserFollowing;
 import cn.m1yellow.mypages.entity.UserFollowingRelation;
@@ -21,6 +21,9 @@ import cn.m1yellow.mypages.service.UserFollowingRelationService;
 import cn.m1yellow.mypages.service.UserFollowingRemarkService;
 import cn.m1yellow.mypages.service.UserFollowingService;
 import cn.m1yellow.mypages.vo.home.UserFollowingItem;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +32,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -98,7 +102,7 @@ public class UserFollowingController {
             return CommonResult.failed("获取平台信息失败");
         }
         if (platformInfo.getId() != following.getPlatformId().intValue()) {
-            logger.error("请检查用户主页跟平台是否对应");
+            logger.error("主页跟平台不对应，或者平台id参数错误");
             return CommonResult.failed("请检查用户主页跟平台是否对应");
         }
 
@@ -116,9 +120,12 @@ public class UserFollowingController {
             }
         }
 
-        // 根据关注用户id是否为空，判断是新增还是更新
+
+        // 查询是否存在记录
         Map<String, Object> params = new HashMap<>();
         params.put("userId", following.getUserId());
+        params.put("platformId", following.getPlatformId()); // TODO 冗余筛选字段，有利于高效利用组合索引
+        params.put("typeId", following.getTypeId());
         params.put("followingId", following.getFollowingId());
 
         UserFollowingDto originalFollowing = null;
@@ -127,6 +134,16 @@ public class UserFollowingController {
         } else { // 更新
             // 查询数据库中的记录
             originalFollowing = userFollowingService.getUserFollowing(params);
+            if (originalFollowing == null) {
+                logger.debug("用户信息加载异常");
+                return CommonResult.failed("用户信息加载失败");
+            }
+            // TODO 用户能改的内容，共用会出现内容不一致问题，多人共用一样东西，一个人把东西搞坏了，其他人还怎么用啊？
+            // 编辑的时候不支持更改用户类型
+            if (following.getIsUser() != originalFollowing.getIsUser()) {
+                logger.debug("编辑的时候不支持更改用户类型");
+                return CommonResult.failed("暂不支持更改用户类型");
+            }
         }
         // 旧头像路径，用于删除旧头像
         String oldFilePath = originalFollowing.getProfilePhoto();
@@ -140,12 +157,14 @@ public class UserFollowingController {
         }
 
         // 获取关注用户所在平台的id或标识
-        String userKey = userFollowingService.getUserKeyFromMainPage(following);
-        if (StringUtils.isBlank(userKey)) {
-            logger.error("获取关注用户所在平台标识失败");
-            throw new AtomicityException("获取关注用户所在平台标识失败");
+        if (isNew) {
+            String userKey = userFollowingService.getUserKeyFromMainPage(following);
+            if (StringUtils.isBlank(userKey)) {
+                logger.error("获取关注用户所在平台标识失败");
+                throw new AtomicityException("获取关注用户所在平台标识失败");
+            }
+            following.setUserKey(userKey);
         }
-        following.setUserKey(userKey);
 
         // 保存关注用户
         UserFollowing saveFollowing = new UserFollowing();
@@ -165,8 +184,10 @@ public class UserFollowingController {
         if (following.getFollowingId() != null && following.getFollowingId() > 0) {
             saveFollowing.setId(following.getFollowingId());
         } else {
-            // 确认同平台、同用户（id）标识是否已经有关注的用户（别人的关注也可以），如果有，直接用这个用户id
-            if (saveFollowing.getPlatformId() != null && StringUtils.isNotBlank(saveFollowing.getUserKey())) {
+            // TODO 确认同平台、同用户标识是否已经有关注的用户（别人添加的关注用户也可以），如果有，直接用这个用户id
+            // 是用户才共用id，非用户，不共用
+            if (saveFollowing.getIsUser() && saveFollowing.getPlatformId() != null
+                    && StringUtils.isNotBlank(saveFollowing.getUserKey())) {
                 QueryWrapper<UserFollowing> existedFollowingWrapper = new QueryWrapper<>();
                 existedFollowingWrapper.eq("platform_id", saveFollowing.getPlatformId());
                 existedFollowingWrapper.eq("user_key", saveFollowing.getUserKey());
@@ -177,6 +198,8 @@ public class UserFollowingController {
             }
         }
 
+        // 去字符串字段两边空格
+        ObjectUtil.stringFiledTrim(saveFollowing);
         // 保存入库
         if (!userFollowingService.saveOrUpdate(saveFollowing)) {
             logger.error("添加关注用户失败");
@@ -193,10 +216,12 @@ public class UserFollowingController {
         following.setFollowingId(saveFollowing.getId());
 
         // 新增保存用户与关注用户关系之前，先根据 userId 和 followingId 判断是否已经存在记录
-        // 为什么不跟上面的检查关注用户是否存在一起校验？因为已存在的关注用户可以是别人的关注啊，现在是判断自己
+        // 为什么不跟上面的检查关注用户是否存在一起校验？上面是判断别人有没有关注用户，现在是判断自己
         if (following.getId() == null) {
             QueryWrapper<UserFollowingRelation> existedRelationWrapper = new QueryWrapper<>();
             existedRelationWrapper.eq("user_id", following.getUserId());
+            existedRelationWrapper.eq("platform_id", following.getPlatformId()); // TODO 冗余筛选字段，有利于高效利用组合索引
+            existedRelationWrapper.eq("type_id", following.getTypeId());
             existedRelationWrapper.eq("following_id", following.getFollowingId());
             UserFollowingRelation existedRelation = userFollowingRelationService.getOne(existedRelationWrapper);
             if (existedRelation != null && existedRelation.getId() != null) {
@@ -212,6 +237,10 @@ public class UserFollowingController {
         relation.setPlatformId(following.getPlatformId());
         relation.setTypeId(following.getTypeId());
         relation.setSortNo(following.getSortNo());
+
+        // 去字符串字段两边空格
+        ObjectUtil.stringFiledTrim(relation);
+
         if (!userFollowingRelationService.saveOrUpdate(relation)) {
             logger.error("保存用户与关注用户关系记录失败");
             throw new AtomicityException("保存用户与关注用户关系记录失败");
@@ -224,6 +253,12 @@ public class UserFollowingController {
             remarkList = JSONObject.parseArray(remarkListJson, UserFollowingRemark.class);
             // 保存用户标签
             if (remarkList != null && remarkList.size() > 0) {
+                // TODO 校验用户对关注用户添加的标签数量不能超过 10 个，代码常量可配
+                int remarkCount = userFollowingRemarkService.getRemarkCount(following.getUserId(), following.getFollowingId());
+                if (remarkCount >= GlobalConstant.SAME_USER_FOLLOWING_REMARK_NUM) {
+                    logger.info("关注用户标签数量超过限制");
+                    throw new AtomicityException("关注用户标签数量超过限制");
+                }
                 if (!userFollowingRemarkService.saveRemarks(remarkList, following)) {
                     logger.error("保存用户标签失败");
                     throw new AtomicityException("保存用户标签失败");
@@ -248,10 +283,12 @@ public class UserFollowingController {
 
         // 重新加载封装对象
         UserFollowingItem followingItem = null;
-        if (!isNew) { // 更新记录才重新加载，新增记录，首页会整体重新加载
+        if (!isNew) { // 更新记录才重新加载，新增记录的话，首页会整体重新加载
             // 重新加载关注用户
             params.clear();
             params.put("userId", following.getUserId());
+            params.put("platformId", following.getPlatformId()); // TODO 冗余筛选字段，有利于高效利用组合索引
+            params.put("typeId", following.getTypeId());
             params.put("followingId", following.getFollowingId());
             UserFollowingDto reloadFollowing = userFollowingService.getUserFollowing(params);
             followingItem = new UserFollowingItem();
@@ -279,6 +316,13 @@ public class UserFollowingController {
             }
         }
 
+        // 清空关注用户列表缓存
+        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + following.getUserId()
+                + "_" + following.getPlatformId() + "_" + following.getTypeId();
+        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
+        logger.info(">>>> add or update following 清空关注用户缓存，cacheKey: {}", cacheKey);
+
         return CommonResult.success(followingItem);
     }
 
@@ -297,9 +341,11 @@ public class UserFollowingController {
             logger.info(">>>> oldFilePath: {}", oldFilePath);
             File oldFile = new File(oldFilePath);
             if (oldFile.exists() && oldFile.isFile()) {
-                if (!oldFile.delete()) {
-                    logger.error("删除用户旧头像失败");
-                    throw new FileSaveException("删除用户旧头像失败");
+                if (oldFile.delete()) {
+                    logger.error(">>>> 用户旧头像已删除：{}", oldFilePath);
+                } else {
+                    logger.error(">>>> 用户旧头像删除失败：{}", oldFilePath);
+                    throw new FileSaveException("用户旧头像删除失败：" + oldFilePath);
                 }
             }
         }
@@ -318,14 +364,55 @@ public class UserFollowingController {
     }
 
 
+    @ApiOperation("关注用户列表")
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @WebLog
+    public CommonResult<Page<UserFollowingItem>> list(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId,
+                                                      @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+
+        if (userId == null || platformId == null || typeId == null) {
+            logger.error("请求参数错误");
+            return CommonResult.failed("请求参数错误");
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("platformId", platformId);
+        params.put("typeId", typeId);
+
+        // 准备分页数据
+        if (pageNo == null) {
+            pageNo = GlobalConstant.PAGE_NO_DEFAULT;
+        }
+        if (pageSize == null) {
+            pageSize = GlobalConstant.PAGE_SIZE_DEFAULT;
+        }
+        params.put("pageNo", pageNo);
+        params.put("pageSize", pageSize);
+
+
+        // 获取关注用户视图层对象数据列表
+        Page<UserFollowingItem> followingItemPage = userFollowingService.getUserFollowingItemListPage(params);
+        /*
+        // 返回失败，会弹出提示，业务不需要提示
+        if (followingItemPage == null || CollectionUtils.isEmpty(followingItemPage.getRecords())) {
+            logger.error("关注列表数据错误");
+            return CommonResult.failed("关注列表加载失败");
+        }
+        */
+
+        return CommonResult.success(followingItemPage);
+    }
+
+
     @ApiOperation("同步关注用户的信息")
-    //@RequestMapping(value = "syncOne/{fuid}") // @PathVariable String fuid
+    //@RequestMapping(value = "syncOne/{followingId}") // @PathVariable String followingId
     @RequestMapping(value = "syncOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
     @DoCache
-    public CommonResult<UserFollowingItem> syncFollowingInfo(@RequestParam Long userId, @RequestParam Long fuid) {
+    public CommonResult<UserFollowingItem> syncFollowingInfo(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {
 
-        if (userId == null || fuid == null) {
+        if (userId == null || platformId == null || typeId == null || followingId == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
@@ -333,18 +420,20 @@ public class UserFollowingController {
         // 查询关注用户
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
-        params.put("followingId", fuid);
+        params.put("platformId", platformId);
+        params.put("typeId", typeId);
+        params.put("followingId", followingId);
         UserFollowingDto following = userFollowingService.getUserFollowing(params);
 
         if (following == null) {
-            logger.error("关注用户不存在，following id:" + fuid);
+            logger.error("关注用户不存在，following id:" + followingId);
             return CommonResult.failed("关注用户不存在");
         }
 
         // 获取用户信息
         UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
         if (userInfoItem == null) {
-            logger.error("用户信息获取失败，following id:" + fuid);
+            logger.error("用户信息获取失败，following id:" + followingId);
             return CommonResult.failed("用户信息获取失败");
         }
 
@@ -353,18 +442,24 @@ public class UserFollowingController {
         BeanUtils.copyProperties(following, saveFollowing);
         // 修正id
         saveFollowing.setId(following.getFollowingId());
+
+        // 去字符串字段两边空格
+        ObjectUtil.stringFiledTrim(saveFollowing);
+
         if (!userFollowingService.saveUserInfo(userInfoItem, saveFollowing)) {
-            logger.error("用户信息保存失败，following id:" + fuid);
+            logger.error("用户信息保存失败，following id:" + followingId);
             return CommonResult.failed("用户信息保存失败");
         }
 
         // 重新加载用户信息
         params.clear();
         params.put("userId", userId);
-        params.put("followingId", fuid);
+        params.put("platformId", platformId);
+        params.put("typeId", typeId);
+        params.put("followingId", followingId);
         UserFollowingDto newFollowing = userFollowingService.getUserFollowing(params);
         if (newFollowing == null) {
-            logger.error("重新加载用户信息失败，following id:" + fuid);
+            logger.error("重新加载用户信息失败，following id:" + followingId);
             return CommonResult.failed("加载用户信息失败");
         }
 
@@ -372,6 +467,12 @@ public class UserFollowingController {
         UserFollowingItem userFollowingItem = new UserFollowingItem();
         userFollowingItem.setUserFollowing(newFollowing);
         //userFollowingItem.setUserFollowingRemarkList(null); // 没改动，不操作
+
+        // 清空关注用户缓存
+        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
+        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
+        logger.info(">>>> syncFollowingInfo 清空关注用户缓存，cacheKey: {}", cacheKey);
 
         return CommonResult.success(userFollowingItem);
     }
@@ -414,12 +515,16 @@ public class UserFollowingController {
             BeanUtils.copyProperties(following, saveFollowing);
             // 修正id
             saveFollowing.setId(following.getFollowingId());
+            // 去字符串字段两边空格
+            ObjectUtil.stringFiledTrim(saveFollowing);
             // 保存入库
             userFollowingService.saveUserInfo(userInfoItem, saveFollowing);
 
             // 重新加载用户信息
             params.clear(); // 每次循环都 clear，不太友好，但不容易出错，各种判断，反而容易出问题
             params.put("userId", userId);
+            params.put("platformId", platformId);
+            if (typeId != null) params.put("typeId", typeId);
             params.put("followingId", following.getFollowingId()); // following id 每次循环都是新的
             UserFollowingDto newFollowing = userFollowingService.getUserFollowing(params);
             if (newFollowing == null) {
@@ -430,7 +535,7 @@ public class UserFollowingController {
             // 封装页面显示对象
             UserFollowingItem userFollowingItem = new UserFollowingItem();
             userFollowingItem.setUserFollowing(newFollowing);
-            //userFollowingItem.setUserFollowingRemarkList(null); // 没改动，不操作
+            //userFollowingItem.setUserFollowingRemarkList(null); // 标签没改动，不操作
 
             userFollowingItemList.add(userFollowingItem);
 
@@ -442,17 +547,32 @@ public class UserFollowingController {
             }
         }
 
+        // 清空关注用户缓存
+        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
+        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
+        logger.info(">>>> syncFollowingInfoBatch 清空关注用户缓存，cacheKey: {}", cacheKey);
+
         return CommonResult.success(userFollowingItemList);
     }
 
 
+    /**
+     * 移除关注用户，这个方法本来应该放 UserFollowingRelationController，放这方便找
+     *
+     * @param userId      用户id
+     * @param platformId  平台id
+     * @param typeId      类型id
+     * @param followingId 关注用户id
+     * @return 操作结果
+     */
     @ApiOperation("移除关注用户")
     @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
     @DoCache
-    public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long followingId) {
+    public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {
 
-        if (userId == null || followingId == null) {
+        if (userId == null || platformId == null || typeId == null || followingId == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
@@ -471,12 +591,20 @@ public class UserFollowingController {
 
         Map<String, Object> params = new HashMap<>();
         params.put("user_id", userId);
+        params.put("platform_id", platformId);
+        params.put("type_id", typeId);
         params.put("following_id", followingId);
         // TODO 会自动替换为逻辑删除，即执行更新语句
         if (!userFollowingRelationService.removeByMap(params)) {
-            logger.error("移除失败，userId: {}, followingId: {}", userId, followingId);
+            logger.error("移除失败，userId: {}, platformId: {}, typeId: {}, followingId: {}", userId, platformId, typeId, followingId);
             return CommonResult.failed("操作失败");
         }
+
+        // 清空关注用户缓存
+        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
+        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
+        logger.info(">>>> removeRelation 清空关注用户缓存，cacheKey: {}", cacheKey);
 
         return CommonResult.success();
     }

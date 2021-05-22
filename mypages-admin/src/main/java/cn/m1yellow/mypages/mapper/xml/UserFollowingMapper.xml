@@ -15,16 +15,16 @@
         ufr.user_id, ufr.following_id, ufr.platform_id, ufr.type_id, ufr.is_deleted, ufr.sort_no
         from user_following_relation ufr straight_join user_following uf on ufr.following_id = uf.id
         where ufr.is_deleted = 0
-        <if test="userId != null and userId != &quot;&quot;">
+        <if test="userId != null">
             and ufr.user_id = #{userId}
         </if>
-        <if test="followingId != null and followingId != &quot;&quot;">
+        <if test="followingId != null">
             and ufr.following_id = #{followingId}
         </if>
-        <if test="platformId != null and platformId != &quot;&quot;">
+        <if test="platformId != null">
             and ufr.platform_id = #{platformId}
         </if>
-        <if test="typeId != null and typeId != &quot;&quot;">
+        <if test="typeId != null">
             and ufr.type_id = #{typeId}
         </if>
         order by ufr.sort_no desc
@@ -38,16 +38,19 @@
         ufr.user_id, ufr.following_id, ufr.platform_id, ufr.type_id, ufr.is_deleted, ufr.sort_no
         from user_following_relation ufr straight_join user_following uf on ufr.following_id = uf.id
         where ufr.is_deleted = 0
-        <if test="userId != null and userId != &quot;&quot;">
+        <if test="userId != null">
             and ufr.user_id = #{userId}
         </if>
-        <if test="platformId != null and platformId != &quot;&quot;">
+        <if test="platformId != null">
             and ufr.platform_id = #{platformId}
         </if>
-        <if test="typeId != null and typeId != &quot;&quot;">
+        <if test="typeId != null">
             and ufr.type_id = #{typeId}
         </if>
-        order by ufr.sort_no desc, ufr.following_id asc
+        <if test="followingId != null">
+            and ufr.following_id = #{followingId}
+        </if>
+        order by ufr.sort_no desc, ufr.id asc
         <if test="pageSize != null and pageSize &gt; 0">
             limit #{pageNo}, #{pageSize}
         </if>
@@ -68,13 +71,31 @@
         select ufr.type_id
         from user_following_relation ufr
         where ufr.is_deleted = 0
-        <if test="userId != null and userId != &quot;&quot;">
+        <if test="userId != null">
             and ufr.user_id = #{userId}
         </if>
-        <if test="platformId != null and platformId != &quot;&quot;">
+        <if test="platformId != null">
             and ufr.platform_id = #{platformId}
         </if>
         group by ufr.type_id
+    </select>
+
+    <select id="getFollowingCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*)
+        from user_following_relation ufr straight_join user_following uf on ufr.following_id = uf.id
+        where ufr.is_deleted = 0
+        <if test="userId != null">
+            and ufr.user_id = #{userId}
+        </if>
+        <if test="platformId != null">
+            and ufr.platform_id = #{platformId}
+        </if>
+        <if test="typeId != null">
+            and ufr.type_id = #{typeId}
+        </if>
+        <if test="followingId != null">
+            and ufr.following_id = #{followingId}
+        </if>
     </select>
 
 </mapper>

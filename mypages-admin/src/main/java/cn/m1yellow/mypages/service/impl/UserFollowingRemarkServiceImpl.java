@@ -1,12 +1,13 @@
 package cn.m1yellow.mypages.service.impl;
 
+import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.dto.UserFollowingDto;
+import cn.m1yellow.mypages.entity.UserFollowingRemark;
+import cn.m1yellow.mypages.mapper.UserFollowingRemarkMapper;
 import cn.m1yellow.mypages.service.UserFollowingRemarkService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import cn.m1yellow.mypages.entity.UserFollowingRemark;
-import cn.m1yellow.mypages.mapper.UserFollowingRemarkMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,9 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
             followingRemark.setSortNo(remark.getSortNo());
             followingRemark.setIsDeleted(false);
 
+            // 去字符串字段两边空格
+            ObjectUtil.stringFiledTrim(followingRemark);
+
             saveOrUpdate(followingRemark);
 
             // 记录保存成功的id
@@ -125,4 +129,14 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
 
         return true;
     }
+
+    @Override
+    public int getRemarkCount(Long userId, Long followingId) {
+        QueryWrapper<UserFollowingRemark> remarkQueryWrapper = new QueryWrapper<>();
+        remarkQueryWrapper.eq("user_id", userId);
+        remarkQueryWrapper.eq("following_id", followingId);
+
+        return count(remarkQueryWrapper);
+    }
+
 }

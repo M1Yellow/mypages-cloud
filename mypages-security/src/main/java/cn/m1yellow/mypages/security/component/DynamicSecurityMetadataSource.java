@@ -50,11 +50,6 @@ public class DynamicSecurityMetadataSource implements FilterInvocationSecurityMe
     private IgnoreUrlsConfig ignoreUrlsConfig;
 
 
-    /*
-    @PostConstruct // 用于在 bean 实例化之前，初始化数据
-    public void loadDataSource() {}
-    */
-
     /**
      * 获取自定义校验参数
      *

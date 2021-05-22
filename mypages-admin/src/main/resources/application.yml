@@ -13,4 +13,4 @@ spring:
 # 错误页面路径
 server:
   error:
-    path: /error
+    path: /sys/error

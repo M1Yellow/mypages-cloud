@@ -21,7 +21,6 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
                        HttpServletResponse response,
                        AccessDeniedException e) throws IOException, ServletException {
 
-        // TODO 当前端跨域访问没有权限的接口时，会出现跨域问题，添加允许跨域访问的响应头即可。
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Cache-Control", "no-cache");
         response.setCharacterEncoding("UTF-8");

@@ -2,6 +2,7 @@ package cn.m1yellow.mypages.controller;
 
 
 import cn.m1yellow.mypages.common.api.CommonResult;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.dto.UserPlatformDto;
 import cn.m1yellow.mypages.service.UserPlatformService;
 import cn.m1yellow.mypages.common.aspect.DoCache;
@@ -55,6 +56,9 @@ public class UserPlatformRelationController {
 
         UserPlatformRelation savePlatformRelation = new UserPlatformRelation();
         BeanUtils.copyProperties(platform, savePlatformRelation);
+
+        // 去字符串字段两边空格
+        ObjectUtil.stringFiledTrim(savePlatformRelation);
 
         if (!userPlatformRelationService.saveOrUpdate(savePlatformRelation)) {
             logger.error("添加/更新平台失败");

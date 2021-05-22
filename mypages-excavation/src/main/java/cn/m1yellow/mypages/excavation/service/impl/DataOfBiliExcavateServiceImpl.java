@@ -2,12 +2,12 @@ package cn.m1yellow.mypages.excavation.service.impl;
 
 import cn.m1yellow.mypages.common.service.FileDownloadService;
 import cn.m1yellow.mypages.common.util.HeaderUtil;
-import cn.m1yellow.mypages.common.util.PooledHttpClientAdaptor;
+import cn.m1yellow.mypages.common.util.HttpClientUtil;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.excavation.bo.UserInfoItem;
 import cn.m1yellow.mypages.excavation.service.DataExcavateService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import cn.m1yellow.mypages.common.util.ObjectUtil;
-import cn.m1yellow.mypages.excavation.bo.UserInfoItem;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -35,11 +35,11 @@ public class DataOfBiliExcavateServiceImpl implements DataExcavateService {
     // TODO 这里报错，实际是能通过编译的
     @Resource(name = "httpClientDownloadService")
     FileDownloadService httpClientDownloadService;
-    @Resource
-    PooledHttpClientAdaptor httpClient;
+
 
     /**
      * 从网页元素中获取图片地址下载（暂未使用）
+     *
      * @param fromUrl
      * @param saveDir
      * @param params
@@ -48,7 +48,7 @@ public class DataOfBiliExcavateServiceImpl implements DataExcavateService {
     @Override
     public UserInfoItem singleImageDownloadFromHtml(String fromUrl, String saveDir, Map<String, Object> params) {
         // 获取 html 对象
-        String html = httpClient.getHtml(fromUrl, HeaderUtil.getOneHeaderRandom());
+        String html = HttpClientUtil.getHtml(fromUrl, HeaderUtil.getOneHeaderRandom());
         Document doc = Jsoup.parse(html, "UTF-8");
 
         // 指定获取信息的元素位置
@@ -86,7 +86,7 @@ public class DataOfBiliExcavateServiceImpl implements DataExcavateService {
     @Override
     public UserInfoItem singleImageDownloadFromJson(String fromUrl, String saveDir, Map<String, Object> params) {
 
-        String result = httpClient.getHtml(fromUrl, HeaderUtil.getOneHeaderRandom());
+        String result = HttpClientUtil.getHtml(fromUrl, HeaderUtil.getOneHeaderRandom());
         JSONObject resultObject = JSON.parseObject(result);
         JSONObject dataObject = JSON.parseObject(resultObject.getString("data"));
 
@@ -138,7 +138,7 @@ public class DataOfBiliExcavateServiceImpl implements DataExcavateService {
                 String originalFilePath = saveDir + headImgOriginalName;
                 String originalFileMd5 = null;
                 try (
-                    FileInputStream fis = new FileInputStream(new File(originalFilePath))
+                        FileInputStream fis = new FileInputStream(new File(originalFilePath))
                 ) {
                     originalFileMd5 = DigestUtils.md5Hex(fis);
                     if (StringUtils.isNotBlank(originalFileMd5)) {

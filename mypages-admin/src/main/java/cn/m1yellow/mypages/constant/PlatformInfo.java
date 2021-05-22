@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum PlatformInfo {
 
-    MYPAGES(1, "前言", "mypages"),
+    MYPAGES(1, "我的", "mypages"),
     BILIBILI(2, "B站", "bilibili"),
     WEIBO(3, "微博", "weibo"),
     DOUBAN(4, "豆瓣", "douban"),

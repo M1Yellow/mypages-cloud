@@ -37,7 +37,7 @@ public class UserPlatformDto implements Serializable {
     @ApiModelProperty(value = "用户id")
     private Long userId;
 
-    @ApiModelProperty(value = "关联平台表id")
+    @ApiModelProperty(value = "关联平台表id") // 用作新增平台参数封装的时候，platformId 可以为空
     private Long platformId;
 
     @NotBlank(message = "平台名不能为空")

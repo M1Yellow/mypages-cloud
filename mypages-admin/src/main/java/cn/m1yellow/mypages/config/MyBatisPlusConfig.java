@@ -1,5 +1,7 @@
 package cn.m1yellow.mypages.config;
 
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +15,14 @@ public class MyBatisPlusConfig {
 
     /**
      * 分页插件
+     * TODO 配置项真的要参照官方文档来，别瞎找资料博客
      */
     @Bean
-    public PaginationInnerInterceptor paginationInnerInterceptor() {
-        return new PaginationInnerInterceptor();
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor(DbType.MYSQL);
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(paginationInnerInterceptor);
+        return interceptor;
     }
 
 }

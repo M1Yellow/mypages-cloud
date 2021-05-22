@@ -23,4 +23,6 @@ public interface UserFollowingMapper extends BaseMapper<UserFollowing> {
 
     List<Long> queryTypeIdList(Map params);
 
+    int getFollowingCount(Map params);
+
 }

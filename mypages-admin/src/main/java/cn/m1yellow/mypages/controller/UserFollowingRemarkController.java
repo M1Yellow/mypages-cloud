@@ -4,6 +4,7 @@ package cn.m1yellow.mypages.controller;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import cn.m1yellow.mypages.common.aspect.DoCache;
 import cn.m1yellow.mypages.common.aspect.WebLog;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.entity.UserFollowingRemark;
 import cn.m1yellow.mypages.service.UserFollowingRemarkService;
 import io.swagger.annotations.ApiOperation;
@@ -43,6 +44,9 @@ public class UserFollowingRemarkController {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
+
+        // 去字符串字段两边空格
+        ObjectUtil.stringFiledTrim(remark);
 
         if (!userFollowingRemarkService.saveOrUpdate(remark)) {
             logger.error("添加/更新标签失败");

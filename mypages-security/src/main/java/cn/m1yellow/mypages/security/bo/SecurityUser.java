@@ -48,6 +48,11 @@ public class SecurityUser implements UserDetails {
         return authorities;
     }
 
+
+    public Long getUserId() {
+        return userBase.getId();
+    }
+
     @Override
     public String getPassword() {
         return userBase.getPassword();
