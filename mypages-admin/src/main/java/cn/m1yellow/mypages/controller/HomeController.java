@@ -8,7 +8,6 @@ import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import cn.m1yellow.mypages.dto.UserFollowingDto;
 import cn.m1yellow.mypages.dto.UserPlatformDto;
-import cn.m1yellow.mypages.entity.UserFollowingRemark;
 import cn.m1yellow.mypages.entity.UserFollowingType;
 import cn.m1yellow.mypages.entity.UserOpinion;
 import cn.m1yellow.mypages.service.*;
@@ -60,20 +59,15 @@ public class HomeController {
     在 Request 中
     ContentType 用来告诉服务器当前发送的数据是什么格式
     Accept 用来告诉服务器，客户端能认识哪些格式，最好返回这些格式中的其中一种
-    accept: Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*\/\*;q=0.8,application/signed-exchange;v=b3;q=0.9
+    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*\/\*;q=0.8,application/signed-exchange;v=b3;q=0.9
 
     consumes 用来限制 ContentType
-    produces 用来限制 Accept
-    charset=utf-8 指定编码格式
-
-    如果使用了 @RestController 或 @ResponseBody，produces 中可以不用重复指定
-    , method = RequestMethod.GET, produces = "application/json;charset=utf-8"
-
+    produces 用来限制 Accept，设置返回数据的类型以及编码，produces = "application/json;charset=utf-8"
     */
 
 
     @ApiOperation("首页默认内容")
-    // @RequestMapping 设置 "" 是能匹配到 "/" 的，反过来则不行
+    //@RequestMapping 设置 "" 是能匹配到 "/" 的，反过来则不行
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
     public CommonResult<List<PlatformItem>> homeContent() {

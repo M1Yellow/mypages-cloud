@@ -97,6 +97,7 @@ mybatis-plus:
 logging:
   config: classpath:config/logback-spring.xml
   log-path: logs
+  log-stash-host: 192.168.3.151:4560
 
 
 # 【项目文件路径问题】

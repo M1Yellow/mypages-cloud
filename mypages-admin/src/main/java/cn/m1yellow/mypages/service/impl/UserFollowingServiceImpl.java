@@ -351,7 +351,8 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
 
         if (isDel) { // 删除缓存
             if (StringUtils.isBlank(cacheKeyChild)) { // 删除 hash 下的所有字段和值
-                redisUtil.hdelall(cacheKey);
+                //redisUtil.hdelall(cacheKey);
+                redisUtil.del(cacheKey);
             } else { // 只删除 hash 下指定的字段
                 redisUtil.hdel(cacheKey, cacheKeyChild);
             }

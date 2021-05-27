@@ -40,6 +40,8 @@ public class UserOpinionServiceImpl extends ServiceImpl<UserOpinionMapper, UserO
         opinionQueryWrapper.eq("user_id", userId);
         opinionQueryWrapper.eq("platform_id", platformId);
         opinionQueryWrapper.eq("opinion_type", typeId);
+        opinionQueryWrapper.orderByDesc("sort_no"); // 跟首页默认数据统一排序
+        opinionQueryWrapper.orderByAsc("id"); // TODO 注意，产生 file sort 可能会影响效率
 
         if (pageNo == null) {
             pageNo = GlobalConstant.PAGE_NO_DEFAULT;
@@ -47,10 +49,24 @@ public class UserOpinionServiceImpl extends ServiceImpl<UserOpinionMapper, UserO
         if (pageSize == null) {
             pageSize = GlobalConstant.PAGE_SIZE_DEFAULT;
         }
+
+        /*
         // TODO 处理分页数据
         int recordNo = (pageNo - 1) * pageSize;
+        if (params != null && params.size() > 0) {
+            String recordNoStr = ObjectUtil.getString(params.get("recordNo"));
+            if (StringUtils.isNotBlank(recordNoStr)) {
+                try {
+                    recordNo = Integer.parseInt(recordNoStr);
+                } catch (NumberFormatException e) {
+                    //e.printStackTrace();
+                    recordNo = (pageNo - 1) * pageSize;
+                }
+            }
+        }
+        */
 
-        Page<UserOpinion> opinionPage = new Page<>(recordNo, pageSize);
+        Page<UserOpinion> opinionPage = new Page<>(pageNo, pageSize); // Page 分页不支持指定记录开始下标
         opinionPage = page(opinionPage, opinionQueryWrapper);
 
         return opinionPage;

@@ -83,14 +83,30 @@ public class UserOpinionController {
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
     public CommonResult<Page<UserOpinion>> list(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId,
-                                                @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+                                                @RequestParam(required = false) Integer recordNo,
+                                                @RequestParam(required = false) Integer pageNo,
+                                                @RequestParam(required = false) Integer pageSize) {
 
         if (userId == null || platformId == null || typeId == null) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
-        Page<UserOpinion> opinionListPage = userOpinionService.getPagingList(userId, platformId, typeId, pageNo, pageSize, null);
+        // 先查询是否有记录
+        int count = userOpinionService.getOpinionCount(userId, platformId, typeId);
+        if (count < 1) {
+            // TODO 返回成功信息，否则页面会弹出错误提示
+            return CommonResult.success();
+        }
+
+        // 添加额外参数
+        Map<String, Object> params = null;
+        if (recordNo != null) {
+            params = new HashMap<>();
+            params.put("recordNo", recordNo); // 用于控制从第几条记录开始
+        }
+
+        Page<UserOpinion> opinionListPage = userOpinionService.getPagingList(userId, platformId, typeId, pageNo, pageSize, params);
         /*
         List<UserOpinion> opinionList = null;
         if (opinionListPage != null) {

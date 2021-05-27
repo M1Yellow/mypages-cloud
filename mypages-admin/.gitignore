@@ -4,6 +4,9 @@
 *.class
 src/test/**/MyTest.java
 
+# 生产环境配置文件
+application-prod.yml
+
 # Log file
 logs/
 *.log

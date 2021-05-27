@@ -8,6 +8,8 @@ public enum Headers {
 
     /** 允许跨域的访问源 */
     ACCESS_CONTROL_ALLOW_ORIGIN("Access-control-Allow-Origin", "*"),
+    // 固定 ip 访问源没有验证，可能写法错误
+    //ACCESS_CONTROL_ALLOW_ORIGIN("Access-control-Allow-Origin", "127.0.0.1, 192.168.3.151, 192.168.3.100, 8.129.220.131, 172.23.199.172"),
     /** 允许跨越发送 cookie */
     ACCESS_CONTROL_ALLOW_CREDENTIALS("Access-Control-Allow-Credentials", "true"),
     /** 允许访问方法 */

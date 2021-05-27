@@ -98,6 +98,15 @@ public class UserFollowingRelationController {
                     + "_" + relation.getPlatformId() + "_" + relation.getTypeId();
             userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
             logger.info(">>>> user following relation update 清空关注用户缓存，cacheKey: {}", cacheKey);
+
+            // 变更分组，清除之前分组的用户列表缓存
+            if (relation.getOldTypeId() != null) {
+                cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + relation.getUserId()
+                        + "_" + relation.getPlatformId() + "_" + relation.getOldTypeId();
+                userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
+                logger.info(">>>> user following relation update 清空原始分组关注用户缓存，cacheKey: {}", cacheKey);
+            }
+
         }
 
         return CommonResult.success(reloadFollowing);

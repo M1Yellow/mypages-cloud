@@ -52,6 +52,10 @@ public class UserFollowingRelationDto implements Serializable {
     @ApiModelProperty(value = "关联关注类型表id，1-默认分类，用于变更类型")
     private Long typeId;
 
+    @Min(value = 0L, message = "请检查原始类型id是否正确")
+    @ApiModelProperty(value = "原始类型id，用户变更分组后，清理原来类型的用户里列表缓存")
+    private Long oldTypeId;
+
     @ApiModelProperty(value = "优先级由低到高：1-10，默认5。8-思想、学习；7-美食、营养；6、健身、锻炼；5-兴趣、生活；4~其他")
     private Integer sortNo;
 

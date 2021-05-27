@@ -380,6 +380,13 @@ public class UserFollowingController {
         params.put("platformId", platformId);
         params.put("typeId", typeId);
 
+        // 先查询是否有记录
+        int count = userFollowingService.getFollowingCount(params);
+        if (count < 1) {
+            // TODO 返回成功信息，否则页面会弹出错误提示
+            return CommonResult.success();
+        }
+
         // 准备分页数据
         if (pageNo == null) {
             pageNo = GlobalConstant.PAGE_NO_DEFAULT;

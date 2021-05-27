@@ -185,9 +185,19 @@ public class UserFollowingTypeController {
             }
         }
 
+        // 清除类型缓存
+        String cacheKey = GlobalConstant.USER_TYPE_LIST_CACHE_KEY + userId + "_" + platformId;
+        redisUtil.del(cacheKey);
+        logger.info(">>>> remove type 清空类型缓存，cacheKey: {}", cacheKey);
+
+
         // 清空关注用户缓存
         // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
+        cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
+        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
+        logger.info(">>>> remove type 清空关注用户缓存，cacheKey: {}", cacheKey);
+        // 清除默认分类的用户缓存
+        cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + 0;
         userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
         logger.info(">>>> remove type 清空关注用户缓存，cacheKey: {}", cacheKey);
 

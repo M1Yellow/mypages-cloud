@@ -17,8 +17,11 @@
     <!--<property name="LOG_PATH" value="E:/DevRes/Projects/mypages/mypages-admin/logs"/>-->
     <!-- 相对路径，项目目录/logs -->
     <!--<property name="LOG_PATH" value="logs"/>-->
-    <!-- 配置参数 LOG_PATH 读取 application.yml 中的 log-path 属性，如果没有配置，默认是 logs -->
+    <!-- 配置参数 LOG_PATH 读取 application-*.yml 中的 log-path 属性，如果没有配置，默认是 logs -->
     <springProperty scope="context" name="LOG_PATH" source="logging.log-path" defaultValue="logs"/>
+    <!-- logstash 配置，LOG_STASH_HOST 读取 application-*.yml 中的 log-stash-host 属性，如果没有配置，默认是 192.168.3.151:4560 -->
+    <springProperty scope="context" name="LOG_STASH_HOST" source="logging.log-stash-host" defaultValue=""/>
+
 
     <!-- 自定义参数 -->
     <property name="FILE_ERROR_PATTERN"
@@ -101,6 +104,15 @@
         </encoder>
     </appender>
 
+    <!-- 输出到logstash的appender -->
+    <!--
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        &lt;!&ndash;可以访问的logstash日志收集端口&ndash;&gt;
+        <destination>${LOG_STASH_HOST}</destination>
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+    -->
+
     <!-- 多环境配置 按照active profile选择分支 -->
     <!-- 开发、测试环境 -->
     <springProfile name="dev,test">
@@ -108,6 +120,7 @@
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE_INFO"/>
             <appender-ref ref="FILE_ERROR"/>
+            <!--<appender-ref ref="LOGSTASH"/>-->
         </root>
 
         <!-- 使用 yml 配置：log-impl: org.apache.ibatis.logging.stdout.StdOutImpl -->
@@ -125,6 +138,7 @@
         <root level="INFO">
             <appender-ref ref="FILE_INFO"/>
             <appender-ref ref="FILE_ERROR"/>
+            <!--<appender-ref ref="LOGSTASH"/>-->
         </root>
     </springProfile>
 

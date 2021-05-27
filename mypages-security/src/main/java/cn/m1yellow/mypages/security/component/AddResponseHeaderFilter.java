@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -55,7 +56,7 @@ import java.util.Map;
  * <p>
  * 拦截器默认的执行顺序，就是它的注册顺序，也可以通过Order手动设置控制，值越小越先执行。
  */
-@Order(2)
+@Order(Ordered.LOWEST_PRECEDENCE)
 @Component
 public class AddResponseHeaderFilter extends OncePerRequestFilter {
 
