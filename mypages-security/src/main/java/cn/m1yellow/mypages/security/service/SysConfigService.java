@@ -1,7 +1,7 @@
-package cn.m1yellow.mypages.god.service;
+package cn.m1yellow.mypages.security.service;
 
 
-import cn.m1yellow.mypages.god.entity.SysConfig;
+import cn.m1yellow.mypages.security.entity.SysConfig;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Map;

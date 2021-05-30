@@ -9,6 +9,7 @@ import cn.m1yellow.mypages.god.mapper.SysPermissionMapper;
 import cn.m1yellow.mypages.god.service.SysPermissionService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,8 @@ import java.util.List;
  * @author M1Yellow
  * @since 2021-05-08
  */
-@Service
+@DubboService(interfaceClass = SysPermissionService.class, version = "1.0.0")
+//@Service("sysPermissionService")
 public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, SysPermission> implements SysPermissionService {
 
     private static final Logger logger = LoggerFactory.getLogger(SysPermissionServiceImpl.class);

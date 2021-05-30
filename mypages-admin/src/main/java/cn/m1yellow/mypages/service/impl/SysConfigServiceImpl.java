@@ -1,12 +1,12 @@
-package cn.m1yellow.mypages.god.service.impl;
+package cn.m1yellow.mypages.service.impl;
 
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.util.FastJsonUtil;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
-import cn.m1yellow.mypages.god.entity.SysConfig;
-import cn.m1yellow.mypages.god.mapper.SysConfigMapper;
-import cn.m1yellow.mypages.god.service.SysConfigService;
+import cn.m1yellow.mypages.entity.SysConfig;
+import cn.m1yellow.mypages.mapper.SysConfigMapper;
+import cn.m1yellow.mypages.service.SysConfigService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * @author M1Yellow
  * @since 2021-05-16
  */
-@Service
+@Service("sysConfigService")
 public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> implements SysConfigService {
 
     private static final Logger logger = LoggerFactory.getLogger(SysConfigServiceImpl.class);

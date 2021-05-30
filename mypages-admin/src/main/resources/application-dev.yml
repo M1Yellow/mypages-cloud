@@ -88,6 +88,26 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 
+# dubbo 配置
+dubbo:
+  application:
+    name: mypages-admin
+  registry:
+    address: zookeeper://192.168.3.151:2181
+  protocol:
+    name: dubbo
+    port: 20881
+  provider:
+    actives: 10 # 最大并发调用
+    timeout: 10000
+  consumer:
+    check: false
+    retries: 0
+    timeout: 10000
+  scan:
+    base-packages: cn.m1yellow.mypages.god.service
+
+
 # logback 日志配置
 # 日志加载顺序：logback.xml -> application.properties -> logback-spring.xml
 # xml 中配置的日志目录，相对路径对直接运行的项目不生效，需要部署后才能生效。IDEA 直接运行使用的是内置代理运行环境，指定的相对路径在内部环境无效

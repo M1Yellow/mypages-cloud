@@ -24,7 +24,6 @@
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-common</artifactId>
         </dependency>
-
         <!-- mysql 连接驱动 -->
         <dependency>
             <groupId>mysql</groupId>

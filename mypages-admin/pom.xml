@@ -24,23 +24,64 @@
     依赖关系
     admin
     -excavation
-     -common
-    -security
-     -god 用户数据操作相关依赖（mybatis-plus）
+      -common
+        -security 合并进 main 了
+          -common
+    -generator 数据库连接操作相关依赖（mysql连接驱动）
+      -common
+
+    独立 war 包
+    god 用户数据操作相关依赖（mybatis-plus）
       -generator 数据库连接操作相关依赖（mysql连接驱动）
-       -common
+        -common
     -->
 
     <dependencies>
-        <!-- mypages security 安全模块 -->
-        <dependency>
-            <groupId>cn.m1yellow.mypages</groupId>
-            <artifactId>mypages-security</artifactId>
-        </dependency>
         <!-- mypages excavation 数据挖掘模块 -->
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-excavation</artifactId>
+        </dependency>
+        <!-- mypages generator 代码生成器模块 -->
+        <dependency>
+            <groupId>cn.m1yellow.mypages</groupId>
+            <artifactId>mypages-generator</artifactId>
+        </dependency>
+        <!-- mybatis-plus 引入后就不用加 mybatis 的依赖了 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+        </dependency>
+        <!-- SpringSecurity -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <!-- JWT 组件依赖 -->
+        <!-- 方式一：引入整合版本 -->
+        <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+        </dependency>
+        <!-- apache dubbo starter -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+        </dependency>
+        <!-- zookeeper -->
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+        </dependency>
+        <!-- apache-curator -->
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
         </dependency>
 
     </dependencies>
@@ -73,6 +114,7 @@
     <build>
         <!-- 项目打包最终名称 -->
         <finalName>${project-name-prod}</finalName>
+
         <!-- 静态资源配置 -->
         <resources>
             <resource>

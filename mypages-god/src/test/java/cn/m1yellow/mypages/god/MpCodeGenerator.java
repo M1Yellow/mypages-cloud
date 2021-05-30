@@ -29,7 +29,6 @@ public class MpCodeGenerator {
 //            ,"user_following_remark"
 //            ,"user_opinion"
 //            ,"user_check_update"
-            "sys_config"
     };
 
     // 数据库连接信息

@@ -20,9 +20,21 @@
 
     <dependencies>
         <!-- mypages god 用户信息模块 -->
+        <!--
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-god</artifactId>
+        </dependency>
+        -->
+        <!-- mypages common 通用模块 -->
+        <dependency>
+            <groupId>cn.m1yellow.mypages</groupId>
+            <artifactId>mypages-common</artifactId>
+        </dependency>
+        <!-- mybatis-plus 引入后就不用加 mybatis 的依赖了 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
         <!-- SpringSecurity -->
         <dependency>
@@ -35,6 +47,25 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
+        </dependency>
+        <!-- apache dubbo -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo</artifactId>
+        </dependency>
+        <!-- zookeeper -->
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+        </dependency>
+        <!-- apache-curator -->
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
         </dependency>
 
     </dependencies>

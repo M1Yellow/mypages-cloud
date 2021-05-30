@@ -12,6 +12,7 @@ import cn.m1yellow.mypages.god.service.SysUserRoleService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,8 @@ import java.util.stream.Collectors;
  * @author M1Yellow
  * @since 2021-05-08
  */
-@Service
+@DubboService(interfaceClass = SysUserRoleService.class, version = "1.0.0")
+//@Service("sysUserRoleService")
 public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUserRole> implements SysUserRoleService {
 
     @Autowired

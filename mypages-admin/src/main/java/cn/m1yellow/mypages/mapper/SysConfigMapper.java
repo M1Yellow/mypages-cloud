@@ -1,6 +1,6 @@
-package cn.m1yellow.mypages.god.mapper;
+package cn.m1yellow.mypages.mapper;
 
-import cn.m1yellow.mypages.god.entity.SysConfig;
+import cn.m1yellow.mypages.entity.SysConfig;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

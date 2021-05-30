@@ -3,7 +3,7 @@ package cn.m1yellow.mypages.security.component;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.constant.Headers;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
-import cn.m1yellow.mypages.god.service.SysConfigService;
+import cn.m1yellow.mypages.security.service.SysConfigService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

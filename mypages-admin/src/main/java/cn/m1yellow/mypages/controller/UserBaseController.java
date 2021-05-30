@@ -1,21 +1,22 @@
 package cn.m1yellow.mypages.controller;
 
 
+import cn.m1yellow.mypages.bo.SecurityUser;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.util.FastJsonUtil;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
+import cn.m1yellow.mypages.config.JwtSecurityProperties;
 import cn.m1yellow.mypages.god.entity.UserBase;
 import cn.m1yellow.mypages.god.service.UserBaseService;
-import cn.m1yellow.mypages.security.bo.SecurityUser;
-import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
-import cn.m1yellow.mypages.security.util.JwtTokenUtil;
+import cn.m1yellow.mypages.util.JwtTokenUtil;
 import cn.m1yellow.mypages.vo.home.UserInfoDetail;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -46,7 +47,7 @@ public class UserBaseController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserBaseController.class);
 
-    @Autowired
+    @DubboReference(interfaceClass = UserBaseService.class, version = "1.0.0")
     private UserBaseService userBaseService;
     @Autowired
     private UserDetailsService userDetailsService;
