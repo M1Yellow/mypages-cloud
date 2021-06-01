@@ -18,6 +18,34 @@ public class GlobalConstant {
     // 缓存相关常量配置
     //==============================================================================//
     /**
+     * 缓存类型，用来根据不同的类型，设置不同的缓存时间
+     */
+    /*
+    public static final String CACHE_2MIN = "CACHE_2MIN#" + 2*60;
+    public static final String CACHE_10MIN = "CACHE_10MIN#" + 10*60;
+    public static final String CACHE_30MIN = "CACHE_30MIN#" + 30*60;
+    public static final String CACHE_2HOURS = "CACHE_2HOURS#" + 2*60*60;
+    public static final String CACHE_12HOURS = "CACHE_12HOURS#" + 12*60*60;
+    public static final String CACHE_24HOURS = "CACHE_24HOURS#" + 24*60*60;
+    public static final String CACHE_7DAYS = "CACHE_7DAYS#" + 7*24*60*60;
+    public static final String CACHE_ETERNAL = "CACHE_ETERNAL#" + 0;
+    */
+    public static final String CACHE_2MIN = "CACHE_2MIN";
+    public static final String CACHE_10MIN = "CACHE_10MIN";
+    public static final String CACHE_30MIN = "CACHE_30MIN";
+    public static final String CACHE_2HOURS = "CACHE_2HOURS";
+    public static final String CACHE_12HOURS = "CACHE_12HOURS";
+    public static final String CACHE_24HOURS = "CACHE_24HOURS";
+    public static final String CACHE_7DAYS = "CACHE_7DAYS";
+    public static final String CACHE_ETERNAL = "CACHE_ETERNAL";
+    public static final String CACHE_USER_FOLLOWING_2HOURS = "CACHE_USER_FOLLOWING_2HOURS";
+
+
+    /** 缓存名和 key 之间的分隔符 */
+    public static final String CACHE_NAME_KEY_SEPARATOR = "::";
+
+
+    /**
      * 用户登录时，平台首页数据缓存
      */
     public static final String HOME_PLATFORM_LIST_CACHE_KEY = "HOME_PLATFORM_LIST_CACHE_";

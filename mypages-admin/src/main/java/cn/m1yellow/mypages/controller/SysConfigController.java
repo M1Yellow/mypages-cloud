@@ -81,6 +81,7 @@ public class SysConfigController implements ErrorController {
     @ApiOperation("全局参数列表")
     @RequestMapping(value = "properties", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
+    //@Cacheable(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).SYS_CONFIG_MAP_CACHE_KEY", unless = "#result==null")
     public CommonResult<Map<String, Object>> getProperties() {
 
         Map<String, Object> properties = new HashMap<>();

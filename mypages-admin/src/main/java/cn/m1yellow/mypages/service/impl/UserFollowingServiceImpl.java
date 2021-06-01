@@ -219,7 +219,10 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
 
         if (userId != null && platformId != null && typeId != null) {
             // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-            cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
+            cacheKey = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS
+                    + GlobalConstant.CACHE_NAME_KEY_SEPARATOR
+                    + GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY
+                    + userId + "_" + platformId + "_" + typeId;
         } else {
             logger.debug(">>>> getUserFollowingItemListPage 请求参数错误");
             return null;

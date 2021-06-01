@@ -2,11 +2,9 @@ package cn.m1yellow.mypages.controller;
 
 
 import cn.m1yellow.mypages.common.api.CommonResult;
-import cn.m1yellow.mypages.common.aspect.DoCache;
 import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.exception.AtomicityException;
-import cn.m1yellow.mypages.common.util.FastJsonUtil;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import cn.m1yellow.mypages.entity.UserFollowingRelation;
@@ -20,6 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -58,7 +59,10 @@ public class UserFollowingTypeController {
     @ApiOperation("添加/更新类型")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #type.userId"),
+            @CacheEvict(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_TYPE_LIST_CACHE_KEY + #type.userId + '_' + #type.platformId")
+    })
     public CommonResult<UserFollowingType> add(UserFollowingType type) {
 
         // id为0表示默认类型，默认类型系统自动管理，用户不能自己创建或编辑
@@ -92,11 +96,6 @@ public class UserFollowingTypeController {
             return CommonResult.failed("操作失败");
         }
 
-        // 新增或修改记录后，清空缓存
-        String cacheKey = GlobalConstant.USER_TYPE_LIST_CACHE_KEY + type.getUserId() + "_" + type.getPlatformId();
-        redisUtil.del(cacheKey);
-        logger.info(">>>> type add 删除用户对应类型列表缓存，cache key: {}", cacheKey);
-
         return CommonResult.success(type);
     }
 
@@ -104,6 +103,7 @@ public class UserFollowingTypeController {
     @ApiOperation("获取分类类型列表")
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
+    @Cacheable(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_TYPE_LIST_CACHE_KEY + #userId + '_' + #platformId", unless = "#result==null")
     public CommonResult<List<UserFollowingType>> list(@RequestParam Long userId, @RequestParam Long platformId) {
 
         if (userId == null || platformId == null) {
@@ -111,23 +111,8 @@ public class UserFollowingTypeController {
             return CommonResult.failed("请求参数错误");
         }
 
-        // 先从缓存中获取
-        String cacheKey = GlobalConstant.USER_TYPE_LIST_CACHE_KEY + userId + "_" + platformId;
-        String cacheStr = ObjectUtil.getString(redisUtil.get(cacheKey));
-        if (StringUtils.isNotBlank(cacheStr)) {
-            List<UserFollowingType> userFollowingTypeList = FastJsonUtil.json2List(cacheStr, UserFollowingType.class);
-            if (userFollowingTypeList != null && userFollowingTypeList.size() > 0) {
-                return CommonResult.success(userFollowingTypeList);
-            }
-        }
-
         // TODO 添加游离于数据库类型表之外的默认类型，方便共用
         List<UserFollowingType> UserFollowingTypeMergeList = userFollowingTypeService.getUserFollowingTypeMergeList(userId, platformId, null);
-
-        // 查询完成之后，设置缓存
-        if (UserFollowingTypeMergeList != null && UserFollowingTypeMergeList.size() > 0) {
-            redisUtil.set(cacheKey, FastJsonUtil.bean2Json(UserFollowingTypeMergeList), GlobalConstant.USER_PLATFORM_TYPE_LIST_CACHE_TIME);
-        }
 
         return CommonResult.success(UserFollowingTypeMergeList);
     }
@@ -137,7 +122,13 @@ public class UserFollowingTypeController {
     @Transactional // 加入事务支持
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
+            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId"),
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + 0"),
+            @CacheEvict(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_TYPE_LIST_CACHE_KEY + #userId + '_' + #platformId")
+    })
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId) {
 
         // id为0表示默认类型，默认类型系统自动管理
@@ -184,22 +175,6 @@ public class UserFollowingTypeController {
                 throw new AtomicityException("删除类型后变更其下用户类型失败");
             }
         }
-
-        // 清除类型缓存
-        String cacheKey = GlobalConstant.USER_TYPE_LIST_CACHE_KEY + userId + "_" + platformId;
-        redisUtil.del(cacheKey);
-        logger.info(">>>> remove type 清空类型缓存，cacheKey: {}", cacheKey);
-
-
-        // 清空关注用户缓存
-        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-        cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
-        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-        logger.info(">>>> remove type 清空关注用户缓存，cacheKey: {}", cacheKey);
-        // 清除默认分类的用户缓存
-        cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + 0;
-        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-        logger.info(">>>> remove type 清空关注用户缓存，cacheKey: {}", cacheKey);
 
         return CommonResult.success();
     }

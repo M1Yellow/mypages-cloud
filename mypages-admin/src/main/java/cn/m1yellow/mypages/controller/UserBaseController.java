@@ -4,7 +4,6 @@ package cn.m1yellow.mypages.controller;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
-import cn.m1yellow.mypages.common.util.FastJsonUtil;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import cn.m1yellow.mypages.god.entity.UserBase;
@@ -20,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,6 +62,7 @@ public class UserBaseController {
     @ApiOperation("添加/更新用户")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
+    @CacheEvict(value = GlobalConstant.CACHE_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_INFO_DETAIL_CACHE_KEY + #userBase.id")
     public CommonResult<UserBase> add(UserBase userBase) {
 
         if (userBase == null) {
@@ -80,16 +82,6 @@ public class UserBaseController {
         if (!userBaseService.saveOrUpdate(userBase)) {
             logger.error("添加/更新用户失败");
             return CommonResult.failed("添加/更新用户失败");
-        }
-
-        // 更新用户信息，需要清理缓存
-        if (!isNew) {
-            String cacheKey = GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userBase.getId();
-            redisUtil.del(cacheKey);
-            logger.info(">>>> user base info update 删除用户信息缓存，cache key: {}", cacheKey);
-            cacheKey = GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userBase.getUserName();
-            redisUtil.del(cacheKey);
-            logger.info(">>>> user base info update 删除用户信息缓存，cache key: {}", cacheKey);
         }
 
         return CommonResult.success(userBase);
@@ -141,25 +133,11 @@ public class UserBaseController {
     @ApiOperation("获取用户信息详情")
     @RequestMapping(value = "detail", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
+    @Cacheable(value = GlobalConstant.CACHE_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_INFO_DETAIL_CACHE_KEY + #userId", unless = "#result==null")
     public CommonResult<UserInfoDetail> getUserInfoDetail(@RequestParam(required = false) Long userId, @RequestParam(required = false) String userName) {
         if (userId == null && StringUtils.isBlank(userName)) {
             logger.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
-        }
-
-        // 先从缓存中获取
-        String cacheStr = null;
-        if (userId != null) {
-            cacheStr = ObjectUtil.getString(redisUtil.get(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userId));
-        }
-        if (StringUtils.isBlank(cacheStr) && StringUtils.isNotBlank(userName)) {
-            cacheStr = ObjectUtil.getString(redisUtil.get(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userName));
-        }
-        if (StringUtils.isNotBlank(cacheStr)) {
-            UserInfoDetail userInfoDetail = FastJsonUtil.json2Bean(cacheStr, UserInfoDetail.class);
-            if (userInfoDetail != null) {
-                return CommonResult.success(userInfoDetail);
-            }
         }
 
         UserInfoDetail userInfoDetail = new UserInfoDetail();
@@ -183,12 +161,6 @@ public class UserBaseController {
             userInfoDetail.setProfilePhoto(GlobalConstant.USER_DEFAULT_PROFILE_PHOTO_PATH);
         }
 
-        // 设置缓存
-        if (userInfoDetail != null) {
-            redisUtil.set(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userInfoDetail.getUserId(), FastJsonUtil.bean2Json(userInfoDetail));
-            redisUtil.set(GlobalConstant.USER_INFO_DETAIL_CACHE_KEY + userInfoDetail.getUserName(), FastJsonUtil.bean2Json(userInfoDetail));
-        }
-
         return CommonResult.success(userInfoDetail);
     }
 
@@ -196,6 +168,7 @@ public class UserBaseController {
     @ApiOperation("移除用户")
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
+    @CacheEvict(value = GlobalConstant.CACHE_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_INFO_DETAIL_CACHE_KEY + #id")
     public CommonResult<String> remove(@RequestParam Long id) {
 
         if (id == null) {

@@ -59,17 +59,9 @@ spring:
           adaptive: true # 是否允许周期性更新集群拓扑视图，默认 false
           dynamic-refresh-sources: true # 是否允许动态刷新拓扑资源，默认 true
           period: 30 # 更新集群拓扑视图周期，默认 60 秒
-  security:
-    auth:
-      ignored:
-        urls: # 不过滤路径列表
-          - /favicon.ico
-          - /public/**
-          - /druid/**
-          - /home/**
-          - /user/login
-          - /user/logout
-          - /user/register
+  cache: # spirng 缓存管理参数配置
+    redis:
+      time-to-live: 86400000 # 毫秒，一天 24 * 60 * 60 * 1000
 
 
 mybatis-plus:

@@ -31,8 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,7 +90,12 @@ public class UserFollowingController {
     @Transactional //(rollbackFor = {AtomicityException.class, FileSaveException.class})
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
+    // TODO 【清除多个缓存】新增或修改关注用户，清除首页缓存、分页缓存
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #following.userId"),
+            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #following.userId + '_' + #following.platformId + '_' + #following.typeId")
+    })
     public CommonResult<UserFollowingItem> add(UserFollowingDto following, @RequestPart(required = false) MultipartFile profile) {
 
         // 基础参数校验
@@ -316,13 +322,6 @@ public class UserFollowingController {
             }
         }
 
-        // 清空关注用户列表缓存
-        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + following.getUserId()
-                + "_" + following.getPlatformId() + "_" + following.getTypeId();
-        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-        logger.info(">>>> add or update following 清空关注用户缓存，cacheKey: {}", cacheKey);
-
         return CommonResult.success(followingItem);
     }
 
@@ -416,7 +415,12 @@ public class UserFollowingController {
     //@RequestMapping(value = "syncOne/{followingId}") // @PathVariable String followingId
     @RequestMapping(value = "syncOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
+    // 新增或修改关注用户，清除首页缓存、分页缓存
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
+            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId")
+    })
     public CommonResult<UserFollowingItem> syncFollowingInfo(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {
 
         if (userId == null || platformId == null || typeId == null || followingId == null) {
@@ -475,12 +479,6 @@ public class UserFollowingController {
         userFollowingItem.setUserFollowing(newFollowing);
         //userFollowingItem.setUserFollowingRemarkList(null); // 没改动，不操作
 
-        // 清空关注用户缓存
-        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
-        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-        logger.info(">>>> syncFollowingInfo 清空关注用户缓存，cacheKey: {}", cacheKey);
-
         return CommonResult.success(userFollowingItem);
     }
 
@@ -488,7 +486,12 @@ public class UserFollowingController {
     @ApiOperation("批量同步关注用户的信息")
     @RequestMapping(value = "syncBatch", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
+    // 新增或修改关注用户，清除首页缓存、分页缓存
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
+            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId")
+    })
     public CommonResult<List<UserFollowingItem>> syncFollowingInfoBatch(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
 
         if (userId == null || platformId == null) {
@@ -554,12 +557,6 @@ public class UserFollowingController {
             }
         }
 
-        // 清空关注用户缓存
-        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
-        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-        logger.info(">>>> syncFollowingInfoBatch 清空关注用户缓存，cacheKey: {}", cacheKey);
-
         return CommonResult.success(userFollowingItemList);
     }
 
@@ -576,7 +573,12 @@ public class UserFollowingController {
     @ApiOperation("移除关注用户")
     @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
+    // 新增或修改关注用户，清除首页缓存、分页缓存
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
+            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId")
+    })
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {
 
         if (userId == null || platformId == null || typeId == null || followingId == null) {
@@ -606,12 +608,6 @@ public class UserFollowingController {
             logger.error("移除失败，userId: {}, platformId: {}, typeId: {}, followingId: {}", userId, platformId, typeId, followingId);
             return CommonResult.failed("操作失败");
         }
-
-        // 清空关注用户缓存
-        // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-        String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + userId + "_" + platformId + "_" + typeId;
-        userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-        logger.info(">>>> removeRelation 清空关注用户缓存，cacheKey: {}", cacheKey);
 
         return CommonResult.success();
     }

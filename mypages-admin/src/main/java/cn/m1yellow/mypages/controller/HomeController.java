@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+
 
 /**
  * 首页内容 controller
@@ -70,6 +72,9 @@ public class HomeController {
     //@RequestMapping 设置 "" 是能匹配到 "/" 的，反过来则不行
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
+    //@Cacheable(value = "T(cn.m1yellow.mypages.common.constant.CacheType.CACHE_ETERNAL).getName()", key = "#userId == null ? 'HOME_PLATFORM_LIST_DEFAULT_CACHE' : 'HOME_PLATFORM_LIST_CACHE_' + #userId", unless = "#result==null")
+    //@Cacheable(value = CacheType.CACHE_ETERNAL.getName(), key = "#userId == null ? 'HOME_PLATFORM_LIST_DEFAULT_CACHE' : 'HOME_PLATFORM_LIST_CACHE_' + #userId", unless = "#result==null")
+    @Cacheable(value = GlobalConstant.CACHE_7DAYS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_DEFAULT_CACHE_KEY", unless = "#result==null")
     public CommonResult<List<PlatformItem>> homeContent() {
 
         return platformList(null);
@@ -79,13 +84,8 @@ public class HomeController {
     @ApiOperation("首页平台所有内容")
     @RequestMapping(value = "platformList", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
+    @Cacheable(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId", unless = "#result==null")
     public CommonResult<List<PlatformItem>> platformList(@RequestParam Long userId) {
-
-        // 先从缓存中取，没有再查数据库。如果 userId 为 null，则获取首页默认内容缓存
-        List<PlatformItem> platformListFromCache = getPlatformListFromCache(userId);
-        if (platformListFromCache != null && platformListFromCache.size() > 0) {
-            return CommonResult.success(platformListFromCache);
-        }
 
         // 默认内容取哪个用户的数据；观点记录条数；关注用户个数
         // 是否为首页默认内容
@@ -231,16 +231,6 @@ public class HomeController {
 
         }
 
-        // 查询完成之后，设置缓存
-        if (platformItemList != null && platformItemList.size() > 0) {
-            if (isHomeDefault) {
-                redisUtil.set(GlobalConstant.HOME_PLATFORM_LIST_DEFAULT_CACHE_KEY, FastJsonUtil.bean2Json(platformItemList));
-            } else {
-                redisUtil.set(GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY + userId, FastJsonUtil.bean2Json(platformItemList),
-                        GlobalConstant.HOME_PLATFORM_LIST_CACHE_TIME);
-            }
-        }
-
         return CommonResult.success(platformItemList);
     }
 
@@ -251,7 +241,7 @@ public class HomeController {
      * @param userId
      * @return
      */
-    private List<PlatformItem> getPlatformListFromCache(Long userId) {
+    public List<PlatformItem> getPlatformListFromCache(Long userId) {
         List<PlatformItem> platformItemList = null;
         String platformListCache;
         if (userId != null) { // 用户已登录，根据用户id取缓存

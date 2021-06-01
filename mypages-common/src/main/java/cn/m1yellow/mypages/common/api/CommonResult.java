@@ -2,11 +2,16 @@ package cn.m1yellow.mypages.common.api;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
+
 /**
  * 通用返回对象
  * Created by macro on 2019/4/19.
  */
-public class CommonResult<T> {
+public class CommonResult<T> implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * 状态码
      */

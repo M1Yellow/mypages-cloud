@@ -1,24 +1,26 @@
 package cn.m1yellow.mypages.controller;
 
 
+import cn.m1yellow.mypages.common.api.CommonResult;
+import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.util.CheckParamUtil;
 import cn.m1yellow.mypages.common.util.FastJsonUtil;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import cn.m1yellow.mypages.dto.UserPlatformDto;
 import cn.m1yellow.mypages.entity.UserPlatform;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import cn.m1yellow.mypages.common.api.CommonResult;
-import cn.m1yellow.mypages.common.aspect.DoCache;
-import cn.m1yellow.mypages.common.aspect.WebLog;
-import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.service.UserPlatformService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,7 +54,10 @@ public class UserPlatformController {
     @ApiOperation("添加/更新平台")
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #platform.userId"),
+            @CacheEvict(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_PLATFORM_LIST_CACHE_KEY + #platform.userId")
+    })
     public CommonResult<UserPlatformDto> add(UserPlatformDto platform) {
 
         CheckParamUtil.validate(platform);
@@ -70,11 +75,6 @@ public class UserPlatformController {
             return CommonResult.failed("操作失败");
         }
 
-        // 新增或修改记录后，清空缓存
-        String cacheKey = GlobalConstant.USER_PLATFORM_LIST_CACHE_KEY + platform.getUserId();
-        redisUtil.del(cacheKey);
-        logger.info(">>>> platform add 删除用户对应平台列表缓存，cache key: {}", cacheKey);
-
         return CommonResult.success();
     }
 
@@ -82,6 +82,7 @@ public class UserPlatformController {
     @ApiOperation("获取平台列表")
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
+    @Cacheable(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_PLATFORM_LIST_CACHE_KEY + #userId", unless = "#result.data==null")
     public CommonResult<List<UserPlatformDto>> list(@RequestParam Long userId) {
 
         if (userId == null) {
@@ -89,24 +90,9 @@ public class UserPlatformController {
             return CommonResult.failed("请求参数错误");
         }
 
-        // 先从缓存中获取
-        String cacheStr = ObjectUtil.getString(redisUtil.get(GlobalConstant.USER_PLATFORM_LIST_CACHE_KEY + userId));
-        if (StringUtils.isNotBlank(cacheStr)) {
-            List<UserPlatformDto> userPlatformList = FastJsonUtil.json2List(cacheStr, UserPlatformDto.class);
-            if (userPlatformList != null && userPlatformList.size() > 0) {
-                return CommonResult.success(userPlatformList);
-            }
-        }
-
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         List<UserPlatformDto> userPlatformList = userPlatformService.queryUserPlatformList(params);
-
-        // 查询完成之后，设置缓存
-        if (userPlatformList != null && userPlatformList.size() > 0) {
-            redisUtil.set(GlobalConstant.USER_PLATFORM_LIST_CACHE_KEY + userId, FastJsonUtil.bean2Json(userPlatformList),
-                    GlobalConstant.USER_PLATFORM_TYPE_LIST_CACHE_TIME);
-        }
 
         return CommonResult.success(userPlatformList);
     }
@@ -193,8 +179,11 @@ public class UserPlatformController {
     @ApiOperation("移除平台")
     @RequestMapping(value = "remove", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    @DoCache
-    public CommonResult<String> remove(@RequestParam Long id) {
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
+            @CacheEvict(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_PLATFORM_LIST_CACHE_KEY + #userId")
+    })
+    public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long id) {
 
         if (id == null) {
             logger.error("请求参数错误");

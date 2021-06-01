@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +50,13 @@ public class UserFollowingRelationController {
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
     @DoCache
+    // 新增或修改关注用户，清除首页缓存、分页缓存
+    @Caching(evict = {
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #relation.userId"),
+            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #relation.userId + '_' + #relation.platformId + '_' + #relation.typeId"),
+            @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #relation.userId + '_' + #relation.platformId + '_' + #relation.oldTypeId", condition = "#relation.oldTypeId!=null")
+    })
     public CommonResult<UserFollowingDto> add(UserFollowingRelationDto relation) {
 
         CheckParamUtil.validate(relation);
@@ -89,24 +98,6 @@ public class UserFollowingRelationController {
             params.put("typeId", relation.getTypeId());  // 同上
             params.put("followingId", relation.getFollowingId());
             reloadFollowing = userFollowingService.getUserFollowing(params);
-        }
-
-        if (!isNew) { // 更新关联关系，比如，变更类型分组
-            // 清空关注用户缓存
-            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
-            String cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + relation.getUserId()
-                    + "_" + relation.getPlatformId() + "_" + relation.getTypeId();
-            userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-            logger.info(">>>> user following relation update 清空关注用户缓存，cacheKey: {}", cacheKey);
-
-            // 变更分组，清除之前分组的用户列表缓存
-            if (relation.getOldTypeId() != null) {
-                cacheKey = GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY + relation.getUserId()
-                        + "_" + relation.getPlatformId() + "_" + relation.getOldTypeId();
-                userFollowingService.operatingFollowingItemPageCache(cacheKey, null, null, true, null);
-                logger.info(">>>> user following relation update 清空原始分组关注用户缓存，cacheKey: {}", cacheKey);
-            }
-
         }
 
         return CommonResult.success(reloadFollowing);
