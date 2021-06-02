@@ -124,7 +124,6 @@ public class UserFollowingTypeController {
     @WebLog
     @Caching(evict = {
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
-            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId"),
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + 0"),
             @CacheEvict(value = GlobalConstant.CACHE_10MIN, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_TYPE_LIST_CACHE_KEY + #userId + '_' + #platformId")

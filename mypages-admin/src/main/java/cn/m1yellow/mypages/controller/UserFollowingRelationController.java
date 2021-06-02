@@ -50,10 +50,8 @@ public class UserFollowingRelationController {
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     @WebLog
     @DoCache
-    // 新增或修改关注用户，清除首页缓存、分页缓存
     @Caching(evict = {
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #relation.userId"),
-            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #relation.userId + '_' + #relation.platformId + '_' + #relation.typeId"),
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #relation.userId + '_' + #relation.platformId + '_' + #relation.oldTypeId", condition = "#relation.oldTypeId!=null")
     })

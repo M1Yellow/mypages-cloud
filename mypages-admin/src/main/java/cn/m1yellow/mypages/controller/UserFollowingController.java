@@ -415,10 +415,8 @@ public class UserFollowingController {
     //@RequestMapping(value = "syncOne/{followingId}") // @PathVariable String followingId
     @RequestMapping(value = "syncOne", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    // 新增或修改关注用户，清除首页缓存、分页缓存
     @Caching(evict = {
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
-            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId")
     })
     public CommonResult<UserFollowingItem> syncFollowingInfo(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {
@@ -486,10 +484,8 @@ public class UserFollowingController {
     @ApiOperation("批量同步关注用户的信息")
     @RequestMapping(value = "syncBatch", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    // 新增或修改关注用户，清除首页缓存、分页缓存
     @Caching(evict = {
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
-            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId")
     })
     public CommonResult<List<UserFollowingItem>> syncFollowingInfoBatch(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
@@ -573,10 +569,8 @@ public class UserFollowingController {
     @ApiOperation("移除关注用户")
     @RequestMapping(value = "removeRelation", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    // 新增或修改关注用户，清除首页缓存、分页缓存
     @Caching(evict = {
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_CACHE_KEY + #userId"),
-            // cacheKey 格式：USER_FOLLOWING_PAGE_LIST_CACHE_1_3_9
             @CacheEvict(value = GlobalConstant.CACHE_USER_FOLLOWING_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_FOLLOWING_PAGE_LIST_CACHE_KEY + #userId + '_' + #platformId + '_' + #typeId")
     })
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {

@@ -72,8 +72,6 @@ public class HomeController {
     //@RequestMapping 设置 "" 是能匹配到 "/" 的，反过来则不行
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     @WebLog
-    //@Cacheable(value = "T(cn.m1yellow.mypages.common.constant.CacheType.CACHE_ETERNAL).getName()", key = "#userId == null ? 'HOME_PLATFORM_LIST_DEFAULT_CACHE' : 'HOME_PLATFORM_LIST_CACHE_' + #userId", unless = "#result==null")
-    //@Cacheable(value = CacheType.CACHE_ETERNAL.getName(), key = "#userId == null ? 'HOME_PLATFORM_LIST_DEFAULT_CACHE' : 'HOME_PLATFORM_LIST_CACHE_' + #userId", unless = "#result==null")
     @Cacheable(value = GlobalConstant.CACHE_7DAYS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).HOME_PLATFORM_LIST_DEFAULT_CACHE_KEY", unless = "#result==null")
     public CommonResult<List<PlatformItem>> homeContent() {
 
