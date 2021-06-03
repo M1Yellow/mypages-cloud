@@ -1,6 +1,6 @@
 package cn.m1yellow.mypages.security.bo;
 
-import cn.m1yellow.mypages.god.entity.SysRole;
+import cn.m1yellow.mypages.security.entity.SysRole;
 import cn.m1yellow.mypages.god.entity.UserBase;
 import lombok.AllArgsConstructor;
 import lombok.Data;

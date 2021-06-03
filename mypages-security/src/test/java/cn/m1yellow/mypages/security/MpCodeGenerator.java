@@ -1,4 +1,4 @@
-package cn.m1yellow.mypages;
+package cn.m1yellow.mypages.security;
 
 import cn.m1yellow.mypages.generator.bo.MpConfigInfo;
 import cn.m1yellow.mypages.generator.service.CodeGenerator;
@@ -8,30 +8,19 @@ import cn.m1yellow.mypages.generator.service.CodeGenerator;
  */
 public class MpCodeGenerator {
 
-    /**
-     * 作者
-     */
+    /** 作者 */
     private static final String AUTHOR = "M1Yellow";
 
-    /**
-     * 数据库类型，mysql、oracle
-     */
+    /** 数据库类型，mysql、oracle */
     private static final String DB_NAME = "mysql";
 
-    /**
-     * 数据库表
-     */
+    /** 数据库表 */
     private static final String[] TABLES = {
-            //"user_base",
-            //"user_platform"
-            //,"user_platform_relation"
-            //,"user_following"
-            //,"user_following_relation"
-            //"user_following_type"
-            //,"user_following_remark"
-            //,"user_opinion"
-            //,"user_check_update"
             "sys_config"
+//            ,"sys_role"
+//            ,"sys_permission"
+//            ,"sys_user_role"
+//            ,"sys_role_permission"
     };
 
     // 数据库连接信息
@@ -40,10 +29,8 @@ public class MpCodeGenerator {
     private static final String USERNAME = "root";
     private static final String PASSWORD = "123456.a";
 
-    /**
-     * 模块名称
-     */
-    private static final String MODULE_NAME = "mypages-admin";
+    /** 模块名称 */
+    private static final String MODULE_NAME = "mypages-security";
 
 
     public static void main(String[] args) {
@@ -67,7 +54,7 @@ public class MpCodeGenerator {
         mpConfigInfo.setDsDbName(DB_NAME);
 
         // PackageConfig 包配置
-        mpConfigInfo.setPcParent("cn.m1yellow.mypages");
+        mpConfigInfo.setPcParent("cn.m1yellow.mypages.security");
         mpConfigInfo.setPcModuleName(null);
         mpConfigInfo.setPcEntity("entity");
         mpConfigInfo.setPcMapper("mapper");

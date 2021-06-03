@@ -7,13 +7,13 @@
     <parent>
         <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <!-- 后台接口服务模块 -->
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-admin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>mypages-admin</name>
     <description>MyPages admin</description>
     <packaging>war</packaging><!-- 外部 tomcat 需要 -->

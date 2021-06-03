@@ -7,13 +7,13 @@
     <parent>
         <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <!-- 通用功能模块 -->
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-common</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>mypages-common</name>
     <description>MyPages common module</description>
     <packaging>jar</packaging>
@@ -71,7 +71,8 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
         </dependency>
-        <!-- elasticsearch -->
+        <!--
+        &lt;!&ndash; elasticsearch &ndash;&gt;
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
@@ -80,11 +81,17 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
         </dependency>
-        <!-- logstash -->
+        &lt;!&ndash; logstash &ndash;&gt;
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
+        &lt;!&ndash; rabbitmq &ndash;&gt;
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        -->
 
     </dependencies>
 

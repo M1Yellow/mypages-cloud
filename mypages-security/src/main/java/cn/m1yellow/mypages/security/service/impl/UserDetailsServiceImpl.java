@@ -1,8 +1,8 @@
 package cn.m1yellow.mypages.security.service.impl;
 
-import cn.m1yellow.mypages.god.entity.SysRole;
+import cn.m1yellow.mypages.security.entity.SysRole;
 import cn.m1yellow.mypages.god.entity.UserBase;
-import cn.m1yellow.mypages.god.service.SysUserRoleService;
+import cn.m1yellow.mypages.security.service.SysUserRoleService;
 import cn.m1yellow.mypages.god.service.UserBaseService;
 import cn.m1yellow.mypages.security.bo.SecurityUser;
 import org.apache.commons.lang3.StringUtils;

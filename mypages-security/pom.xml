@@ -7,13 +7,13 @@
     <parent>
         <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <!-- 安全控制模块 -->
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-security</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>mypages-security</name>
     <description>MyPages security module</description>
     <packaging>jar</packaging>
@@ -23,6 +23,11 @@
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-god</artifactId>
+        </dependency>
+        <!-- mybatis-plus 引入后就不用加 mybatis 的依赖了 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
         <!-- SpringSecurity -->
         <dependency>

@@ -7,13 +7,13 @@
     <parent>
         <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <!-- 数据挖掘模块 -->
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-excavation</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>mypages-excavation</name>
     <description>Excavation of data.</description>
     <packaging>jar</packaging>
@@ -24,6 +24,7 @@
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-common</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

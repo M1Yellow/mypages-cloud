@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@MapperScan({"cn.m1yellow.mypages.mapper", "cn.m1yellow.mypages.god.mapper"})
-@EnableTransactionManagement
+
 @Configuration
+@EnableTransactionManagement
+@MapperScan({"cn.m1yellow.mypages.mapper", "cn.m1yellow.mypages.god.mapper", "cn.m1yellow.mypages.security.mapper"})
 public class MyBatisPlusConfig {
 
     /**

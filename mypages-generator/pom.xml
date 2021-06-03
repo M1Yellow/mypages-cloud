@@ -7,13 +7,13 @@
     <parent>
         <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <!-- 代码生成模块 -->
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-generator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>mypages-generator</name>
     <description>MyBatis code generator</description>
     <packaging>jar</packaging>

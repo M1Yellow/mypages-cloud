@@ -16,20 +16,7 @@ public class MpCodeGenerator {
 
     /** 数据库表 */
     private static final String[] TABLES = {
-//            "user_base"
-//            ,"sys_role"
-//            ,"sys_permission"
-//            ,"sys_user_role"
-//            ,"sys_role_permission"
-//            ,"user_platform"
-//            ,"user_platform_relation"
-//            ,"user_following"
-//            ,"user_following_relation"
-//            ,"user_following_type"
-//            ,"user_following_remark"
-//            ,"user_opinion"
-//            ,"user_check_update"
-            "sys_config"
+            "user_base"
     };
 
     // 数据库连接信息

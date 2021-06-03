@@ -7,13 +7,13 @@
     <parent>
         <groupId>cn.m1yellow.mypages</groupId>
         <artifactId>mypages</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <!-- 用户信息模块 -->
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-god</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>mypages-god</name>
     <description>MyPages user module.</description>
     <packaging>jar</packaging><!-- 需要手动指定，否则会报错 -->

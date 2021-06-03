@@ -1,12 +1,12 @@
 package cn.m1yellow.mypages.security.component;
 
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
-import cn.m1yellow.mypages.god.entity.SysPermission;
-import cn.m1yellow.mypages.god.entity.SysRole;
-import cn.m1yellow.mypages.god.entity.SysRolePermission;
-import cn.m1yellow.mypages.god.service.SysPermissionService;
-import cn.m1yellow.mypages.god.service.SysRolePermissionService;
-import cn.m1yellow.mypages.god.service.SysRoleService;
+import cn.m1yellow.mypages.security.entity.SysPermission;
+import cn.m1yellow.mypages.security.entity.SysRole;
+import cn.m1yellow.mypages.security.entity.SysRolePermission;
+import cn.m1yellow.mypages.security.service.SysPermissionService;
+import cn.m1yellow.mypages.security.service.SysRolePermissionService;
+import cn.m1yellow.mypages.security.service.SysRoleService;
 import cn.m1yellow.mypages.security.config.IgnoreUrlsConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
