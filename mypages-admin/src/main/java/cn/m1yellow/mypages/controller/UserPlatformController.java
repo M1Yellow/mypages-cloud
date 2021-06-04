@@ -13,9 +13,8 @@ import cn.m1yellow.mypages.entity.UserPlatform;
 import cn.m1yellow.mypages.service.UserPlatformService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,11 +38,10 @@ import java.util.stream.Collectors;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @RestController
 @RequestMapping("/platform")
 public class UserPlatformController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserPlatformController.class);
 
     @Autowired
     private UserPlatformService userPlatformService;
@@ -71,7 +69,7 @@ public class UserPlatformController {
         ObjectUtil.stringFiledTrim(savePlatform);
 
         if (!userPlatformService.saveOrUpdate(savePlatform)) {
-            logger.error("添加/更新平台失败");
+            log.error("添加/更新平台失败");
             return CommonResult.failed("操作失败");
         }
 
@@ -86,7 +84,7 @@ public class UserPlatformController {
     public CommonResult<List<UserPlatformDto>> list(@RequestParam Long userId) {
 
         if (userId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -104,7 +102,7 @@ public class UserPlatformController {
     public CommonResult<List<UserPlatform>> baseList(@RequestParam Long userId, @RequestParam(required = false) boolean isAdd) {
 
         if (userId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -186,12 +184,12 @@ public class UserPlatformController {
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long id) {
 
         if (id == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
         if (!userPlatformService.removeById(id)) {
-            logger.error("移除平台失败，id: {}", id);
+            log.error("移除平台失败，id: {}", id);
             return CommonResult.failed("操作失败");
         }
 

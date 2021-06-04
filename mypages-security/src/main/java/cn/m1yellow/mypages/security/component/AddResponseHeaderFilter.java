@@ -4,9 +4,8 @@ import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.constant.Headers;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.security.service.SysConfigService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -56,12 +55,10 @@ import java.util.Map;
  * <p>
  * 拦截器默认的执行顺序，就是它的注册顺序，也可以通过Order手动设置控制，值越小越先执行。
  */
+@Slf4j
 @Order(Ordered.LOWEST_PRECEDENCE)
 @Component
 public class AddResponseHeaderFilter extends OncePerRequestFilter {
-
-    private static final Logger logger = LoggerFactory.getLogger(AddResponseHeaderFilter.class);
-
 
     @Autowired
     private SysConfigService sysConfigService;

@@ -14,9 +14,8 @@ import cn.m1yellow.mypages.service.UserFollowingService;
 import cn.m1yellow.mypages.service.UserFollowingTypeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,12 +38,10 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @RestController
 @RequestMapping("/type")
 public class UserFollowingTypeController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserFollowingTypeController.class);
-
 
     @Autowired
     private UserFollowingService userFollowingService;
@@ -67,13 +64,13 @@ public class UserFollowingTypeController {
 
         // id为0表示默认类型，默认类型系统自动管理，用户不能自己创建或编辑
         if (type == null || (type.getId() != null && type.getId() < 1)) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
         // 校验必须参数
         if (type.getUserId() == null || type.getPlatformId() == null || StringUtils.isBlank(type.getTypeName())) {
-            logger.error("typeName must be not null.");
+            log.error("typeName must be not null.");
             return CommonResult.failed("请检查必须参数");
         }
 
@@ -92,7 +89,7 @@ public class UserFollowingTypeController {
         ObjectUtil.stringFiledTrim(type);
 
         if (!userFollowingTypeService.saveOrUpdate(type)) {
-            logger.error("添加/更新类型失败");
+            log.error("添加/更新类型失败");
             return CommonResult.failed("操作失败");
         }
 
@@ -107,7 +104,7 @@ public class UserFollowingTypeController {
     public CommonResult<List<UserFollowingType>> list(@RequestParam Long userId, @RequestParam Long platformId) {
 
         if (userId == null || platformId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -132,7 +129,7 @@ public class UserFollowingTypeController {
 
         // id为0表示默认类型，默认类型系统自动管理
         if (userId == null || typeId == null || typeId < 1 || platformId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -143,7 +140,7 @@ public class UserFollowingTypeController {
         typeQueryWrapper.eq("id", typeId);
         UserFollowingType type = userFollowingTypeService.getOne(typeQueryWrapper);
         if (type == null) {
-            logger.error("用户类型信息查询失败");
+            log.error("用户类型信息查询失败");
             return CommonResult.failed("用户类型信息查询失败");
         }
 
@@ -153,7 +150,7 @@ public class UserFollowingTypeController {
         params.put("platform_id", platformId);
         params.put("id", typeId);
         if (!userFollowingTypeService.removeByMap(params)) {
-            logger.error("移除失败，userId: {}, platformId: {}, typeId: {}", userId, platformId, typeId);
+            log.error("移除失败，userId: {}, platformId: {}, typeId: {}", userId, platformId, typeId);
             throw new AtomicityException("操作失败");
         }
 
@@ -170,7 +167,7 @@ public class UserFollowingTypeController {
             boolean result = userFollowingRelationService.changeUserFollowingTypeByTypeId(userId, platformId, typeId,
                     GlobalConstant.USER_FOLLOWING_DEFAULT_TYPE_ID);
             if (!result) {
-                logger.error("删除类型后变更其下用户类型失败");
+                log.error("删除类型后变更其下用户类型失败");
                 throw new AtomicityException("删除类型后变更其下用户类型失败");
             }
         }

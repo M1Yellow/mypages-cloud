@@ -14,9 +14,8 @@ import cn.m1yellow.mypages.security.util.JwtTokenUtil;
 import cn.m1yellow.mypages.vo.home.UserInfoDetail;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -41,11 +40,10 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @RestController
 @RequestMapping("/user")
 public class UserBaseController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserBaseController.class);
 
     @Autowired
     private UserBaseService userBaseService;
@@ -66,7 +64,7 @@ public class UserBaseController {
     public CommonResult<UserBase> add(UserBase userBase) {
 
         if (userBase == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -80,7 +78,7 @@ public class UserBaseController {
         ObjectUtil.stringFiledTrim(userBase);
 
         if (!userBaseService.saveOrUpdate(userBase)) {
-            logger.error("添加/更新用户失败");
+            log.error("添加/更新用户失败");
             return CommonResult.failed("添加/更新用户失败");
         }
 
@@ -100,7 +98,7 @@ public class UserBaseController {
          */
 
         if (StringUtils.isBlank(userName) || StringUtils.isBlank(password)) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -116,7 +114,7 @@ public class UserBaseController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             token = jwtTokenUtil.generateToken(userDetails);
         } catch (Exception e) {
-            logger.warn("登录异常: {}", e.getMessage());
+            log.warn("登录异常: {}", e.getMessage());
         }
         if (StringUtils.isBlank(token)) {
             return CommonResult.validateFailed("用户名或密码错误");
@@ -136,7 +134,7 @@ public class UserBaseController {
     @Cacheable(value = GlobalConstant.CACHE_2HOURS, key = "T(cn.m1yellow.mypages.common.constant.GlobalConstant).USER_INFO_DETAIL_CACHE_KEY + #userId", unless = "#result==null")
     public CommonResult<UserInfoDetail> getUserInfoDetail(@RequestParam(required = false) Long userId, @RequestParam(required = false) String userName) {
         if (userId == null && StringUtils.isBlank(userName)) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -172,12 +170,12 @@ public class UserBaseController {
     public CommonResult<String> remove(@RequestParam Long id) {
 
         if (id == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
         if (!userBaseService.removeById(id)) {
-            logger.error("移除失败，id:" + id);
+            log.error("移除失败，id:" + id);
             return CommonResult.failed("移除失败");
         }
 

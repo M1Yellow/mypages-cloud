@@ -1,16 +1,16 @@
 package cn.m1yellow.mypages.security.service.impl;
 
-import cn.m1yellow.mypages.security.entity.SysRole;
 import cn.m1yellow.mypages.god.entity.UserBase;
-import cn.m1yellow.mypages.security.service.SysUserRoleService;
 import cn.m1yellow.mypages.god.service.UserBaseService;
 import cn.m1yellow.mypages.security.bo.SecurityUser;
+import cn.m1yellow.mypages.security.entity.SysRole;
+import cn.m1yellow.mypages.security.service.SysUserRoleService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -19,10 +19,9 @@ import java.util.List;
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    //@Autowired // 不能识别注入传递依赖模块 god 中的 bean
-    @Resource
+    @Autowired
     private UserBaseService userBaseService;
-    @Resource
+    @Autowired
     private SysUserRoleService userRoleService;
 
 

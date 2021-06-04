@@ -2,12 +2,11 @@ package cn.m1yellow.mypages.common.aspect;
 
 import cn.m1yellow.mypages.common.util.GsonUtil;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -21,12 +20,11 @@ import java.lang.reflect.Method;
  * 切面日志
  * https://www.exception.site/springboot/spring-boot-aop-web-request
  */
+@Slf4j
 @Aspect
 @Component
 @Profile({"dev", "test"})
 public class WebLogAspect {
-
-    private final static Logger logger = LoggerFactory.getLogger(WebLogAspect.class);
 
     /**
      * 换行符
@@ -56,12 +54,12 @@ public class WebLogAspect {
         long startTime = System.currentTimeMillis();
         Object result = proceedingJoinPoint.proceed();
         // 打印出参
-        logger.info("Response Args  : {}", GsonUtil.bean2Json(result));
+        log.info("Response Args  : {}", GsonUtil.bean2Json(result));
         // 执行耗时
-        logger.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
+        log.info("Time-Consuming : {} ms", System.currentTimeMillis() - startTime);
 
         // 最后的结束标志
-        logger.info("==================== End ====================" + LINE_SEPARATOR);
+        log.info("==================== End ====================" + LINE_SEPARATOR);
 
         return result;
     }
@@ -83,19 +81,19 @@ public class WebLogAspect {
         String methodDescription = getAspectLogDescription(joinPoint);
 
         // TODO 打印请求相关参数，PathVariable 存在问题？？
-        logger.info("==================== Start ====================");
+        log.info("==================== Start ====================");
         // 打印请求 url
-        logger.info("URL            : {}", request.getRequestURL().toString());
+        log.info("URL            : {}", request.getRequestURL().toString());
         // 打印描述信息
-        logger.info("Description    : {}", methodDescription);
+        log.info("Description    : {}", methodDescription);
         // 打印 Http method
-        logger.info("HTTP Method    : {}", request.getMethod());
+        log.info("HTTP Method    : {}", request.getMethod());
         // 打印调用 controller 的全路径以及执行方法
-        logger.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
+        log.info("Class Method   : {}.{}", joinPoint.getSignature().getDeclaringTypeName(), joinPoint.getSignature().getName());
         // 打印请求的 IP
-        logger.info("IP             : {}", request.getRemoteAddr());
+        log.info("IP             : {}", request.getRemoteAddr());
         // 打印请求入参
-        logger.info("Request Args   : {}", GsonUtil.bean2Json(joinPoint.getArgs()));
+        log.info("Request Args   : {}", GsonUtil.bean2Json(joinPoint.getArgs()));
     }
 
 
@@ -107,7 +105,7 @@ public class WebLogAspect {
     @After("webLog()")
     public void doAfter() throws Throwable {
         // 接口结束后换行，方便分割查看
-        //logger.info("==================== End ====================" + LINE_SEPARATOR);
+        //log.info("==================== End ====================" + LINE_SEPARATOR);
     }
 
 

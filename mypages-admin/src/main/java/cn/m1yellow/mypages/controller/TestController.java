@@ -3,8 +3,7 @@ package cn.m1yellow.mypages.controller;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,11 +16,10 @@ import java.util.Map;
 /**
  * 测试控制类
  */
+@Slf4j
 @RestController
 @RequestMapping("/test")
 public class TestController {
-
-    private static final Logger logger = LoggerFactory.getLogger(TestController.class);
 
     @Value("${user.avatar.savedir}")
     private String saveDir;

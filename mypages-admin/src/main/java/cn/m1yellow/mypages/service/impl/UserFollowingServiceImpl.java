@@ -14,9 +14,8 @@ import cn.m1yellow.mypages.service.UserFollowingService;
 import cn.m1yellow.mypages.vo.home.UserFollowingItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,10 +35,9 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @Service
 public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, UserFollowing> implements UserFollowingService {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserFollowingServiceImpl.class);
 
     @Value("${user.avatar.savedir}")
     private String saveDir;
@@ -84,7 +82,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
         // 获取、校验用户所属平台的id
         String userId = getUserKeyFromMainPage(following);
         if (StringUtils.isBlank(userId)) {
-            logger.error("用户主页不符合要求，following id:" + following.getFollowingId());
+            log.error("用户主页不符合要求，following id:" + following.getFollowingId());
             return null;
         }
 
@@ -224,7 +222,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
                     + GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY
                     + userId + "_" + platformId + "_" + typeId;
         } else {
-            logger.debug(">>>> getUserFollowingItemListPage 请求参数错误");
+            log.debug(">>>> getUserFollowingItemListPage 请求参数错误");
             return null;
         }
 
@@ -238,7 +236,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
         // 缓存为空，重新加载
         List<UserFollowingDto> followingList = queryUserFollowingList(params);
         if (CollectionUtils.isEmpty(followingList)) {
-            logger.debug(">>>> queryUserFollowingList 用户关注列表为空");
+            log.debug(">>>> queryUserFollowingList 用户关注列表为空");
             return null;
         }
         // 用户列表封装对象添加对应的标签 List<UserFollowingDto> 转换为 List<UserFollowingItem>，item 包含用户及其标签
@@ -342,7 +340,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
                                                                    boolean isDel, Page<UserFollowingItem> followingItemPage) {
 
         if (StringUtils.isBlank(cacheKey) || !cacheKey.contains(GlobalConstant.USER_FOLLOWING_PAGE_LIST_CACHE_KEY)) {
-            logger.debug("参数错误");
+            log.debug("参数错误");
             return null;
         }
 

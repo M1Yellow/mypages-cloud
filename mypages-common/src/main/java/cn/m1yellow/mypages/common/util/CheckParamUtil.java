@@ -1,8 +1,7 @@
 package cn.m1yellow.mypages.common.util;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -14,9 +13,8 @@ import java.util.stream.Collectors;
 /**
  * 接口或方法通用参数校验工具类
  */
+@Slf4j
 public class CheckParamUtil {
-
-    private static final Logger logger = LoggerFactory.getLogger(CheckParamUtil.class);
 
     private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -32,7 +30,7 @@ public class CheckParamUtil {
             StringBuilder errorMessage = new StringBuilder();
             errorMessageList.stream().forEach(o -> errorMessage.append(o + ";"));
 
-            logger.info(">>>> errorMessage: {}", errorMessage.toString());
+            log.info(">>>> errorMessage: {}", errorMessage.toString());
 
             String message = resultSet.iterator().next().getMessage();
             throw new IllegalArgumentException(message);

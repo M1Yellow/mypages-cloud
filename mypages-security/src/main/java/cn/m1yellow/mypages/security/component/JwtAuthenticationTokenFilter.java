@@ -4,11 +4,9 @@ import cn.m1yellow.mypages.security.bo.SecurityUser;
 import cn.m1yellow.mypages.security.config.IgnoreUrlsConfig;
 import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
 import cn.m1yellow.mypages.security.util.JwtTokenUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,11 +27,10 @@ import java.io.IOException;
 /**
  * JWT 登录验证过滤器
  */
+@Slf4j
 @Order(1) // 数值越小，越先执行
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
-
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationTokenFilter.class);
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -80,7 +77,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             String authToken = authHeader.substring(jwtSecurityProperties.getTokenStart().length());
             // 从 token 中获取用户名
             String username = jwtTokenUtil.getUserNameFromToken(authToken);
-            logger.info(">>>> check token username: {}", username);
+            log.info(">>>> check token username: {}", username);
 
             if (StringUtils.isNotBlank(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
                 // spring security 用户详情对象封装
@@ -90,7 +87,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                     // spring security 用户名和密码校验规则
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    logger.info(">>>> authenticated user: {}", username);
+                    log.info(">>>> authenticated user: {}", username);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }

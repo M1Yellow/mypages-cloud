@@ -8,9 +8,8 @@ import cn.m1yellow.mypages.service.UserFollowingRemarkService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +27,9 @@ import java.util.stream.Collectors;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @Service
 public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRemarkMapper, UserFollowingRemark> implements UserFollowingRemarkService {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserFollowingRemarkServiceImpl.class);
 
     @Override
     public List<UserFollowingRemark> queryUserFollowingRemarkListRegularly(Map<String, Object> params) {
@@ -47,15 +45,15 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
     @Transactional // 多条修改 sql 需要开启事务
     public boolean saveRemarks(List<UserFollowingRemark> remarkList, UserFollowingDto following) {
 
-        logger.info(">>>> saveRemarks, remarkList={}, following={}", remarkList, following);
+        log.info(">>>> saveRemarks, remarkList={}, following={}", remarkList, following);
 
         if (remarkList == null || remarkList.size() < 1) {
-            logger.info(">>>> save remark: remarkList is invalid.");
+            log.info(">>>> save remark: remarkList is invalid.");
             return false;
         }
 
         if (following == null || following.getUserId() == null || following.getFollowingId() == null) {
-            logger.info(">>>> save remark: following is invalid.");
+            log.info(">>>> save remark: following is invalid.");
             return false;
         }
 
@@ -64,13 +62,13 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
         queryParams.put("user_id", following.getUserId());
         queryParams.put("following_id", following.getFollowingId()); // saveFollowing.getId()
         List<UserFollowingRemark> existedRemarkList = queryUserFollowingRemarkListRegularly(queryParams);
-        logger.info(">>>> save remark: existedRemarkList: {}", existedRemarkList);
+        log.info(">>>> save remark: existedRemarkList: {}", existedRemarkList);
 
         // 直接在循环外面创建实例，放在循环内 new 实例容易产生坑！会导致永远只有一个元素
         List<Long> savedRemarkIdList = new ArrayList<>();
         for (UserFollowingRemark remark : remarkList) {
             if (remark == null || StringUtils.isBlank(remark.getLabelName())) {
-                logger.info(">>>> save remark: userId={}, followingId={}, labelName is blank.",
+                log.info(">>>> save remark: userId={}, followingId={}, labelName is blank.",
                         following.getUserId(), following.getFollowingId());
                 continue;
             }
@@ -88,7 +86,7 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
                     if (existedRemark.getLabelName().trim().equals(remark.getLabelName().trim()) && remark.getId() == null) {
 
                         remark.setId(existedRemark.getId());
-                        logger.info(">>>> save remark: userId={}, followingId={}, remark is already existed: {}, do update.",
+                        log.info(">>>> save remark: userId={}, followingId={}, remark is already existed: {}, do update.",
                                 following.getUserId(), following.getFollowingId(), remark.getLabelName());
                         break;
                     }
@@ -114,7 +112,7 @@ public class UserFollowingRemarkServiceImpl extends ServiceImpl<UserFollowingRem
 
         // id 去重
         savedRemarkIdList = savedRemarkIdList.stream().distinct().collect(Collectors.toList());
-        logger.info(">>>> save remark: savedRemarkIdList: {}", savedRemarkIdList);
+        log.info(">>>> save remark: savedRemarkIdList: {}", savedRemarkIdList);
 
         // 删除本次保存id以外的记录
         if (savedRemarkIdList != null && savedRemarkIdList.size() > 0) {

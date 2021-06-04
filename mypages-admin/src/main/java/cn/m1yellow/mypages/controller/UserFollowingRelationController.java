@@ -13,8 +13,7 @@ import cn.m1yellow.mypages.entity.UserFollowingRelation;
 import cn.m1yellow.mypages.service.UserFollowingRelationService;
 import cn.m1yellow.mypages.service.UserFollowingService;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,11 +33,10 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-23
  */
+@Slf4j
 @RestController
 @RequestMapping("/following-relation")
 public class UserFollowingRelationController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserFollowingRelationController.class);
 
     @Autowired
     private UserFollowingService userFollowingService;
@@ -83,7 +81,7 @@ public class UserFollowingRelationController {
         }
 
         if (!userFollowingRelationService.saveOrUpdate(saveRelation)) {
-            logger.error("添加/更新用户关系失败");
+            log.error("添加/更新用户关系失败");
             return CommonResult.failed("操作失败");
         }
 

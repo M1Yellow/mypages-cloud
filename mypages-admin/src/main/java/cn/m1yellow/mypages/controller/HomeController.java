@@ -17,9 +17,8 @@ import cn.m1yellow.mypages.vo.home.UserFollowingTypeItem;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.CollectionUtils;
@@ -34,11 +33,10 @@ import java.util.*;
 /**
  * 首页内容 controller
  */
+@Slf4j
 @RestController // 整个 controller 返回 json 格式数据。@ResponseBody 是单个方法返回 json 格式数据
 @RequestMapping("/home")
 public class HomeController {
-
-    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     @Autowired
     private UserPlatformService userPlatformService;
@@ -112,7 +110,7 @@ public class HomeController {
         List<UserPlatformDto> PlatformList = userPlatformService.queryUserPlatformList(platformQueryParams);
 
         if (PlatformList == null || PlatformList.size() <= 0) { // 平台表数据异常
-            logger.error("平台表数据异常");
+            log.error("平台表数据异常");
             return CommonResult.failed("用户平台信息加载失败");
         }
 
@@ -145,7 +143,7 @@ public class HomeController {
             // 关注类型列表封装
             List<UserFollowingType> userFollowingTypeMergeList = userFollowingTypeService.getUserFollowingTypeMergeList(userId, platform.getPlatformId(), null);
             if (CollectionUtils.isEmpty(userFollowingTypeMergeList)) {
-                logger.info(">>>> platform userFollowingTypeList is empty, platform id: {}", platform.getPlatformId());
+                log.info(">>>> platform userFollowingTypeList is empty, platform id: {}", platform.getPlatformId());
                 continue;
             }
 
@@ -190,7 +188,7 @@ public class HomeController {
 
                     // TODO 如果这个类型的观点列表和关注用户列表都为空，不返回给页面
                     if (CollectionUtils.isEmpty(typeOpinionList) && CollectionUtils.isEmpty(typeFollowingList)) {
-                        logger.info(">>>> typeOpinionList and typeFollowingList is empty, userId: {}, typeId: {}", userId, type.getId());
+                        log.info(">>>> typeOpinionList and typeFollowingList is empty, userId: {}, typeId: {}", userId, type.getId());
                         continue;
                     }
 

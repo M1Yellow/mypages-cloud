@@ -4,6 +4,7 @@ import cn.m1yellow.mypages.common.api.ResultCode;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -11,8 +12,6 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,12 +22,12 @@ import java.lang.reflect.Method;
 /**
  * 通过切面拦截，处理一些业务
  */
+@Slf4j
 @Aspect
 @Component
 //@Profile({"dev", "test"})
 public class DoCacheAspect {
 
-    private final static Logger logger = LoggerFactory.getLogger(DoCacheAspect.class);
     /**
      * 换行符
      */
@@ -70,7 +69,7 @@ public class DoCacheAspect {
         Boolean isException = localExceptionFlag.get();
         localExceptionFlag.remove();
         if (isException != null && isException) {
-            logger.info(">>>> 方法出现异常，不进行缓存操作");
+            log.info(">>>> 方法出现异常，不进行缓存操作");
             return;
         }
 
@@ -88,12 +87,12 @@ public class DoCacheAspect {
                 }
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         if (code != null && !code.equals(ResultCode.SUCCESS.getCode())) {
             // TODO 方法未执行成功，不操作缓存
-            logger.info(">>>> 方法未执行成功，不进行缓存操作");
+            log.info(">>>> 方法未执行成功，不进行缓存操作");
             return;
         }
 
@@ -105,25 +104,25 @@ public class DoCacheAspect {
         Object[] args = joinPoint.getArgs();
 
         if (args == null || args.length < 1) {
-            logger.info(">>>> 参数列表为空");
+            log.info(">>>> 参数列表为空");
             return;
         }
 
         // 获取 userId 的下标
         int userIdIndex = ArrayUtils.indexOf(parameterNames, "userId");
         if (userIdIndex < 0) {
-            logger.info(">>>> 请求参数 userId 未找到");
+            log.info(">>>> 请求参数 userId 未找到");
             //return;
         } else {
             userId = Long.parseLong(ObjectUtil.getString(args[userIdIndex]));
             if (userId == null) {
-                logger.info(">>>> 获取请求参数中的 userId 失败");
+                log.info(">>>> 获取请求参数中的 userId 失败");
                 //return;
             }
         }
 
         if (userId == null || userId < 1) {
-            logger.info(">>>> 进一步从请求对象中获取 userId");
+            log.info(">>>> 进一步从请求对象中获取 userId");
             // 从参数封装对象中取 userId
             Object obj = null;
             Method method = null;
@@ -154,13 +153,13 @@ public class DoCacheAspect {
                         break;
                     }
                 } catch (Exception e) {
-                    logger.error(e.getMessage());
+                    log.error(e.getMessage());
                     //e.printStackTrace();
                 }
 
             }
             if (userId == null || userId < 1) {
-                logger.info(">>>> 获取请求对象中的 userId 失败");
+                log.info(">>>> 获取请求对象中的 userId 失败");
                 return;
             }
         }
@@ -168,7 +167,7 @@ public class DoCacheAspect {
         // 删除对应用户的首页缓存
         String cacheKey = GlobalConstant.HOME_PLATFORM_LIST_CACHE_KEY + userId;
         redisUtil.del(cacheKey);
-        logger.info(">>>> DoCacheAspect 删除首页列表缓存，cache key: {}", cacheKey);
+        log.info(">>>> DoCacheAspect 删除首页列表缓存，cache key: {}", cacheKey);
     }
 
 }

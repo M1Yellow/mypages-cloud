@@ -8,12 +8,11 @@ import cn.m1yellow.mypages.excavation.bo.UserInfoItem;
 import cn.m1yellow.mypages.excavation.service.DataExcavateService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -27,10 +26,9 @@ import java.util.Map;
 /**
  * 微博图片获取
  */
+@Slf4j
 @Service("dataOfWeiboExcavateService")
 public class DataOfWeiboExcavateServiceImpl implements DataExcavateService {
-
-    private static final Logger logger = LoggerFactory.getLogger(DataOfWeiboExcavateServiceImpl.class);
 
     // TODO 这里报错，实际是能通过编译的
     @Resource(name = "httpClientDownloadService")
@@ -130,9 +128,9 @@ public class DataOfWeiboExcavateServiceImpl implements DataExcavateService {
                 File oldFile = new File(filePath);
                 if (oldFile.exists() && oldFile.isFile()) {
                     if (oldFile.delete()) {
-                        logger.info(filePath + " 删除成功。");
+                        log.info(filePath + " 删除成功。");
                     } else {
-                        logger.info(filePath + " 删除失败。");
+                        log.info(filePath + " 删除失败。");
                         return infoItem;
                     }
                 }
@@ -149,9 +147,9 @@ public class DataOfWeiboExcavateServiceImpl implements DataExcavateService {
                         params.put("originalFileMd5", originalFileMd5);
                     }
                 } catch (FileNotFoundException e) {
-                    logger.error(e.getMessage());
+                    log.error(e.getMessage());
                 } catch (IOException e) {
-                    logger.error(e.getMessage());
+                    log.error(e.getMessage());
                 }
             }
         }

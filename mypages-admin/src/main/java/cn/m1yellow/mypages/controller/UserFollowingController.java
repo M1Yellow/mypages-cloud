@@ -2,7 +2,6 @@ package cn.m1yellow.mypages.controller;
 
 
 import cn.m1yellow.mypages.common.api.CommonResult;
-import cn.m1yellow.mypages.common.aspect.DoCache;
 import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.exception.AtomicityException;
@@ -25,9 +24,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,11 +51,10 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @RestController
 @RequestMapping("/following")
 public class UserFollowingController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserFollowingController.class);
 
     @Value("${user.avatar.savedir}")
     private String saveDir;
@@ -104,11 +101,11 @@ public class UserFollowingController {
         // 进一步校验 url 是否跟平台对应
         PlatformInfo platformInfo = PlatformInfo.getPlatformInfoByUrl(CommonUtil.getSimpleUrl(following.getMainPage()));
         if (platformInfo == null) {
-            logger.error("获取平台信息失败");
+            log.error("获取平台信息失败");
             return CommonResult.failed("获取平台信息失败");
         }
         if (platformInfo.getId() != following.getPlatformId().intValue()) {
-            logger.error("主页跟平台不对应，或者平台id参数错误");
+            log.error("主页跟平台不对应，或者平台id参数错误");
             return CommonResult.failed("请检查用户主页跟平台是否对应");
         }
 
@@ -121,7 +118,7 @@ public class UserFollowingController {
         // 新增的非用户头像不能为空
         if (!following.getIsUser() && isNew) {
             if (profile == null) {
-                logger.error("新增非用户需要上传头像");
+                log.error("新增非用户需要上传头像");
                 return CommonResult.failed("新增非用户需要上传头像");
             }
         }
@@ -141,13 +138,13 @@ public class UserFollowingController {
             // 查询数据库中的记录
             originalFollowing = userFollowingService.getUserFollowing(params);
             if (originalFollowing == null) {
-                logger.debug("用户信息加载异常");
+                log.debug("用户信息加载异常");
                 return CommonResult.failed("用户信息加载失败");
             }
             // TODO 用户能改的内容，共用会出现内容不一致问题，多人共用一样东西，一个人把东西搞坏了，其他人还怎么用啊？
             // 编辑的时候不支持更改用户类型
             if (following.getIsUser() != originalFollowing.getIsUser()) {
-                logger.debug("编辑的时候不支持更改用户类型");
+                log.debug("编辑的时候不支持更改用户类型");
                 return CommonResult.failed("暂不支持更改用户类型");
             }
         }
@@ -157,7 +154,7 @@ public class UserFollowingController {
         if (profile != null) {
             // 获取新头像相对路径
             String newFilePath = FileUtil.getFilePath(UserFollowingController.class, profile, saveDir, oldFilePath, true, false);
-            logger.info(">>>> init newFilePath: {}", newFilePath);
+            log.info(">>>> init newFilePath: {}", newFilePath);
             // 设置新头像路径
             following.setProfilePhoto(newFilePath);
         }
@@ -166,7 +163,7 @@ public class UserFollowingController {
         if (isNew) {
             String userKey = userFollowingService.getUserKeyFromMainPage(following);
             if (StringUtils.isBlank(userKey)) {
-                logger.error("获取关注用户所在平台标识失败");
+                log.error("获取关注用户所在平台标识失败");
                 throw new AtomicityException("获取关注用户所在平台标识失败");
             }
             following.setUserKey(userKey);
@@ -208,13 +205,13 @@ public class UserFollowingController {
         ObjectUtil.stringFiledTrim(saveFollowing);
         // 保存入库
         if (!userFollowingService.saveOrUpdate(saveFollowing)) {
-            logger.error("添加关注用户失败");
+            log.error("添加关注用户失败");
             throw new AtomicityException("添加关注用户失败");
         }
 
         // 校验保存后的新增用户
         if (saveFollowing.getId() == null || saveFollowing.getId() <= 0) {
-            logger.error("新增用户信息错误");
+            log.error("新增用户信息错误");
             throw new AtomicityException("新增用户信息错误");
         }
 
@@ -248,7 +245,7 @@ public class UserFollowingController {
         ObjectUtil.stringFiledTrim(relation);
 
         if (!userFollowingRelationService.saveOrUpdate(relation)) {
-            logger.error("保存用户与关注用户关系记录失败");
+            log.error("保存用户与关注用户关系记录失败");
             throw new AtomicityException("保存用户与关注用户关系记录失败");
         }
 
@@ -262,11 +259,11 @@ public class UserFollowingController {
                 // TODO 校验用户对关注用户添加的标签数量不能超过 10 个，代码常量可配
                 int remarkCount = userFollowingRemarkService.getRemarkCount(following.getUserId(), following.getFollowingId());
                 if (remarkCount >= GlobalConstant.SAME_USER_FOLLOWING_REMARK_NUM) {
-                    logger.info("关注用户标签数量超过限制");
+                    log.info("关注用户标签数量超过限制");
                     throw new AtomicityException("关注用户标签数量超过限制");
                 }
                 if (!userFollowingRemarkService.saveRemarks(remarkList, following)) {
-                    logger.error("保存用户标签失败");
+                    log.error("保存用户标签失败");
                     throw new AtomicityException("保存用户标签失败");
                 }
             }
@@ -277,12 +274,12 @@ public class UserFollowingController {
             // 获取用户信息
             UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
             if (userInfoItem == null) {
-                logger.error("获取用户信息失败，following id:" + following.getFollowingId());
+                log.error("获取用户信息失败，following id:" + following.getFollowingId());
                 throw new AtomicityException("获取用户信息失败");
             }
             // 更新信息，保存入库
             if (!userFollowingService.saveUserInfo(userInfoItem, saveFollowing)) {
-                logger.error("保存用户信息失败");
+                log.error("保存用户信息失败");
                 throw new AtomicityException("保存用户信息失败");
             }
         }
@@ -337,13 +334,13 @@ public class UserFollowingController {
         // 更新用户头像时，先删除旧头像
         if (StringUtils.isNotBlank(oldFilePath)) {
             oldFilePath = FileUtil.getFilePath(UserFollowingController.class, null, saveDir, oldFilePath, false, true);
-            logger.info(">>>> oldFilePath: {}", oldFilePath);
+            log.info(">>>> oldFilePath: {}", oldFilePath);
             File oldFile = new File(oldFilePath);
             if (oldFile.exists() && oldFile.isFile()) {
                 if (oldFile.delete()) {
-                    logger.error(">>>> 用户旧头像已删除：{}", oldFilePath);
+                    log.error(">>>> 用户旧头像已删除：{}", oldFilePath);
                 } else {
-                    logger.error(">>>> 用户旧头像删除失败：{}", oldFilePath);
+                    log.error(">>>> 用户旧头像删除失败：{}", oldFilePath);
                     throw new FileSaveException("用户旧头像删除失败：" + oldFilePath);
                 }
             }
@@ -351,13 +348,13 @@ public class UserFollowingController {
 
         // 上传新头像文件
         String fileFullPath = FileUtil.getFilePath(UserFollowingController.class, null, saveDir, newFilePath, false, true);
-        logger.info(">>>> saving fileFullPath: {}", fileFullPath);
+        log.info(">>>> saving fileFullPath: {}", fileFullPath);
         File dest = new File(fileFullPath);
         try {
             Files.copy(profile.getInputStream(), dest.toPath());
             //file.transferTo(new File(filePath));
         } catch (IOException e) {
-            logger.error("保存用户头像失败：" + e.getMessage());
+            log.error("保存用户头像失败：" + e.getMessage());
             throw new FileSaveException("保存用户头像失败");
         }
     }
@@ -370,7 +367,7 @@ public class UserFollowingController {
                                                       @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
 
         if (userId == null || platformId == null || typeId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -402,7 +399,7 @@ public class UserFollowingController {
         /*
         // 返回失败，会弹出提示，业务不需要提示
         if (followingItemPage == null || CollectionUtils.isEmpty(followingItemPage.getRecords())) {
-            logger.error("关注列表数据错误");
+            log.error("关注列表数据错误");
             return CommonResult.failed("关注列表加载失败");
         }
         */
@@ -422,7 +419,7 @@ public class UserFollowingController {
     public CommonResult<UserFollowingItem> syncFollowingInfo(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {
 
         if (userId == null || platformId == null || typeId == null || followingId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -435,14 +432,14 @@ public class UserFollowingController {
         UserFollowingDto following = userFollowingService.getUserFollowing(params);
 
         if (following == null) {
-            logger.error("关注用户不存在，following id:" + followingId);
+            log.error("关注用户不存在，following id:" + followingId);
             return CommonResult.failed("关注用户不存在");
         }
 
         // 获取用户信息
         UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
         if (userInfoItem == null) {
-            logger.error("用户信息获取失败，following id:" + followingId);
+            log.error("用户信息获取失败，following id:" + followingId);
             return CommonResult.failed("用户信息获取失败");
         }
 
@@ -456,7 +453,7 @@ public class UserFollowingController {
         ObjectUtil.stringFiledTrim(saveFollowing);
 
         if (!userFollowingService.saveUserInfo(userInfoItem, saveFollowing)) {
-            logger.error("用户信息保存失败，following id:" + followingId);
+            log.error("用户信息保存失败，following id:" + followingId);
             return CommonResult.failed("用户信息保存失败");
         }
 
@@ -468,7 +465,7 @@ public class UserFollowingController {
         params.put("followingId", followingId);
         UserFollowingDto newFollowing = userFollowingService.getUserFollowing(params);
         if (newFollowing == null) {
-            logger.error("重新加载用户信息失败，following id:" + followingId);
+            log.error("重新加载用户信息失败，following id:" + followingId);
             return CommonResult.failed("加载用户信息失败");
         }
 
@@ -491,7 +488,7 @@ public class UserFollowingController {
     public CommonResult<List<UserFollowingItem>> syncFollowingInfoBatch(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam(required = false) Long typeId) {
 
         if (userId == null || platformId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -503,7 +500,7 @@ public class UserFollowingController {
         List<UserFollowingDto> userFollowingList = userFollowingService.queryUserFollowingList(params);
 
         if (userFollowingList == null || userFollowingList.size() < 1) {
-            logger.error("获取关注用户记录失败");
+            log.error("获取关注用户记录失败");
             return CommonResult.failed("获取关注用户记录失败");
         }
 
@@ -512,7 +509,7 @@ public class UserFollowingController {
             // 获取用户信息
             UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
             if (userInfoItem == null) {
-                logger.error("用户信息获取失败，following id:" + following.getFollowingId());
+                log.error("用户信息获取失败，following id:" + following.getFollowingId());
                 return CommonResult.failed("用户信息获取失败");
             }
 
@@ -534,7 +531,7 @@ public class UserFollowingController {
             params.put("followingId", following.getFollowingId()); // following id 每次循环都是新的
             UserFollowingDto newFollowing = userFollowingService.getUserFollowing(params);
             if (newFollowing == null) {
-                logger.error("重新加载用户信息失败，following id:" + following.getFollowingId());
+                log.error("重新加载用户信息失败，following id:" + following.getFollowingId());
                 return CommonResult.failed("加载用户信息失败");
             }
 
@@ -576,7 +573,7 @@ public class UserFollowingController {
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId, @RequestParam Long typeId, @RequestParam Long followingId) {
 
         if (userId == null || platformId == null || typeId == null || followingId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -587,7 +584,7 @@ public class UserFollowingController {
         updateWrapper.eq("user_id", userId);
         updateWrapper.eq("following_id", followingId);
         if (!userFollowingRelationService.update(updateWrapper)) {
-            logger.error("移除失败，userId: {}, followingId: {}", userId, followingId);
+            log.error("移除失败，userId: {}, followingId: {}", userId, followingId);
             return CommonResult.failed("操作失败");
         }
         */
@@ -599,7 +596,7 @@ public class UserFollowingController {
         params.put("following_id", followingId);
         // TODO 会自动替换为逻辑删除，即执行更新语句
         if (!userFollowingRelationService.removeByMap(params)) {
-            logger.error("移除失败，userId: {}, platformId: {}, typeId: {}, followingId: {}", userId, platformId, typeId, followingId);
+            log.error("移除失败，userId: {}, platformId: {}, typeId: {}, followingId: {}", userId, platformId, typeId, followingId);
             return CommonResult.failed("操作失败");
         }
 

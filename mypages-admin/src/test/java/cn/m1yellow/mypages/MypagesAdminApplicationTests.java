@@ -1,9 +1,8 @@
 package cn.m1yellow.mypages;
 
 import cn.m1yellow.mypages.common.util.RedisUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,10 +11,9 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+@Slf4j
 @SpringBootTest
 class MypagesAdminApplicationTests {
-
-    private static final Logger logger = LoggerFactory.getLogger(MypagesAdminApplicationTests.class);
 
     @Autowired
     private DataSource dataSource;
@@ -34,11 +32,11 @@ class MypagesAdminApplicationTests {
     @Test
     public void testLogging() {
         //<!-- 日志级别：TRACE < DEBUG < INFO < WARN < ERROR [< FATAL（致命）] -->
-        logger.trace("====测试日志级别TRACE====");
-        logger.debug("====测试日志级别DEBUG====");
-        logger.info("====测试日志级别INFO====");
-        logger.warn("====测试日志级别WARN====");
-        logger.error("====测试日志级别ERROR====");
+        log.trace("====测试日志级别TRACE====");
+        log.debug("====测试日志级别DEBUG====");
+        log.info("====测试日志级别INFO====");
+        log.warn("====测试日志级别WARN====");
+        log.error("====测试日志级别ERROR====");
 
     }
 
@@ -58,7 +56,7 @@ class MypagesAdminApplicationTests {
         // connection.flushDb();
         // connection.flushAll();
         //redisUtil.set("mykey", "测试 redis 序列化是否乱码1111");
-        //logger.info(redisUtil.get("mykey").toString());
+        //log.info(redisUtil.get("mykey").toString());
 
         System.out.println(redisUtil.hkeys("page_1_3_9"));
         redisUtil.hdelall("page_1_3_9");

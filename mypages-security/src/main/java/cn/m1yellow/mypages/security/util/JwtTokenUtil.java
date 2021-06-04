@@ -8,9 +8,8 @@ import cn.m1yellow.mypages.security.config.JwtSecurityProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,11 +18,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@Slf4j
 @Component
 public class JwtTokenUtil implements InitializingBean {
-
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
 
     private static final String CLAIM_KEY_USER_ID = "sub";
     private static final String CLAIM_KEY_USERNAME = "username";
@@ -76,7 +73,7 @@ public class JwtTokenUtil implements InitializingBean {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            logger.info("JWT格式验证失败: {}", token);
+            log.info("JWT格式验证失败: {}", token);
         }
         return claims;
     }

@@ -162,7 +162,7 @@ public class HttpClientUtil {
                     new String[]{"SSLv2Hello", "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"},
                     null, NoopHostnameVerifier.INSTANCE);
         } catch (Exception e) {
-            //logger.error("构建安全连接工厂失败: ", e);
+            //log.error("构建安全连接工厂失败: ", e);
             e.printStackTrace();
             throw new RuntimeException("构建安全连接工厂失败");
         }
@@ -192,7 +192,7 @@ public class HttpClientUtil {
 
         @Override
         public void run() {
-            //logger.info(">>>> IdleConnectionMonitorThread is running...");
+            //log.info(">>>> IdleConnectionMonitorThread is running...");
             System.out.println(">>>> IdleConnectionMonitorThread is running...");
             try {
                 while (!exitFlag) {
@@ -205,10 +205,10 @@ public class HttpClientUtil {
                     }
                 }
             } catch (Exception e) {
-                //logger.error(">>>> IdleConnectionMonitorThread error: ", e);
+                //log.error(">>>> IdleConnectionMonitorThread error: ", e);
                 e.printStackTrace();
             }
-            //logger.info(">>>> IdleConnectionMonitorThread stopped.");
+            //log.info(">>>> IdleConnectionMonitorThread stopped.");
             System.out.println(">>>> IdleConnectionMonitorThread stopped.");
         }
 
@@ -271,11 +271,11 @@ public class HttpClientUtil {
                     return EntityUtils.toString(entityRes, StandardCharsets.UTF_8);
                 }
             } else {
-                //logger.error(">>>> doGet failure, url: {}, code: {}", url, statusCode);
+                //log.error(">>>> doGet failure, url: {}, code: {}", url, statusCode);
                 System.out.println(">>>> doGet failure, code: " + statusCode);
             }
         } catch (Exception e) {
-            //logger.error(">>>> doGet error, url: {}, e: {}", url, e.getMessage());
+            //log.error(">>>> doGet error, url: {}, e: {}", url, e.getMessage());
             e.printStackTrace();
         } finally {
             // 关闭响应资源
@@ -333,11 +333,11 @@ public class HttpClientUtil {
                     return EntityUtils.toString(entityRes, StandardCharsets.UTF_8);
                 }
             } else {
-                //logger.error(">>>> doPost failure, url: {}, code: {}", apiUrl, statusCode);
+                //log.error(">>>> doPost failure, url: {}, code: {}", apiUrl, statusCode);
                 System.out.println(">>>> doPost failure, code: " + statusCode);
             }
         } catch (Exception e) {
-            //logger.error(">>>> doPost error, url: {}, e: {}", apiUrl, e.getMessage());
+            //log.error(">>>> doPost error, url: {}, e: {}", apiUrl, e.getMessage());
             e.printStackTrace();
         } finally {
             // 关闭响应资源

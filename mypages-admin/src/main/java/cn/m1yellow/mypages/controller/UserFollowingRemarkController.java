@@ -8,8 +8,7 @@ import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.entity.UserFollowingRemark;
 import cn.m1yellow.mypages.service.UserFollowingRemarkService;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +23,10 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @RestController
 @RequestMapping("/remark")
 public class UserFollowingRemarkController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserFollowingRemarkController.class);
 
     @Autowired
     private UserFollowingRemarkService userFollowingRemarkService;
@@ -41,7 +39,7 @@ public class UserFollowingRemarkController {
     public CommonResult<UserFollowingRemark> add(@RequestBody UserFollowingRemark remark) {
 
         if (remark == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -49,7 +47,7 @@ public class UserFollowingRemarkController {
         ObjectUtil.stringFiledTrim(remark);
 
         if (!userFollowingRemarkService.saveOrUpdate(remark)) {
-            logger.error("添加/更新标签失败");
+            log.error("添加/更新标签失败");
             return CommonResult.failed("操作失败");
         }
 
@@ -64,7 +62,7 @@ public class UserFollowingRemarkController {
     public CommonResult<String> removeOne(@RequestParam Long userId, @RequestParam Long id) {
 
         if (userId == null || id == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -72,7 +70,7 @@ public class UserFollowingRemarkController {
         params.put("user_id", userId);
         params.put("id", id);
         if (!userFollowingRemarkService.removeByMap(params)) {
-            logger.error("移除失败，userId: {}, id: {}", userId, id);
+            log.error("移除失败，userId: {}, id: {}", userId, id);
             return CommonResult.failed("操作失败");
         }
 
@@ -87,7 +85,7 @@ public class UserFollowingRemarkController {
     public CommonResult<String> removeBelongs(@RequestParam Long userId, @RequestParam Long followingId) {
 
         if (userId == null || followingId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -95,7 +93,7 @@ public class UserFollowingRemarkController {
         params.put("user_id", userId);
         params.put("following_id", followingId);
         if (!userFollowingRemarkService.removeByMap(params)) {
-            logger.error("移除失败，userId: {}, followingId: {}", userId, followingId);
+            log.error("移除失败，userId: {}, followingId: {}", userId, followingId);
             return CommonResult.failed("操作失败");
         }
 

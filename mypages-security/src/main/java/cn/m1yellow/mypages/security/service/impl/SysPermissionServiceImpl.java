@@ -8,9 +8,8 @@ import cn.m1yellow.mypages.security.entity.SysPermission;
 import cn.m1yellow.mypages.security.mapper.SysPermissionMapper;
 import cn.m1yellow.mypages.security.service.SysPermissionService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -24,10 +23,9 @@ import java.util.List;
  * @author M1Yellow
  * @since 2021-06-02
  */
+@Slf4j
 @Service
 public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, SysPermission> implements SysPermissionService {
-
-    private static final Logger logger = LoggerFactory.getLogger(SysPermissionServiceImpl.class);
 
     //@Autowired // 不是直接依赖的 jar 包，传递依赖的 common 模块，@Autowired 会报错
     @Resource

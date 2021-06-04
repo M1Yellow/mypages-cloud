@@ -2,16 +2,15 @@ package cn.m1yellow.mypages.controller;
 
 
 import cn.m1yellow.mypages.common.api.CommonResult;
-import cn.m1yellow.mypages.common.util.ObjectUtil;
-import cn.m1yellow.mypages.dto.UserPlatformDto;
-import cn.m1yellow.mypages.service.UserPlatformService;
 import cn.m1yellow.mypages.common.aspect.DoCache;
 import cn.m1yellow.mypages.common.aspect.WebLog;
+import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.dto.UserPlatformDto;
 import cn.m1yellow.mypages.entity.UserPlatformRelation;
 import cn.m1yellow.mypages.service.UserPlatformRelationService;
+import cn.m1yellow.mypages.service.UserPlatformService;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,11 +29,10 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-23
  */
+@Slf4j
 @RestController
 @RequestMapping("/platform-relation")
 public class UserPlatformRelationController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserPlatformRelationController.class);
 
     @Autowired
     private UserPlatformService userPlatformService;
@@ -50,7 +48,7 @@ public class UserPlatformRelationController {
 
         //CheckParamUtil.validate(platform);
         if (platform == null || platform.getUserId() == null || platform.getPlatformId() == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -61,7 +59,7 @@ public class UserPlatformRelationController {
         ObjectUtil.stringFiledTrim(savePlatformRelation);
 
         if (!userPlatformRelationService.saveOrUpdate(savePlatformRelation)) {
-            logger.error("添加/更新平台失败");
+            log.error("添加/更新平台失败");
             return CommonResult.failed("操作失败");
         }
 
@@ -82,7 +80,7 @@ public class UserPlatformRelationController {
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long platformId) {
 
         if (userId == null || platformId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -90,7 +88,7 @@ public class UserPlatformRelationController {
         params.put("user_id", userId);
         params.put("platform_id", platformId);
         if (!userPlatformRelationService.removeByMap(params)) {
-            logger.error("移除失败，userId: {}, platformId: {}", userId, platformId);
+            log.error("移除失败，userId: {}, platformId: {}", userId, platformId);
             return CommonResult.failed("操作失败");
         }
 

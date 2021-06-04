@@ -7,9 +7,8 @@ import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.error.ErrorController;
@@ -32,12 +31,10 @@ import java.util.Map;
  * 返回类型	若请求的类型为Ajax则返回JSON，否则返回页面	若请求的媒介类型为HTML 则返回页面 ，否则返回JSON
  * 缺点	    无法处理404类异常	                        很强大，可处理全部错误/异常
  */
+@Slf4j
 @RestController
 @RequestMapping("/sys")
 public class SysConfigController implements ErrorController {
-
-    private static final Logger logger = LoggerFactory.getLogger(SysConfigController.class);
-
 
     @Value("${server.error.path}")
     private String errorPath;
@@ -100,7 +97,7 @@ public class SysConfigController implements ErrorController {
     public CommonResult<Object> delRedisCache(@RequestParam String cacheKey) {
 
         if (StringUtils.isBlank(cacheKey)) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 

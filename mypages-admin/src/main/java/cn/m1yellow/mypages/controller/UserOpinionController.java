@@ -12,8 +12,7 @@ import cn.m1yellow.mypages.entity.UserOpinion;
 import cn.m1yellow.mypages.service.UserOpinionService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,11 +31,10 @@ import java.util.Map;
  * @author M1Yellow
  * @since 2021-04-13
  */
+@Slf4j
 @RestController
 @RequestMapping("/opinion")
 public class UserOpinionController {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserOpinionController.class);
 
     @Autowired
     private UserOpinionService userOpinionService;
@@ -54,7 +52,7 @@ public class UserOpinionController {
         // 查询对应平台和类型下的观点数量
         int opinionCount = userOpinionService.getOpinionCount(opinion.getUserId(), opinion.getPlatformId(), opinion.getOpinionType());
         if (opinionCount >= GlobalConstant.PLATFORM_TYPE_OPINION_NUM) {
-            logger.info("同一平台、同一类型只能添加 " + GlobalConstant.PLATFORM_TYPE_OPINION_NUM + " 条观点！");
+            log.info("同一平台、同一类型只能添加 " + GlobalConstant.PLATFORM_TYPE_OPINION_NUM + " 条观点！");
             return CommonResult.failed("同一平台、同一类型只能添加 " + GlobalConstant.PLATFORM_TYPE_OPINION_NUM + " 条观点！");
         }
 
@@ -65,7 +63,7 @@ public class UserOpinionController {
         ObjectUtil.stringFiledTrim(saveOpinion);
 
         if (!userOpinionService.saveOrUpdate(saveOpinion)) {
-            logger.error("添加/更新观点失败");
+            log.error("添加/更新观点失败");
             return CommonResult.failed("操作失败");
         }
 
@@ -88,7 +86,7 @@ public class UserOpinionController {
                                                 @RequestParam(required = false) Integer pageSize) {
 
         if (userId == null || platformId == null || typeId == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -124,7 +122,7 @@ public class UserOpinionController {
     public CommonResult<String> remove(@RequestParam Long userId, @RequestParam Long id) {
 
         if (userId == null || id == null) {
-            logger.error("请求参数错误");
+            log.error("请求参数错误");
             return CommonResult.failed("请求参数错误");
         }
 
@@ -132,7 +130,7 @@ public class UserOpinionController {
         params.put("user_id", userId);
         params.put("id", id);
         if (!userOpinionService.removeByMap(params)) {
-            logger.error("移除失败，userId: {}, id: {}", userId, id);
+            log.error("移除失败，userId: {}, id: {}", userId, id);
             return CommonResult.failed("操作失败");
         }
 

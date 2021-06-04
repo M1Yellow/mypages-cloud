@@ -8,9 +8,8 @@ import cn.m1yellow.mypages.security.entity.SysConfig;
 import cn.m1yellow.mypages.security.mapper.SysConfigMapper;
 import cn.m1yellow.mypages.security.service.SysConfigService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -27,11 +26,9 @@ import java.util.stream.Collectors;
  * @author M1Yellow
  * @since 2021-05-16
  */
+@Slf4j
 @Service
 public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> implements SysConfigService {
-
-    private static final Logger logger = LoggerFactory.getLogger(SysConfigServiceImpl.class);
-
 
     @Resource // 非直接依赖模块，@Autowired 注入报错
     private RedisUtil redisUtil;
