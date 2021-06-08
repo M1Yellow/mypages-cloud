@@ -32,15 +32,39 @@
     -->
 
     <dependencies>
-        <!-- mypages security 安全模块 -->
+        <!-- mypages generator 代码生成器模块 -->
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
-            <artifactId>mypages-security</artifactId>
+            <artifactId>mypages-generator</artifactId>
         </dependency>
         <!-- mypages excavation 数据挖掘模块 -->
         <dependency>
             <groupId>cn.m1yellow.mypages</groupId>
             <artifactId>mypages-excavation</artifactId>
+        </dependency>
+        <!-- mybatis-plus 引入后就不用加 mybatis 的依赖了 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+        </dependency>
+        <!-- nacos 注册中心 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!-- nacos 分布式配置 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        <!-- openfeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
         </dependency>
 
     </dependencies>
