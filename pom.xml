@@ -66,7 +66,7 @@
         <jjwt-api-version>0.11.2</jjwt-api-version><!-- jjwt 各部分单独库 -->
         <jjwt-impl-version>0.11.2</jjwt-impl-version>
         <jjwt-jackson-version>0.11.2</jjwt-jackson-version>
-        <nimbus-jose-jwt.version>8.16</nimbus-jose-jwt.version><!-- 9.9.3 -->
+        <nimbus-jose-jwt.version>8.16</nimbus-jose-jwt.version><!-- 9.9.3 有兼容问题 -->
         <hutool-version>5.6.3</hutool-version>
         <docker-maven-plugin.version>1.2.2</docker-maven-plugin.version>
         <dockerfile-maven-plugin.version>1.4.10</dockerfile-maven-plugin.version>

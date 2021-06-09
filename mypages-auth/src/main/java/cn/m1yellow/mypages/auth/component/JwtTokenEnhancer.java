@@ -13,16 +13,20 @@ import java.util.Map;
 
 /**
  * JWT 增加自定义内容
- * <br>
- * TODO 注意！！！ spring security oauth2 JwtReactiveAuthenticationManager.authenticate 验证方法默认不包含增强属性字段，
- *  导致 jwt 验证总是失败，oauth2 网上资料不多，找遍了各种博客资料、视频教程，及 debug 源码，整整耗费了一天的时间，排查问题！
- *  时间、精力、头发都非常宝贵，框架虽然好用，但出了问题，要排查，那就是非常令人头秃的事情了！
  */
 @Component
 public class JwtTokenEnhancer implements TokenEnhancer {
 
-    /** 用户id */
-    private static final String CLAIM_KEY_USER_ID = "sub";
+    /**
+     * TODO
+     * JWT 自带属性，表示所属者，类型必须是字符串类型，否则校验会失败。
+     * JWT 转换 com.nimbusds.jwt.JWTClaimsSet#parse(java.util.Map)
+     * 如果项目内 JWT 解析错误日志被 try-catch 吃掉了，那么问题排错就得 debug 一步一步调试跟踪了。
+     * 这个问题卡了一天，先是网上各种找博客资料，然后各种参考开源项目，硬生生地看着别人地项目就没问题，自己地项目就是出错！
+     * 原来是自己使用了内部自带字段，还特么有特定类型要求！时间、精力、头发都非常宝贵，框架虽然好用，但出了问题，要排查，那就是非常令人头秃的事情了！
+     * 结论：组件自带字段有他特定的用处，没有业务明确需要，尽量使用新增自定义字段！
+     */
+    private static final String CLAIM_KEY_USER_ID = "userId";
     /** 用户名 */
     private static final String CLAIM_KEY_USERNAME = "username";
     /** 创建时间，单位：秒 */
@@ -33,7 +37,6 @@ public class JwtTokenEnhancer implements TokenEnhancer {
         SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
         Map<String, Object> info = new HashMap<>();
         info.put(CLAIM_KEY_USER_ID, securityUser.getUserId());
-        info.put("userId", securityUser.getUserId()); // 冗余用户id
         info.put(CLAIM_KEY_USERNAME, securityUser.getUsername());
         info.put(CLAIM_KEY_IAT, DateUtil.currentSeconds());
         ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(info);

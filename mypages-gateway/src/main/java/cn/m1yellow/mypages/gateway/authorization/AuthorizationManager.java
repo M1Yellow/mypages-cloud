@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import cn.m1yellow.mypages.common.constant.AuthConstant;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.domian.JwtPayloadDto;
+import cn.m1yellow.mypages.common.util.CommonUtil;
 import cn.m1yellow.mypages.common.util.FastJsonUtil;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
@@ -76,7 +77,7 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
         URI uri = request.getURI();
         String path = uri.getPath();
         // 微服务路径不参与权限验证
-        path = this.StripPathPrefix(path, 1);
+        path = CommonUtil.StripPathPrefix(path, 1);
         PathMatcher pathMatcher = new AntPathMatcher();
         // 白名单路径直接放行
         List<String> ignoreUrls = ignoreUrlsConfig.getUrls();
@@ -129,29 +130,6 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
                 .any(authorities::contains)
                 .map(AuthorizationDecision::new)
                 .defaultIfEmpty(new AuthorizationDecision(false));
-    }
-
-    /**
-     * 访问路径去掉指定前面 n 级路径
-     * @param path 访问路径 uri.getPath()
-     * @param n 去掉几级路径
-     * @return
-     */
-    private static String StripPathPrefix(String path, int n) {
-        if (StringUtils.isBlank(path)) {
-            return path;
-        }
-        String[] pathArr = path.split("/");
-        if (n >= pathArr.length) {
-            return "/";
-        }
-        StringBuffer newPath = new StringBuffer("");
-        for (int i = 0; i < pathArr.length; i++) {
-            if (i <= n) continue;
-            newPath.append("/").append(pathArr[i]);
-        }
-        path = newPath.toString();
-        return path.equals("") ? "/" : path;
     }
 
 }
