@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 日志级别从低到高分为TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果设置为WARN，则低于WARN的信息都不会输出 -->
+<!-- scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true -->
+<!-- scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。 -->
+<!-- debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<configuration>
+    <!-- 上下文名称，相当于命名空间，可以自定义，默认为default。使用%contextName来引用 -->
+    <contextName>logback</contextName>
+
+    <!-- 引入默认配置文件 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- name的值是变量的名称，value的值时变量定义的值。通过定义的值会被插入到logger上下文中。定义变量后，可以使“${}”来使用变量。 -->
+    <!--<property name="APP_NAME" value="mypages-admin"/>-->
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
+
+    <!--<property name="LOG_PATH" value="E:/DevRes/Projects/mypages/mypages-admin/logs"/>-->
+    <!-- 相对路径，项目目录/logs -->
+    <!--<property name="LOG_PATH" value="logs"/>-->
+    <!-- 配置参数 LOG_PATH 读取 application-*.yml 中的 log-path 属性，如果没有配置，默认是 logs -->
+    <springProperty scope="context" name="LOG_PATH" source="logging.log-path" defaultValue="logs"/>
+    <!-- logstash 配置，LOG_STASH_HOST 读取 application-*.yml 中的 log-stash-host 属性，如果没有配置，默认是 192.168.3.151:4560 -->
+    <springProperty scope="context" name="LOG_STASH_HOST" source="logging.log-stash-host" defaultValue=""/>
+
+
+    <!-- 自定义参数 -->
+    <property name="FILE_ERROR_PATTERN"
+              value="${FILE_LOG_PATTERN:-%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} %file:%line: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
+    <!-- slf4j中的日志级别：TRACE < DEBUG < INFO < WARN < ERROR [< FATAL（致命）] -->
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+        </filter>
+        <!--定义输出格式-->
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 显示 INFO、WARN -->
+    <appender name="FILE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--如果只是想要 Info 级别的日志，只是过滤 info 还是会输出 Error 日志，因为 Error 的级别高， 所以我们使用下面的策略，可以避免输出 Error 的日志-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!--过滤 Error-->
+            <level>ERROR</level>
+            <!--过滤 WARN+ -->
+            <!-- <level>WARN</level>-->
+            <!--匹配到就禁止-->
+            <onMatch>DENY</onMatch>
+            <!--没有匹配到就允许-->
+            <onMismatch>ACCEPT</onMismatch>
+        </filter>
+        <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天的日志改名为今天的日期。即，<File> 的日志都是当天的。-->
+        <file>${LOG_PATH}/${APP_NAME}_info.log</file><!-- %d{yyyy-MM-dd}在这没用 -->
+        <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
+            <FileNamePattern>${LOG_PATH}/history/info_%d{yyyy-MM-dd}_%i.log</FileNamePattern>
+            <!--只保留最近30天的日志-->
+            <maxHistory>30</maxHistory>
+            <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+            <!--<totalSizeCap>1GB</totalSizeCap>-->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- maxFileSize:这是活动文件的大小，默认值是10MB,本篇设置为1KB，只是为了演示 -->
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <!--<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">-->
+        <!--<maxFileSize>1KB</maxFileSize>-->
+        <!--</triggeringPolicy>-->
+        <!--定义输出格式-->
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
+        </encoder>
+    </appender>
+
+    <!-- 显示 ERROR -->
+    <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--如果只是想要 Error 级别的日志，那么需要过滤一下，默认是 info 级别的，ThresholdFilter-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>Error</level>
+        </filter>
+        <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天的日志改名为今天的日期。即，<File> 的日志都是当天的。-->
+        <File>${LOG_PATH}/${APP_NAME}_error.log</File>
+        <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
+            <FileNamePattern>${LOG_PATH}/history/error_%d{yyyy-MM-dd}_%i.log</FileNamePattern>
+            <!--只保留最近30天的日志-->
+            <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- maxFileSize:这是活动文件的大小，默认值是10MB,本篇设置为1KB，只是为了演示 -->
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <!--定义输出格式-->
+        <encoder>
+            <pattern>${FILE_ERROR_PATTERN}</pattern>
+            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
+        </encoder>
+    </appender>
+
+    <!-- 输出到logstash的appender -->
+    <!--
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        &lt;!&ndash;可以访问的logstash日志收集端口&ndash;&gt;
+        <destination>${LOG_STASH_HOST}</destination>
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+    -->
+
+    <!-- 多环境配置 按照active profile选择分支 -->
+    <!-- 开发、测试环境 -->
+    <springProfile name="dev,test">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE_INFO"/>
+            <appender-ref ref="FILE_ERROR"/>
+            <!--<appender-ref ref="LOGSTASH"/>-->
+        </root>
+
+        <!-- 使用 yml 配置：log-impl: org.apache.ibatis.logging.stdout.StdOutImpl -->
+        <!--
+        <logger name="cn.m1yellow.mypages.mapper" level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE_INFO"/>
+            <appender-ref ref="FILE_ERROR"/>
+        </logger>
+        -->
+    </springProfile>
+
+    <!-- 生产环境 -->
+   <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="FILE_INFO"/>
+            <appender-ref ref="FILE_ERROR"/>
+            <!--<appender-ref ref="LOGSTASH"/>-->
+        </root>
+    </springProfile>
+
+    <springProfile name="!prod">
+        <!-- 非生产环境配置 -->
+    </springProfile>
+
+</configuration>

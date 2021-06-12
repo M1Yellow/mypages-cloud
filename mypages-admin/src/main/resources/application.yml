@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: mypages-admin
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      enabled: true # 开启文件上传
+      max-file-size: 3MB # 限制文件上传大小
+      max-request-size: 10MB # 单次请求上传大小
+
+
+# 错误页面路径
+server:
+  error:
+    path: /sys/error

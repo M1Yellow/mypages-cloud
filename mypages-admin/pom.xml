@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>cn.m1yellow.mypages</groupId>
+        <artifactId>mypages</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <!-- 后台接口服务模块 -->
+    <groupId>cn.m1yellow.mypages</groupId>
+    <artifactId>mypages-admin</artifactId>
+    <version>1.0.0</version>
+    <name>mypages-admin</name>
+    <description>MyPages admin</description>
+    <packaging>war</packaging><!-- 外部 tomcat 需要 -->
+    <!--<packaging>jar</packaging>--><!-- 默认内嵌 tomcat 运行 -->
+
+
+    <!--
+    依赖关系
+    admin
+    -excavation
+     -common
+    -security
+     -god 用户数据操作相关依赖（mybatis-plus）
+      -generator 数据库连接操作相关依赖（mysql连接驱动）
+       -common
+    -->
+
+    <dependencies>
+        <!-- mypages security 安全模块 -->
+        <dependency>
+            <groupId>cn.m1yellow.mypages</groupId>
+            <artifactId>mypages-security</artifactId>
+        </dependency>
+        <!-- mypages excavation 数据挖掘模块 -->
+        <dependency>
+            <groupId>cn.m1yellow.mypages</groupId>
+            <artifactId>mypages-excavation</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <!--
+    maven 仓库的优先级
+    1、本地仓库
+    2、settings 里面 profile 中设置的仓库
+    3、pom 文件中的 repository
+    4、mirror 仓库
+    -->
+    <!-- TODO 这个仓库用来下载 tomcat8-maven-plugin，如果不需要这个插件，这个插件仓库地址配置可以去掉 -->
+    <!--
+    <pluginRepositories>
+        <pluginRepository>
+            <id>alfresco-public</id>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>alfresco-public-snapshots</id>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+    -->
+
+    <build>
+        <!-- 项目打包最终名称 -->
+        <finalName>${project-name-prod}</finalName>
+        <!-- 静态资源配置 -->
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+                <!--<filtering>true</filtering>-->
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/**</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+
+        <!--
+        【插件配置】
+        多模块打包：只需在启动类所在模块的POM文件：指定打包插件
+        在IDE打开Maven插件，然后在聚合父工程spring-boot-integration中点击 clean ，然后点击 package 进行打包。
+
+        【打jar包步骤】
+        单击IDEA菜单栏的 “File -> Project struct -> Artifact”命令，单击界面上的 “ + ”按钮，选择“JAR”，然后选择 “From modules with dependencies”。
+        在弹出的窗口中，在Main Class 框中选择入口类，单击“OK”按钮，在切换回来的窗口中，在单击“OK”按钮。
+        单击IDEA开发工具右侧的“Maven构造”按钮，在弹出的窗口中单击“lifeCycle -> clean”命令，IDEA就会运行“clean”命令，此时控制台会有执行情况提示。
+        根据控制台提示，稍等一会儿，等待提示完成之后，在继续单击IDEA开发工具右侧的“Maven构造”按钮，在弹出的窗口中单击“liftCycle -> package”命令，等待控制台提示，当提示完成时，代表JAR被成功打包。
+        打包成功后，控制台输出下方信息。可以根据这个控制台的提示找到JAR包的位置“Building.jar”后的值就是JAR包的地址。
+        如果需要打war包，在pom文件中把项目打包方式改为war即可。
+        -->
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <!-- 跳过单元测试 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <!--<skipTests>true</skipTests>--><!-- 已经在全局变量中定义 -->
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
+            <!--
+            自动部署 war 包到远程 tomcat 服务器
+
+            修改 conf/tomcat-users.xml，新增角色权限
+            <user username="tomcat" password="123456.a" roles="manager-gui,manager-script"/>
+
+            tomcat8-maven-plugin 插件可能会下载出错，手动下载，放到 maven 仓库对应目录下即可
+            https://artifacts.alfresco.com/nexus/content/repositories/public/org/apache/tomcat/maven/tomcat8-maven-plugin/3.0-r1756463/
+            E:\DevRes\mvnRepository\org\apache\tomcat\maven\tomcat8-maven-plugin\
+
+            修改完代码，启动菜单选 Update classes and resources 即可，速度较快
+            执行 maven tomcat:redeploy 重新部署，是将整个 war 替换掉原来的目录，静态资源文件也会覆盖
+            执行 maven tomcat:deploy update=true 时，静态资源可以保留。试了几次，静态资源还是清空了
+            deploy redeploy，先删除了原来的项目目录，再重新解压真个 war 包部署
+            自定义部署流程：
+
+            可能出现的问题：
+            deploy redeploy 控制台报错，war 包没有生成
+            tomcat 日志显示项目启动失败，可能是 war 不是最新的代码，执行 clear install package，再 deploy
+
+            -->
+
+            <!--
+            TODO 不好用，每次都是重新部署，上传在 classpath 的图片会被清除
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat8-maven-plugin</artifactId>
+                <configuration>
+                    <url>http://192.168.3.151:8081/manager/text</url>
+                    <username>tomcat</username>
+                    <password>123456.a</password>
+                    <path>/mypages</path>&lt;!&ndash; tomcat webapps 下的项目目录名称 &ndash;&gt;
+                    <port>8081</port>
+                    <update>true</update>&lt;!&ndash; 自动解压，重启部署 &ndash;&gt;
+                    <uriEncoding>UTF-8</uriEncoding>
+                </configuration>
+            </plugin>
+            -->
+
+            <!-- 项目直接部署为 docker 镜像 -->
+            <!-- 【dockerfile-maven-plugin 版本】 官方推荐 -->
+            <!-- 文件上传目录不好配置，暂时不用这种方式部署项目 -->
+            <!--
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>${project.artifactId}</repository>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
+                    <dockerfile>Dockerfile</dockerfile>
+                </configuration>
+            </plugin>
+            -->
+
+            <!-- 【docker-maven-plugin 版本】 -->
+            <!--<plugin>
+                &lt;!&ndash; spotify 推荐使用 dockerfile-maven-plugin 来代替 docker-maven-plugin &ndash;&gt;
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker-maven-plugin.version}</version>
+
+                &lt;!&ndash;将插件绑定在某个phase执行&ndash;&gt;
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        &lt;!&ndash;用户只需执行mvn package ，就会自动执行mvn docker:build&ndash;&gt;
+                        <phase>package</phase>
+                        <goals>
+                            &lt;!&ndash;<goal>build</goal>&ndash;&gt;&lt;!&ndash; 注释后，即为关闭 docker:build &ndash;&gt;
+                        </goals>
+                    </execution>
+                </executions>
+
+                &lt;!&ndash; configuration 标签里面的内容用来生成 dockerfile &ndash;&gt;
+                <configuration>
+                    &lt;!&ndash;指定生成的镜像名&ndash;&gt;
+                    <imageName>${project.artifactId}</imageName>
+                    &lt;!&ndash;指定标签&ndash;&gt;
+                    <imageTags>
+                        <imageTag>${project.version}</imageTag>
+                    </imageTags>
+                    &lt;!&ndash;指定基础镜像jdk1.8&ndash;&gt;
+                    <baseImage>java:8</baseImage>
+                    &lt;!&ndash;镜像制作人本人信息&ndash;&gt;
+                    <maintainer>M1Yellow</maintainer>
+                    &lt;!&ndash;切换到ROOT目录&ndash;&gt;
+                    &lt;!&ndash;<workdir>/ROOT</workdir>&ndash;&gt;
+                    <workdir>/</workdir>
+                    <cmd>["java", "-version"]</cmd>
+                    <cmd>["ADD *.jar /${project.build.finalName}.jar"]</cmd>
+                    <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
+                    &lt;!&ndash;指定远程 docker api地址&ndash;&gt;
+                    <dockerHost>http://192.168.3.151:2375</dockerHost>
+
+                    &lt;!&ndash; 复制 jar 包到 docker 容器指定目录配置 &ndash;&gt;
+                    <resources>
+                        <resource>
+                            &lt;!&ndash;<targetPath>/ROOT</targetPath>&ndash;&gt;
+                            <targetPath>/</targetPath>
+                            &lt;!&ndash; 用于指定需要复制的根目录，${project.build.directory}表示target目录 &ndash;&gt;
+                            <directory>${project.build.directory}</directory>
+                            &lt;!&ndash; 用于指定需要复制的文件，${project.build.finalName}.jar指的是打包后的jar包文件 &ndash;&gt;
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>-->
+        </plugins>
+    </build>
+
+</project>
