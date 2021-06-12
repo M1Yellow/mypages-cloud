@@ -16,7 +16,7 @@
     <version>1.0.0</version>
     <name>mypages-god</name>
     <description>MyPages user module.</description>
-    <packaging>war</packaging><!-- 需要手动指定，否则会报错 -->
+    <packaging>jar</packaging><!-- 需要手动指定，否则会报错 -->
 
     <dependencies>
         <!-- mypages generator 代码生成器模块 -->

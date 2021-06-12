@@ -53,10 +53,12 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
         <!-- nacos 分布式配置 -->
+        <!--
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
+        -->
         <!-- openfeign -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

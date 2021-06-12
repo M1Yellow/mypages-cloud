@@ -73,6 +73,7 @@
         <tomcat8-maven-plugin.version>3.0-r1756463</tomcat8-maven-plugin.version>
         <elasticsearch.version>7.13.0</elasticsearch.version>
         <logstash.version>6.6</logstash.version>
+        <aliyun-sdk-oss.version>3.12.0</aliyun-sdk-oss.version>
         <mypages-common.version>1.0.0</mypages-common.version>
         <mypages-generator.version>1.0.0</mypages-generator.version>
         <mypages-excavation.version>1.0.0</mypages-excavation.version>
@@ -335,6 +336,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-amqp</artifactId>
                 <version>${spring-boot.version}</version>
+            </dependency>
+            <!-- 阿里云 对象存储 OSS SDK -->
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun-sdk-oss.version}</version>
             </dependency>
 
         </dependencies>

@@ -1,7 +1,6 @@
-package cn.m1yellow.mypages.auth.service;
+package cn.m1yellow.mypages.service;
 
-
-import cn.m1yellow.mypages.auth.entity.SysConfig;
+import cn.m1yellow.mypages.entity.SysConfig;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Map;
@@ -12,10 +11,12 @@ import java.util.Map;
  * </p>
  *
  * @author M1Yellow
- * @since 2021-05-16
+ * @since 2021-06-11
  */
 public interface SysConfigService extends IService<SysConfig> {
 
     Map<String, String> getSysConfigs();
+
+    String getConfigValueByKey(String configKey);
 
 }

@@ -131,3 +131,10 @@ secure:
       - /error
       - /mypages-auth/oauth/token
       - /mypages-auth/rsa/publicKey
+
+
+# 项目访问 IP 白名单
+project:
+  access:
+    allow:
+      list: 127.0.0.1,localhost,192.168.3.100,192.168.58.1,8.129.220.131,172.23.199.172,m1yellow.cn

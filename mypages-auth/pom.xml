@@ -13,9 +13,9 @@
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-auth</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
     <name>mypages-auth</name>
     <description>Access authentication.</description>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!-- mypages generator 代码生成器模块 -->

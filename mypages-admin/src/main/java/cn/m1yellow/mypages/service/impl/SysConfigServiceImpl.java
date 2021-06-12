@@ -1,19 +1,19 @@
-package cn.m1yellow.mypages.auth.service.impl;
+package cn.m1yellow.mypages.service.impl;
 
-import cn.m1yellow.mypages.auth.entity.SysConfig;
-import cn.m1yellow.mypages.auth.mapper.SysConfigMapper;
-import cn.m1yellow.mypages.auth.service.SysConfigService;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.util.FastJsonUtil;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
+import cn.m1yellow.mypages.entity.SysConfig;
+import cn.m1yellow.mypages.mapper.SysConfigMapper;
+import cn.m1yellow.mypages.service.SysConfigService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
  * </p>
  *
  * @author M1Yellow
- * @since 2021-05-16
+ * @since 2021-06-11
  */
 @Slf4j
 @Service
 public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> implements SysConfigService {
 
-    @Resource // 非直接依赖模块，@Autowired 注入报错
+    @Autowired
     private RedisUtil redisUtil;
 
 
@@ -56,6 +56,13 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
             redisUtil.set(GlobalConstant.SYS_CONFIG_MAP_CACHE_KEY, FastJsonUtil.bean2Json(sysConfigMap));
         }
         return sysConfigMap;
+    }
+
+    @Override
+    public String getConfigValueByKey(String configKey) {
+        if (StringUtils.isBlank(configKey)) return null;
+
+        return null;
     }
 
 }

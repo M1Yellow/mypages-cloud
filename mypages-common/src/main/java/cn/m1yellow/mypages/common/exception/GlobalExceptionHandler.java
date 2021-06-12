@@ -47,6 +47,18 @@ public class GlobalExceptionHandler {
      * @return
      */
     @ResponseBody
+    @ExceptionHandler(AccessNotAllowException.class)
+    public CommonResult accessNotAllowException(AccessNotAllowException e) {
+        return CommonResult.failed(ResultCode.FORBIDDEN, e.getMessage());
+    }
+
+    /**
+     * 统一处理参数校验错误异常（controller 请求接口参数数据绑定异常）
+     *
+     * @param e
+     * @return
+     */
+    @ResponseBody
     @ExceptionHandler(BindException.class)
     public CommonResult processValidException(BindException e) {
         return CommonResult.failed(ResultCode.VALIDATE_FAILED, e.getMessage());

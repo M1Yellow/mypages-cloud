@@ -73,7 +73,7 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
     /**
      * 数据库参数配置
      */
-    private Map<String, Object> sysConfigMap;
+    private Map<String, String> sysConfigMap;
 
 
     @PostConstruct
@@ -128,8 +128,8 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
     }
 
 
-    private Map<String, Object> getSysConfigMap() {
-        Map<String, Object> sysConfigMap = new HashMap<>();
+    private Map<String, String> getSysConfigMap() {
+        Map<String, String> sysConfigMap = new HashMap<>();
         /*
         sysConfigMap.put("oauth_client_id", "admin-web");
         sysConfigMap.put("oauth_client_secret", "123456");
