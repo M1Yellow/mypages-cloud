@@ -50,4 +50,29 @@ public class CommonUtil {
         return url.substring(0, lastIdx);
     }
 
+
+    /**
+     * 访问路径去掉指定前面 n 级路径
+     * @param path 访问路径 uri.getPath()
+     * @param n 去掉几级路径
+     * @return
+     */
+    public static String StripPathPrefix(String path, int n) {
+        if (StringUtils.isBlank(path)) {
+            return path;
+        }
+        String[] pathArr = path.split("/");
+        if (n >= pathArr.length) {
+            return "/";
+        }
+        StringBuffer newPath = new StringBuffer("");
+        for (int i = 0; i < pathArr.length; i++) {
+            if (i <= n) continue;
+            newPath.append("/").append(pathArr[i]);
+        }
+        path = newPath.toString();
+        return path.equals("") ? "/" : path;
+    }
+
+
 }

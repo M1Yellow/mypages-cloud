@@ -122,21 +122,21 @@ mypages -- 项目目录
 
 
 ## 技术选型
-| 技术                 | 说明                       | 官网                                            |
-| -------------------- | ------------------------- | ---------------------------------------------- |
-| SpringBoot           | 容器+MVC框架 `2.4.3`       | https://spring.io/projects/spring-boot/         |
-| Spring Security      | 认证权限框架 `2.4.3`        | https://spring.io/projects/spring-security/       |
-| MyBatisPlus          | ORM、分页、代码生成 `3.4.2`  | https://baomidou.com/                          |
-| MySQL 	           | 关系型数据库 `5.7`          | https://www.mysql.com/                         |
-| Redis	               | 数据缓存中间件 `6.2.3`       | https://redis.io/download/                    |
-| Druid                | 数据库连接池 `1.1.22`       | https://github.com/alibaba/druid/              |
-| JWT                  | JWT登录支持 `0.9.1`        | https://github.com/jwtk/jjwt/                  |
-| Docker               | 虚拟应用容器 `20.10.1`      | https://www.docker.com/                        |
-| Nginx                | 静态资源服务器 `1.19.10`    | https://www.nginx.com/                         |
-| Tomcat               | Web应用服务器 `9.0.45`     | https://tomcat.apache.org/                     |
-| Jenkins              | 自动化部署工具 `2.60.3`     | https://github.com/jenkinsci/jenkins/          |
-| Lombok               | 简化对象封装工具 `1.18.18`  | https://github.com/rzwitserloot/lombok/        |
-| Swagger-UI           | 文档生成工具 `2.9.2`        | https://github.com/swagger-api/swagger-ui/     |
+| 技术                 | 说明                         | 官网                                            |
+| -------------------- | --------------------------- | ---------------------------------------------- |
+| SpringBoot           | 容器+MVC框架 `2.3.10.RELEASE` | https://spring.io/projects/spring-boot/         |
+| Spring Security      | 认证权限框架 `2.3.10.RELEASE` | https://spring.io/projects/spring-security/       |
+| MyBatisPlus          | ORM、分页、代码生成 `3.4.2`    | https://baomidou.com/                          |
+| MySQL 	           | 关系型数据库 `5.7.34`         | https://www.mysql.com/                         |
+| Redis	               | 数据缓存中间件 `6.2.3`         | https://redis.io/download/                    |
+| Druid                | 数据库连接池 `1.1.22`         | https://github.com/alibaba/druid/              |
+| JWT                  | JWT登录支持 `0.9.1`           | https://github.com/jwtk/jjwt/                  |
+| Docker               | 虚拟应用容器 `20.10.1`        | https://www.docker.com/                        |
+| Nginx                | 静态资源服务器 `1.19.10`      | https://www.nginx.com/                         |
+| Tomcat               | Web应用服务器 `9.0.45`       | https://tomcat.apache.org/                     |
+| Jenkins              | 自动化部署工具 `2.60.3`       | https://github.com/jenkinsci/jenkins/          |
+| Lombok               | 简化对象封装工具 `1.18.18`    | https://github.com/rzwitserloot/lombok/        |
+| Swagger-UI           | 文档生成工具 `2.9.2`          | https://github.com/swagger-api/swagger-ui/     |
 
 
 ## 开发环境与工具

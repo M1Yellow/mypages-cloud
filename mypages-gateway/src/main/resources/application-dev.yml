@@ -1,0 +1,114 @@
+server:
+  port: 8000
+spring:
+  cloud:
+    nacos: # 服务注册中心
+      discovery:
+        server-addr: http://192.168.3.151:8848
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 开启从注册中心动态创建路由的功能
+          lower-case-service-id: true # 使用小写服务名，默认是大写
+      routes: # 配置路由路径
+        - id: mypages-auth
+          uri: lb://mypages-auth # 通过服务名称匹配
+          predicates: # 断言，路径相匹配的进行路由
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1 # 表示在将请求发送到下游之前从请求中剥离的路径个数，即 path 从头开始去掉几个路径
+        - id: mypages-god
+          uri: lb://mypages-god
+          predicates:
+            - Path=/god/**
+          filters:
+            - StripPrefix=1
+        - id: mypages-admin
+          uri: lb://mypages-admin
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix=1
+  security: # 注意！！！对齐位置，在 spring 下一级。很容易出错，照着源项目、找了半天资料，结果是对齐的锅！！！
+      oauth2:
+        resourceserver:
+          jwt:
+            #jwk-set-uri: http://192.168.3.151:8010/rsa/publicKey # 配置RSA的公钥访问地址
+            jwk-set-uri: http://localhost:8010/rsa/publicKey # 配置RSA的公钥访问地址
+  redis:
+    host: 192.168.3.151
+    port: 6379
+    username: default
+    password: 123456.a
+    timeout: 10000 # 连接超时时间（毫秒）
+    lettuce:
+      shutdown-timeout: 10000 # 默认 100ms
+      cluster:
+        refresh:
+          adaptive: true # 是否允许周期性更新集群拓扑视图，默认 false
+          dynamic-refresh-sources: true # 是否允许动态刷新拓扑资源，默认 true
+          period: 30 # 更新集群拓扑视图周期，默认 60 秒
+  cache: # spirng 缓存管理参数配置
+    redis:
+      time-to-live: 86400000 # 毫秒，一天 24 * 60 * 60 * 1000
+  # rabbitmq 配置
+  rabbitmq:
+    username: admin
+    password: 123456.a
+    virtual-host: /
+    host: 192.168.3.151
+    port: 5672
+
+
+management: #开启SpringBoot Admin的监控
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+
+# logback 日志配置
+# 日志加载顺序：logback.xml -> application.properties -> logback-spring.xml
+# xml 中配置的日志目录，相对路径对直接运行的项目不生效，需要部署后才能生效。IDEA 直接运行使用的是内置代理运行环境，指定的相对路径在内部环境无效
+# 【IDEA运行环境】
+# path 和 name 同时设置的话，只有name生效，文件位置在项目根目录
+# logging.config 加载配置文件，如果外部配置和xml配置同时配置了参数，最终取xml的配置
+logging:
+  config: classpath:config/logback-spring.xml
+  log-path: logs
+  log-stash-host: 192.168.3.151:4560
+
+
+# jwt 配置
+jwt:
+  tokenHeader: Authorization # JWT存储的请求头
+  base64Secret: REczZmVGcjdARTZSVGc3IzhSOUo= # JWT加解密使用的密钥
+  expiration: 7200 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
+  tokenStart: 'Bearer' # JWT负载中拿到开头，getter 方法会添加一个空格
+
+
+# spring security 不过滤资源路径列表。注意，自定义属性不建议直接放到 spring 的配置下面
+# 注意，"/" 加与不加是有区别的，单独匹配的
+secure:
+  ignored:
+    urls:
+      - /swagger-ui.html
+      - /swagger-resources/**
+      - /swagger/**
+      - /**/v2/api-docs
+      - /webjars/springfox-swagger-ui/**
+      - /favicon.ico
+      - /**/images/**
+      - /**/css/**
+      - /**/js/**
+      - /druid/**
+      - /home
+      - /home/
+      - /user/login
+      - /user/logout
+      - /user/register
+      - /error
+      - /**/oauth/token

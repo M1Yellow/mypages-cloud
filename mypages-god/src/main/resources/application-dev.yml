@@ -1,0 +1,140 @@
+server:
+  port: 8082
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: http://192.168.3.151:8848 # 配置 Nacos 服务注册中心地址
+  datasource:
+    url: jdbc:mysql://192.168.3.151:3306/mypages-test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456.a
+    initialization-mode: always
+    continue-on-error: true
+    type: com.zaxxer.hikari.HikariDataSource
+    #type: com.alibaba.druid.pool.DruidDataSource
+    # hikari 连接池配置
+    hikari:
+      auto-commit: true # 自动提交从池中返回的连接
+      minimum-idle: 5 # 最小空闲连接，默认值10，小于0或大于maximum-pool-size，都会重置为maximum-pool-size
+      maximum-pool-size: 10 # 最大连接数，小于等于0会被重置为默认值10；大于零小于1会被重置为minimum-idle的值
+      idle-timeout: 50000 # 空闲连接超时时间，默认值600000（10分钟），大于等于max-lifetime且max-lifetime>0，会被重置为0；不等于0且小于10秒，会被重置为10秒
+      max-lifetime: 60000 # 连接最大存活时间，不等于0且小于30秒，会被重置为默认值30分钟.设置应该比mysql设置的超时时间短
+      connection-timeout: 60000 # 连接超时时间：毫秒，小于250毫秒，否则被重置为默认值30秒
+      connection-test-query: select 1 # 用于测试连接是否可用的查询语句
+      pool-name: HikariPool-admin # 连接池的用户定义名称，主要出现在日志记录和JMX管理控制台中以识别池和池配置
+      read-only: false # 从池中获取的连接是否默认处于只读模式
+  redis:
+    host: 192.168.3.151
+    port: 6379
+    username: default
+    password: 123456.a
+    timeout: 10000 # 连接超时时间（毫秒）
+    lettuce:
+      shutdown-timeout: 10000 # 默认 100ms
+      cluster:
+        refresh:
+          adaptive: true # 是否允许周期性更新集群拓扑视图，默认 false
+          dynamic-refresh-sources: true # 是否允许动态刷新拓扑资源，默认 true
+          period: 30 # 更新集群拓扑视图周期，默认 60 秒
+  cache: # spirng 缓存管理参数配置
+    redis:
+      time-to-live: 86400000 # 毫秒，一天 24 * 60 * 60 * 1000
+  # rabbitmq 配置
+  rabbitmq:
+    username: admin
+    password: 123456.a
+    virtual-host: /
+    host: 192.168.3.151
+    port: 5672
+
+
+management: #开启SpringBoot Admin的监控
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+
+mybatis-plus:
+  # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
+  mapper-locations: classpath:cn/m1yellow/mypages/god/mapper/xml/*.xml
+  # 实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: cn.m1yellow.mypages.god.entity
+  global-config:
+    banner: false
+    # 数据库相关配置
+    db-config:
+      db-type: mysql
+      # 主键类型  AUTO:"数据库ID自增", NONE:"未设置主键", INPUT:"用户输入ID", ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID";
+      id-type: AUTO
+      # 注意，字段写的是数据库中的字段名称。貌似 boolean 不支持，可以自己实现逻辑删除功能
+      logic-delete-field: is_deleted # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)，也就是不用手动加 @TableLogic 注解
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+    # 刷新 mapper，调试神器
+    #refresh: true
+  # 原生配置
+  configuration:
+    # 是否开启自动驼峰命名规则映射:从数据库列名到Java属性驼峰命名的类似映射
+    map-underscore-to-camel-case: true
+    # 如果查询结果中包含空值的列，则 MyBatis 在映射的时候，不会映射这个字段
+    call-setters-on-nulls: true
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+# logback 日志配置
+# 日志加载顺序：logback.xml -> application.properties -> logback-spring.xml
+# xml 中配置的日志目录，相对路径对直接运行的项目不生效，需要部署后才能生效。IDEA 直接运行使用的是内置代理运行环境，指定的相对路径在内部环境无效
+# 【IDEA运行环境】
+# path 和 name 同时设置的话，只有name生效，文件位置在项目根目录
+# logging.config 加载配置文件，如果外部配置和xml配置同时配置了参数，最终取xml的配置
+logging:
+  config: classpath:config/logback-spring.xml
+  log-path: logs
+  log-stash-host: 192.168.3.151:4560
+
+
+# jwt 配置
+jwt:
+  tokenHeader: Authorization # JWT存储的请求头
+  base64Secret: REczZmVGcjdARTZSVGc3IzhSOUo= # JWT加解密使用的密钥
+  expiration: 7200 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
+  tokenStart: 'Bearer' # JWT负载中拿到开头，getter 方法会添加一个空格
+
+
+# spring security 不过滤资源路径列表。注意，自定义属性不建议直接放到 spring 的配置下面
+# 注意，"/" 加与不加是有区别的，单独匹配的
+secure:
+  ignored:
+    urls:
+      - /swagger-ui.html
+      - /swagger-resources/**
+      - /swagger/**
+      - /**/v2/api-docs
+      - /webjars/springfox-swagger-ui/**
+      - /favicon.ico
+      - /**/images/**
+      - /**/css/**
+      - /**/js/**
+      - /druid/**
+      - /home
+      - /home/
+      - /user/login
+      - /user/logout
+      - /user/register
+      - /error
+      - /mypages-auth/oauth/token
+      - /mypages-auth/rsa/publicKey
+
+
+# 项目访问 IP 白名单
+project:
+  access:
+    allow:
+      list: 127.0.0.1,localhost,192.168.3.100,192.168.58.1,8.129.220.131,172.23.199.172,m1yellow.cn

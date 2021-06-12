@@ -1,6 +1,10 @@
 server:
   port: 8081
 spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: http://192.168.3.151:8848
   datasource:
     url: jdbc:mysql://192.168.3.151:3306/mypages-test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -68,6 +72,22 @@ spring:
     virtual-host: /
     host: 192.168.3.151
     port: 5672
+
+
+management: #开启SpringBoot Admin的监控
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+feign:
+  okhttp:
+    enabled: true
+ribbon:
+  ConnectTimeout: 3000 #服务请求连接超时时间（毫秒）
+  ReadTimeout: 3000 #服务请求处理超时时间（毫秒）
 
 
 mybatis-plus:
@@ -161,6 +181,13 @@ secure:
       - /error
 
 
+# 项目访问 IP 白名单
+project:
+  access:
+    allow:
+      list: 127.0.0.1,localhost,192.168.3.100,192.168.58.1,8.129.220.131,172.23.199.172,m1yellow.cn
+
+
 # 用户头像保存位置
 user:
   avatar:
@@ -168,3 +195,20 @@ user:
     #savedir: mypages-admin/src/main/resources/public/images/user-profile-photo/
     # target 下的 classes 目录，不区分平台，但本地项目执行 mvn clean 后会被清理
     savedir: public/images/user-profile-photo/
+
+
+# OSS 相关配置信息，外网访问需要流量费！
+aliyun:
+  oss:
+    # 外网查看、下载会产生流量费用，上传免费。内网都免费。配置内网地址，避免产生流量费用。
+    # 内网：oss-cn-shenzhen-internal.aliyuncs.com 外网：oss-cn-shenzhen.aliyuncs.com
+    endpoint: oss-cn-shenzhen.aliyuncs.com
+    accessKeyId: accessKeyId # 访问身份验证中用到用户标识
+    accessKeySecret: accessKeySecret # 用户用于加密签名字符串和oss用来验证签名字符串的密钥
+    bucketName: mypages # oss的存储空间
+    policy:
+      expire: 300 # 签名有效期(S)
+    maxSize: 10 # 上传文件大小(M)
+    callback: http://localhost:8081/aliyun/oss/callback # 文件上传成功后的回调地址
+    dir:
+      prefix: images/ # 上传文件夹路径前缀

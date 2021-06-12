@@ -2,7 +2,11 @@ package cn.m1yellow.mypages;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
+@EnableFeignClients
+@EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = {"cn.m1yellow.mypages"}) // 默认扫描是启动类 MypagesAdminApplication 所在的同级目录及子目录
 public class MypagesAdminApplication {
 
