@@ -15,7 +15,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>mypages-auth</name>
     <description>Access authentication.</description>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <dependencies>
         <!-- mypages generator 代码生成器模块 -->

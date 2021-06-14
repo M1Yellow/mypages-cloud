@@ -13,9 +13,9 @@
     <groupId>cn.m1yellow.mypages</groupId>
     <artifactId>mypages-gateway</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
     <name>mypages-gateway</name>
     <description>Service gateway.</description>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!-- mypages common 代码生成器模块 -->

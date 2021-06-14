@@ -98,7 +98,7 @@
 
     <build>
         <!-- 项目打包最终名称 -->
-        <finalName>${project-name-prod}</finalName>
+        <finalName>${project.artifactId}</finalName>
         <!-- 静态资源配置 -->
         <resources>
             <resource>
