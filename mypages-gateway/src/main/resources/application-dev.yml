@@ -4,7 +4,7 @@ spring:
   cloud:
     nacos: # 服务注册中心
       discovery:
-        server-addr: http://192.168.3.151:8848
+        server-addr: http://192.168.137.151:8848
     gateway:
       discovery:
         locator:
@@ -33,10 +33,10 @@ spring:
       oauth2:
         resourceserver:
           jwt:
-            #jwk-set-uri: http://192.168.3.151:8010/rsa/publicKey # 配置RSA的公钥访问地址
+            #jwk-set-uri: http://192.168.137.151:8010/rsa/publicKey # 配置RSA的公钥访问地址
             jwk-set-uri: http://localhost:8010/rsa/publicKey # 配置RSA的公钥访问地址
   redis:
-    host: 192.168.3.151
+    host: 192.168.137.151
     port: 6379
     username: default
     password: 123456.a
@@ -56,7 +56,7 @@ spring:
     username: admin
     password: 123456.a
     virtual-host: /
-    host: 192.168.3.151
+    host: 192.168.137.151
     port: 5672
 
 
@@ -79,7 +79,7 @@ management: #开启SpringBoot Admin的监控
 logging:
   config: classpath:config/logback-spring.xml
   log-path: logs
-  log-stash-host: 192.168.3.151:4560
+  log-stash-host: 192.168.137.151:4560
 
 
 # jwt 配置

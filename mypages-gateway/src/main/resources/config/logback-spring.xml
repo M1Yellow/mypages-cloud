@@ -19,7 +19,7 @@
     <!--<property name="LOG_PATH" value="logs"/>-->
     <!-- 配置参数 LOG_PATH 读取 application-*.yml 中的 log-path 属性，如果没有配置，默认是 logs -->
     <springProperty scope="context" name="LOG_PATH" source="logging.log-path" defaultValue="logs"/>
-    <!-- logstash 配置，LOG_STASH_HOST 读取 application-*.yml 中的 log-stash-host 属性，如果没有配置，默认是 192.168.3.151:4560 -->
+    <!-- logstash 配置，LOG_STASH_HOST 读取 application-*.yml 中的 log-stash-host 属性，如果没有配置，默认是 192.168.137.151:4560 -->
     <springProperty scope="context" name="LOG_STASH_HOST" source="logging.log-stash-host" defaultValue=""/>
 
 

@@ -21,7 +21,7 @@ public enum Headers {
     /** 缓存控制，不使用缓存。Cache-Control: no-cache, no-store, max-age=0, must-revalidate */
     CACHE_CONTROL_NOT_ALLOW_CACHED("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate"),
     /** 缓存控制，使用自定义缓存 */
-    CACHE_CONTROL_ALLOW_CACHED("Cache-Control", "public, max-age=600"),
+    CACHE_CONTROL_ALLOW_CACHED("Cache-Control", "public, max-age=864000"), // 10天
     CACHE_CONTROL_PUBLIC("Cache-Control", "public"),
     /** 冗余字段，非请求头属性，自定义的默认缓存时间，单位：秒。后续在数据库配置表 sys_config 配置 cache_control_max_age */
     CACHE_CONTROL_MAX_AGE("max-age", "86400"), // 一天

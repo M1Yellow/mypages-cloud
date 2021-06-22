@@ -28,14 +28,14 @@ spring:
             - StripPrefix=1
     nacos:
       discovery:
-        server-addr: http://192.168.3.151:8848
+        server-addr: http://192.168.137.151:8848
     security:
       oauth2:
         resourceserver:
           jwt:
-            jwk-set-uri: 'http://192.168.3.151:8010/mypages-auth/rsa/publicKey' # 配置RSA的公钥访问地址
+            jwk-set-uri: 'http://192.168.137.151:8010/mypages-auth/rsa/publicKey' # 配置RSA的公钥访问地址
   redis:
-    host: 192.168.3.151
+    host: 192.168.137.151
     port: 6379
     username: default
     password: 123456.a
@@ -55,7 +55,7 @@ spring:
     username: admin
     password: 123456.a
     virtual-host: /
-    host: 192.168.3.151
+    host: 192.168.137.151
     port: 5672
 
 
@@ -78,7 +78,7 @@ management: #开启SpringBoot Admin的监控
 logging:
   config: classpath:config/logback-spring.xml
   log-path: logs
-  log-stash-host: 192.168.3.151:4560
+  log-stash-host: 192.168.137.151:4560
 
 
 # jwt 配置

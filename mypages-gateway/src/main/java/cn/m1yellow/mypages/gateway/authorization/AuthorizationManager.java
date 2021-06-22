@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 /**
  * 鉴权管理器，用于判断是否有资源的访问权限
- * Created by macro on 2020/6/19.
  */
 @Slf4j
 @Component
@@ -102,7 +101,7 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
             JwtPayloadDto jwtPayloadDto = JSONUtil.toBean(jwtPayloadStr, JwtPayloadDto.class);
 
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error(">>>> token 解析异常: {}", e.getMessage());
             return Mono.just(new AuthorizationDecision(false));
         }
 
