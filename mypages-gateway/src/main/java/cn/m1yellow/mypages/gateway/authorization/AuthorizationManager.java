@@ -11,9 +11,12 @@ import cn.m1yellow.mypages.common.util.ObjectUtil;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import cn.m1yellow.mypages.gateway.config.IgnoreUrlsConfig;
 import com.nimbusds.jose.JWSObject;
+import com.sun.jndi.toolkit.url.UrlUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -23,11 +26,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,7 +79,8 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
     @Override
     public Mono<AuthorizationDecision> check(Mono<Authentication> mono, AuthorizationContext authorizationContext) {
 
-        ServerHttpRequest request = authorizationContext.getExchange().getRequest();
+        ServerWebExchange exchange = authorizationContext.getExchange();
+        ServerHttpRequest request = exchange.getRequest();
         URI uri = request.getURI();
         String path = uri.getPath();
         // 微服务路径不参与权限验证
@@ -111,17 +119,51 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
         // 校验 token 身份
         // TODO 注意，个别接口可能没有 userId 参数
         Long userId = null;
-        String userIdStr = authorizationContext.getExchange().getAttribute("userId");
-        if (StringUtils.isNotBlank(userIdStr)) {
-            try {
-                userId = Long.parseLong(userIdStr);
-            } catch (NumberFormatException e) {
-                log.error(">>>> token 解析 userId 异常: {}", e.getMessage());
+        //String userIdStr = authorizationContext.getExchange().getAttribute("userId"); // 没值
+        // TODO 获取 GET 请求参数，后续再提取成公共方法
+        MultiValueMap<String, String> queryParams = request.getQueryParams();
+        if (queryParams != null && queryParams.size() > 0) {
+            List<String> resultList = queryParams.get("userId"); // [1]，结果是List<String>，有多个值
+            if (resultList != null && resultList.size() > 0) {
+                String userIdStr = resultList.get(0); // [1]，结果是List<String>，有多个值
+                if (StringUtils.isNotBlank(userIdStr)) {
+                    try {
+                        userId = Long.parseLong(userIdStr);
+                    } catch (NumberFormatException e) {
+                        log.error(">>>> token 解析 queryParams 中的 userId 异常: {}", e.getMessage());
+                    }
+                }
             }
         }
+
+        // TODO 获取 POST 请求参数，后续再提取成公共方法
+        if (userId == null) {
+            String method = request.getMethodValue();
+            String contentType = request.getHeaders().getFirst("Content-Type");
+            if ("POST".equals(method) && StringUtils.isNotBlank(contentType)) {
+                String postBodyStr = this.resolveBodyFromRequest(request);
+                log.info(">>>> post body={}", postBodyStr);
+                // TODO POST 参数处理
+                if (contentType.contains("multipart/form-data")) { // multipart/form-data 文件和表单形式
+
+                } else if (contentType.contains("x-www-form-urlencoded")) { // x-www-form-urlencoded 普通键值对形式
+                    // userName=admin&userId=1
+                    Map<String, Object> postParams = CommonUtil.getUrlParams(postBodyStr);
+                    try {
+                        userId = Long.parseLong(ObjectUtil.getString(postParams.get("userId")));
+                    } catch (Exception e) {
+                        log.error(">>>> token 解析 post body 中的 userId 异常: {}", e.getMessage());
+                    }
+                } else if (contentType.contains("json")) { // json 形式
+
+                }
+            }
+        }
+
         if (userId != null) {
             if (!userId.equals(jwtPayloadDto.getUserId())) {
                 // token 身份不对应
+                log.error(">>>> token 身份不对应，request userId={}, jwt userId={}", userId, jwtPayloadDto.getUserId());
                 return Mono.just(new AuthorizationDecision(false));
             }
         }
@@ -151,5 +193,38 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
                 .map(AuthorizationDecision::new)
                 .defaultIfEmpty(new AuthorizationDecision(false));
     }
+
+
+    /**
+     * 从Flux<DataBuffer>中获取字符串的方法
+     *
+     * @return 请求体
+     */
+    private String resolveBodyFromRequest(ServerHttpRequest serverHttpRequest) {
+        //获取请求体
+        Flux<DataBuffer> body = serverHttpRequest.getBody();
+
+        /*
+        AtomicReference<String> bodyRef = new AtomicReference<>();
+        body.subscribe(buffer -> {
+            CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer.asByteBuffer());
+            DataBufferUtils.release(buffer);
+            bodyRef.set(charBuffer.toString());
+        });
+        //获取request body
+        return bodyRef.get();
+        */
+
+        StringBuilder sb = new StringBuilder();
+        body.subscribe(dataBuffer -> {
+            byte[] bytes = new byte[dataBuffer.readableByteCount()];
+            dataBuffer.read(bytes);
+            DataBufferUtils.release(dataBuffer);
+            String bodyString = new String(bytes, StandardCharsets.UTF_8);
+            sb.append(bodyString);
+        });
+        return sb.toString();
+    }
+
 
 }

@@ -39,7 +39,7 @@ public class AccessControlFilter extends OncePerRequestFilter {
         }
         // 校验访问IP
         if (!accessAllowList.contains(requestIp)) {
-            log.error(">>>> AccessControlFilter request ip is not allowed.");
+            log.error(">>>> AccessControlFilter request ip: {} is not allowed.", requestIp);
             throw new AccessNotAllowException(ResultCode.FORBIDDEN.getMessage());
         }
 
