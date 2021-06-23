@@ -89,20 +89,41 @@ public class AuthorizationManager implements ReactiveAuthorizationManager<Author
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return Mono.just(new AuthorizationDecision(true));
         }
-        // 不同用户体系登录不允许互相访问
+
+        // token 解析
+        String realToken = null;
+        JwtPayloadDto jwtPayloadDto = null;
         try {
             String token = request.getHeaders().getFirst(AuthConstant.JWT_TOKEN_HEADER);
             if (StringUtils.isBlank(token)) {
                 return Mono.just(new AuthorizationDecision(false));
             }
-            String realToken = token.replace(AuthConstant.JWT_TOKEN_PREFIX, "");
+            realToken = token.replace(AuthConstant.JWT_TOKEN_PREFIX, "");
             JWSObject jwsObject = JWSObject.parse(realToken);
             String jwtPayloadStr = jwsObject.getPayload().toString();
-            JwtPayloadDto jwtPayloadDto = JSONUtil.toBean(jwtPayloadStr, JwtPayloadDto.class);
+            jwtPayloadDto = JSONUtil.toBean(jwtPayloadStr, JwtPayloadDto.class);
 
         } catch (ParseException e) {
             log.error(">>>> token 解析异常: {}", e.getMessage());
             return Mono.just(new AuthorizationDecision(false));
+        }
+
+        // 校验 token 身份
+        // TODO 注意，个别接口可能没有 userId 参数
+        Long userId = null;
+        String userIdStr = authorizationContext.getExchange().getAttribute("userId");
+        if (StringUtils.isNotBlank(userIdStr)) {
+            try {
+                userId = Long.parseLong(userIdStr);
+            } catch (NumberFormatException e) {
+                log.error(">>>> token 解析 userId 异常: {}", e.getMessage());
+            }
+        }
+        if (userId != null) {
+            if (!userId.equals(jwtPayloadDto.getUserId())) {
+                // token 身份不对应
+                return Mono.just(new AuthorizationDecision(false));
+            }
         }
 
         // 校验访问权限
