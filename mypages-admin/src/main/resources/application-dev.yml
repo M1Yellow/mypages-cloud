@@ -8,7 +8,8 @@ spring:
     sentinel:
       transport:
         dashboard: http://192.168.137.151:8080 # 配置 sentinel dashboard 地址
-        port: 8719 # 指定应用与 Sentinel 控制台交互的端口，应用本地会起一个该端口占用的 HttpServer
+        port: 8720 # 指定应用与 Sentinel 控制台交互的端口，应用本地会起一个该端口占用的 HttpServer，默认 8719
+        clientIp: 192.168.137.151
   datasource:
     url: jdbc:mysql://192.168.137.151:3306/mypages-test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
