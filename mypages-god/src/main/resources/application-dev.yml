@@ -5,6 +5,10 @@ spring:
     nacos:
       discovery:
         server-addr: http://192.168.137.151:8848 # 配置 Nacos 服务注册中心地址
+    sentinel:
+      transport:
+        dashboard: http://192.168.137.151:8080 # 配置 sentinel dashboard 地址
+        port: 8719 # 指定应用与 Sentinel 控制台交互的端口，应用本地会起一个该端口占用的 HttpServer
   datasource:
     url: jdbc:mysql://192.168.137.151:3306/mypages-test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -58,6 +62,15 @@ management: #开启SpringBoot Admin的监控
   endpoint:
     health:
       show-details: always
+
+feign:
+  sentinel:
+    enabled: true
+  okhttp:
+    enabled: true
+ribbon:
+  ConnectTimeout: 3000 #服务请求连接超时时间（毫秒）
+  ReadTimeout: 3000 #服务请求处理超时时间（毫秒）
 
 
 mybatis-plus:
@@ -137,4 +150,4 @@ secure:
 project:
   access:
     allow:
-      list: 127.0.0.1,192.168.3.100,192.168.137.91,192.168.137.1,192.168.137.151,8.129.220.131,172.23.199.172,43.129.189.39,172.19.0.7
+      list: 127.0.0.1,192.168.3.100,192.168.58.1,192.168.137.91,192.168.137.1,192.168.137.151,8.129.220.131,172.23.199.172,43.129.189.39,172.19.0.7

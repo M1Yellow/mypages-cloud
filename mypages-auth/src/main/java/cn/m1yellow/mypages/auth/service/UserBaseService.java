@@ -2,6 +2,7 @@ package cn.m1yellow.mypages.auth.service;
 
 
 import cn.m1yellow.mypages.auth.entity.UserBase;
+import cn.m1yellow.mypages.auth.service.impl.UserBaseFallbackServiceImpl;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @since 2021-04-13
  */
 //@Component
-@FeignClient("mypages-god")
+@FeignClient(value = "mypages-god", fallback = UserBaseFallbackServiceImpl.class)
 public interface UserBaseService {
 
     @PostMapping(value = "/user/getByUserName")

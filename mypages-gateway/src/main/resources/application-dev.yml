@@ -69,6 +69,16 @@ management: #开启SpringBoot Admin的监控
     health:
       show-details: always
 
+# 修改 ribbon 负载均衡配置
+#load-balanced-service:
+  #ribbon:
+    # 负载地址
+    #listOfServers: http://localhost:8072,http://localhost:8073
+    # 负载轮询策略
+    #NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule
+    # 健康检查
+    #NFLoadBalancerPingClassName: com.modules.scistor.config.HealthExamination
+
 
 # logback 日志配置
 # 日志加载顺序：logback.xml -> application.properties -> logback-spring.xml

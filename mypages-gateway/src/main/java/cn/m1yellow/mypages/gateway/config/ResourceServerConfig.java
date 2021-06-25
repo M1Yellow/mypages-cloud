@@ -6,6 +6,7 @@ import cn.m1yellow.mypages.gateway.authorization.AuthorizationManager;
 import cn.m1yellow.mypages.gateway.component.RestAuthenticationEntryPoint;
 import cn.m1yellow.mypages.gateway.component.RestfulAccessDeniedHandler;
 import cn.m1yellow.mypages.gateway.filter.CacheBodyFilter;
+import cn.m1yellow.mypages.gateway.filter.IgnoreUrlsRemoveJwtFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,7 @@ public class ResourceServerConfig {
     private final IgnoreUrlsConfig ignoreUrlsConfig;
     private final RestfulAccessDeniedHandler restfulAccessDeniedHandler;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final IgnoreUrlsRemoveJwtFilter ignoreUrlsRemoveJwtFilter;
     private final CacheBodyFilter cacheBodyFilter;
 
     @Bean
@@ -46,7 +48,7 @@ public class ResourceServerConfig {
         // 自定义处理JWT请求头过期或签名错误的结果
         http.oauth2ResourceServer().authenticationEntryPoint(restAuthenticationEntryPoint);
         // 对白名单路径，直接移除JWT请求头
-        //http.addFilterBefore(ignoreUrlsRemoveJwtFilter, SecurityWebFiltersOrder.AUTHENTICATION);
+        http.addFilterBefore(ignoreUrlsRemoveJwtFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         // 重写 getBody 方法
         http.addFilterBefore(cacheBodyFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         http.authorizeExchange()
