@@ -1,7 +1,7 @@
 package cn.m1yellow.mypages.component;
 
 import cn.m1yellow.mypages.common.constant.QueueEnum;
-import cn.m1yellow.mypages.dto.UserFollowingDto;
+import cn.m1yellow.mypages.common.dto.MessageTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +17,10 @@ public class UserInfoSyncSender {
     @Autowired
     private AmqpTemplate amqpTemplate;
 
-    public void sendMessage(UserFollowingDto userFollowingDto) {
+    public void sendMessage(MessageTask messageTask) {
         // 往用户信息同步队列发送消息
-        log.info(">>>> UserInfoSyncSender userFollowingDto={}", userFollowingDto);
-        amqpTemplate.convertAndSend(QueueEnum.QUEUE_USER_INFO_SYNC.getExchange(), QueueEnum.QUEUE_USER_INFO_SYNC.getRouteKey(), userFollowingDto);
+        log.info(">>>> UserInfoSyncSender messageTask={}", messageTask);
+        amqpTemplate.convertAndSend(QueueEnum.QUEUE_USER_INFO_SYNC.getExchange(), QueueEnum.QUEUE_USER_INFO_SYNC.getRouteKey(), messageTask);
     }
 
 }

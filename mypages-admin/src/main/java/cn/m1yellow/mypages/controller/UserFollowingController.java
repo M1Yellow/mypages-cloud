@@ -4,13 +4,11 @@ package cn.m1yellow.mypages.controller;
 import cn.m1yellow.mypages.common.api.CommonResult;
 import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
+import cn.m1yellow.mypages.common.dto.MessageTask;
 import cn.m1yellow.mypages.common.exception.AtomicityException;
 import cn.m1yellow.mypages.common.exception.FileSaveException;
 import cn.m1yellow.mypages.common.service.OssService;
-import cn.m1yellow.mypages.common.util.CheckParamUtil;
-import cn.m1yellow.mypages.common.util.CommonUtil;
-import cn.m1yellow.mypages.common.util.FileUtil;
-import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.common.util.*;
 import cn.m1yellow.mypages.component.UserInfoSyncSender;
 import cn.m1yellow.mypages.constant.PlatformInfo;
 import cn.m1yellow.mypages.dto.UserFollowingDto;
@@ -489,8 +487,10 @@ public class UserFollowingController {
             return CommonResult.failed("关注用户不存在");
         }
 
+        // 封装 mq 消息实体
+        MessageTask messageTask = new MessageTask(GsonUtil.bean2Json(following));
         // 通过 mq 异步请求同步
-        userInfoSyncSender.sendMessage(following);
+        userInfoSyncSender.sendMessage(messageTask);
 
         // TODO 重新加载用户信息，注意，mq 消息队列任务因为是异步的，可能还没有执行，这里重新加载信息存在问题
         params.clear();
@@ -541,8 +541,10 @@ public class UserFollowingController {
 
         List<UserFollowingItem> userFollowingItemList = new ArrayList<>();
         for (UserFollowingDto following : userFollowingList) {
+            // 封装 mq 消息实体
+            MessageTask messageTask = new MessageTask(GsonUtil.bean2Json(following));
             // 通过 mq 异步请求同步
-            userInfoSyncSender.sendMessage(following);
+            userInfoSyncSender.sendMessage(messageTask);
 
             // TODO 重新加载用户信息，注意，mq 消息队列任务因为是异步的，可能还没有执行，这里重新加载信息存在问题
             params.clear(); // 每次循环都 clear，不太友好，但不容易出错，各种判断，反而容易出问题

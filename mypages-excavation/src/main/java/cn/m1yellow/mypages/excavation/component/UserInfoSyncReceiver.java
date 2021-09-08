@@ -1,6 +1,7 @@
 package cn.m1yellow.mypages.excavation.component;
 
-import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.common.dto.MessageTask;
+import cn.m1yellow.mypages.common.util.GsonUtil;
 import cn.m1yellow.mypages.excavation.bo.UserInfoItem;
 import cn.m1yellow.mypages.excavation.dto.UserFollowingDto;
 import cn.m1yellow.mypages.excavation.entity.UserFollowing;
@@ -24,14 +25,23 @@ public class UserInfoSyncReceiver {
     private UserFollowingService userFollowingService;
 
     @RabbitHandler
-    public void handle(UserFollowingDto userFollowingDto){
-        log.info(">>>> UserInfoSyncReceiver userFollowingDto={}", userFollowingDto);
+    public void handle(MessageTask messageTask) {
+        log.info(">>>> UserInfoSyncReceiver messageTask={}", messageTask);
+
+        // 获取封装对象
+        UserFollowingDto userFollowingDto = GsonUtil.json2Bean(messageTask.getPayload(), UserFollowingDto.class);
+        if (userFollowingDto == null) {
+            log.error(">>>> UserInfoSyncReceiver messageTask 消息内容加载失败，taskId:{}", messageTask.getTaskId());
+            return;
+        }
+
         // 获取用户信息
         UserInfoItem userInfoItem = userFollowingService.doExcavate(userFollowingDto);
         if (userInfoItem == null) {
             log.error(">>>> UserInfoSyncReceiver 获取用户信息失败，following id:{}", userFollowingDto.getFollowingId());
             return;
         }
+
         // 更新信息，保存入库。（注意，内容未改动，即影响行数为 0，返回的也是 false，实际上并不算失败）
         UserFollowing saveFollowing = new UserFollowing();
         BeanUtils.copyProperties(userFollowingDto, saveFollowing);
