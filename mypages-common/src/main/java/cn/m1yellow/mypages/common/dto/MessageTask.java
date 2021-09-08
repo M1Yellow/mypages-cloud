@@ -1,11 +1,14 @@
 package cn.m1yellow.mypages.common.dto;
 
-import com.google.gson.Gson;
+import cn.m1yellow.mypages.common.util.UUIDGenerateUtil;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 
-public class MessageTask {
+public class MessageTask implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String taskId;
     private int command;
@@ -41,14 +44,9 @@ public class MessageTask {
     }
 
     public MessageTask(String payload) {
-        taskId = UUID.randomUUID().toString();
+        taskId = UUIDGenerateUtil.getUUID32();
         this.payload = payload;
         this.command = -1;
-    }
-
-    public String toJson() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
     }
 
     public String toString() {
