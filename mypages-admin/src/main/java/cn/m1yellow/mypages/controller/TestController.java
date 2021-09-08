@@ -1,18 +1,15 @@
 package cn.m1yellow.mypages.controller;
 
 import cn.m1yellow.mypages.common.api.CommonResult;
-import cn.m1yellow.mypages.service.OssService;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +23,6 @@ public class TestController {
 
     @Value("${user.avatar.savedir}")
     private String saveDir;
-    @Autowired
-    private OssService ossService;
 
 
     @ApiOperation("测试文件路径")
@@ -48,19 +43,6 @@ public class TestController {
         System.out.println(result);
 
         return CommonResult.success(result);
-    }
-
-
-    @ApiOperation("测试OSS服务")
-    //@PreAuthorize("hasPermission('/testPath', 'admin')")
-    @RequestMapping(value = "testOss", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
-    public CommonResult<String> testOss() {
-        File file = new File("E:\\DocHub\\f1b5c4d9d59242e9992892d078bf6cca.jpeg");
-        boolean result = ossService.upload("mypages", "images/" + file.getName(), file);
-        if (result) {
-            boolean delFlag = ossService.delete("mypages", file.getName());
-        }
-        return null;
     }
 
 }

@@ -1,17 +1,9 @@
 server:
-  port: 8010
+  port: 8083
 spring:
-  cloud:
-    nacos: # 服务注册中心
-      discovery:
-        server-addr: http://192.168.137.151:8848
-    sentinel:
-      transport:
-        dashboard: http://192.168.137.151:8080 # 配置 sentinel dashboard 地址
-        port: 8721 # 指定应用与 Sentinel 控制台交互的端口，应用本地会起一个该端口占用的 HttpServer
-        clientIp: 192.168.137.151
   datasource:
-    url: jdbc:mysql://192.168.137.151:3306/mypages-test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+    # 【注意！！生产环境配置信息不要提交Git】
+    url: jdbc:mysql://127.23.199.172:3306/mypages?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456.a
@@ -22,22 +14,46 @@ spring:
     # hikari 连接池配置
     hikari:
       auto-commit: true # 自动提交从池中返回的连接
-      minimum-idle: 5 # 最小空闲连接，默认值10，小于0或大于maximum-pool-size，都会重置为maximum-pool-size
-      maximum-pool-size: 10 # 最大连接数，小于等于0会被重置为默认值10；大于零小于1会被重置为minimum-idle的值
+      minimum-idle: 10 # 最小空闲连接，默认值10，小于0或大于maximum-pool-size，都会重置为maximum-pool-size
+      maximum-pool-size: 50 # 最大连接数，小于等于0会被重置为默认值10；大于零小于1会被重置为minimum-idle的值
       idle-timeout: 50000 # 空闲连接超时时间，默认值600000（10分钟），大于等于max-lifetime且max-lifetime>0，会被重置为0；不等于0且小于10秒，会被重置为10秒
       max-lifetime: 60000 # 连接最大存活时间，不等于0且小于30秒，会被重置为默认值30分钟.设置应该比mysql设置的超时时间短
       connection-timeout: 60000 # 连接超时时间：毫秒，小于250毫秒，否则被重置为默认值30秒
       connection-test-query: select 1 # 用于测试连接是否可用的查询语句
       pool-name: HikariPool-admin # 连接池的用户定义名称，主要出现在日志记录和JMX管理控制台中以识别池和池配置
       read-only: false # 从池中获取的连接是否默认处于只读模式
+      # druid 连接池配置
+      # Spring Boot 默认是不注入这些属性值的，需要自己绑定
+      #druid:
+      #initialSize: 5
+      #minIdle: 5
+      #maxActive: 20
+      #maxWait: 60000
+      #timeBetweenEvictionRunsMillis: 60000
+      #minEvictableIdleTimeMillis: 300000
+      #validationQuery: SELECT 1 FROM DUAL
+      #testWhileIdle: true
+      #testOnBorrow: false
+      #testOnReturn: false
+      #poolPreparedStatements: true
+      # 配置监控统计拦截的filters，stat:监控统计、log4j：日志记录、wall：防御sql注入
+      # 如果允许时报错  java.lang.ClassNotFoundException: org.apache.log4j.Priority
+      # 则导入 log4j 依赖即可，Maven 地址：https://mvnrepository.com/artifact/log4j/log4j
+      #filters: stat,wall,log4j
+      # 指定每个连接上PSCache的大小
+      #maxPoolPreparedStatementPerConnectionSize: 20
+      # 合并多个DruidDataSource的监控数据
+      #useGlobalDataSourceStat: true
+      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+      #connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   redis:
-    host: 192.168.137.151
+    host: 127.23.199.172
     port: 6379
     username: default
     password: 123456.a
     timeout: 10000 # 连接超时时间（毫秒）
     lettuce:
-      shutdown-timeout: 10000 # 默认 100ms
+      shutdown-timeout: 10000ms # 默认 100ms
       cluster:
         refresh:
           adaptive: true # 是否允许周期性更新集群拓扑视图，默认 false
@@ -51,36 +67,15 @@ spring:
     username: admin
     password: 123456.a
     virtual-host: /
-    host: 192.168.137.151
+    host: 127.23.199.172
     port: 5672
-
-
-# 开启SpringBoot Admin的监控。TODO 注意，暴露全部服务的话，可能导致项目配置信息泄漏
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: '*'
-#  endpoint:
-#    health:
-#      show-details: always
-
-
-feign:
-  sentinel:
-    enabled: true
-  okhttp:
-    enabled: true
-ribbon:
-  ConnectTimeout: 3000 #服务请求连接超时时间（毫秒）
-  ReadTimeout: 3000 #服务请求处理超时时间（毫秒）
 
 
 mybatis-plus:
   # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
-  mapper-locations: classpath:cn/m1yellow/mypages/auth/mapper/xml/*.xml
+  mapper-locations: classpath:cn/m1yellow/mypages/mapper/xml/*.xml,classpath:cn/m1yellow/mypages/god/mapper/xml/*.xml,classpath:cn/m1yellow/mypages/security/mapper/xml/*.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: cn.m1yellow.mypages.auth.entity
+  typeAliasesPackage: cn.m1yellow.mypages.entity,cn.m1yellow.mypages.god.entity,cn.m1yellow.mypages.security.entity
   global-config:
     banner: false
     # 数据库相关配置
@@ -101,7 +96,7 @@ mybatis-plus:
     # 如果查询结果中包含空值的列，则 MyBatis 在映射的时候，不会映射这个字段
     call-setters-on-nulls: true
     # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 
 # logback 日志配置
@@ -113,27 +108,22 @@ mybatis-plus:
 logging:
   config: classpath:config/logback-spring.xml
   log-path: logs
-  log-stash-host: 192.168.137.151:4560
+  log-stash-host: 127.23.199.172:4560
 
 
+# 【注意！！生产环境配置信息不要提交Git】
 # jwt 配置
 jwt:
   tokenHeader: Authorization # JWT存储的请求头
-  base64Secret: REczZmVGcjdARTZSVGc3IzhSOUo= # JWT加解密使用的密钥
-  expiration: 7200 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
-  tokenStart: 'Bearer' # JWT负载中拿到开头，getter 方法会添加一个空格
+  base64Secret: Base64(123456.a) # JWT加解密使用的密钥
+  expiration: 3600 # JWT的超期限时间，单位：秒。(例：60*60*24*7=604800)
+  tokenStart: 'Bearer'  # JWT负载中拿到开头，getter 方法会添加一个空格
 
 
-# spring security 不过滤资源路径列表。注意，自定义属性不建议直接放到 spring 的配置下面
-# 注意，"/" 加与不加是有区别的，单独匹配的
+# spring security 不过滤资源路径列表
 secure:
   ignored:
     urls:
-      - /swagger-ui.html
-      - /swagger-resources/**
-      - /swagger/**
-      - /**/v2/api-docs
-      - /webjars/springfox-swagger-ui/**
       - /favicon.ico
       - /**/images/**
       - /**/css/**
@@ -145,12 +135,9 @@ secure:
       - /user/logout
       - /user/register
       - /error
-      - /oauth/token
-      - /rsa/publicKey
 
 
-# 项目访问 IP 白名单
-project:
-  access:
-    allow:
-      list: 127.0.0.1,192.168.3.100,192.168.137.1,192.168.137.151,8.129.220.131,172.23.199.172,43.129.189.39,172.19.0.7
+# 用户头像保存位置
+user:
+  avatar:
+    savedir: public/images/user-profile-photo/

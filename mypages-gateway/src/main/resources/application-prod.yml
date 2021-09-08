@@ -59,14 +59,15 @@ spring:
     port: 5672
 
 
-management: #开启SpringBoot Admin的监控
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  endpoint:
-    health:
-      show-details: always
+# 开启SpringBoot Admin的监控。TODO 注意，暴露全部服务的话，可能导致项目配置信息泄漏
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: '*'
+#  endpoint:
+#    health:
+#      show-details: always
 
 
 # logback 日志配置

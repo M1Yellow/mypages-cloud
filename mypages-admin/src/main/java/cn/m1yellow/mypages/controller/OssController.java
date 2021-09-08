@@ -1,9 +1,9 @@
 package cn.m1yellow.mypages.controller;
 
 import cn.m1yellow.mypages.common.api.CommonResult;
-import cn.m1yellow.mypages.dto.OssCallbackResult;
-import cn.m1yellow.mypages.dto.OssPolicyResult;
-import cn.m1yellow.mypages.service.OssService;
+import cn.m1yellow.mypages.common.dto.OssCallbackResult;
+import cn.m1yellow.mypages.common.dto.OssPolicyResult;
+import cn.m1yellow.mypages.common.service.OssService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -6,19 +6,21 @@ import cn.m1yellow.mypages.common.aspect.WebLog;
 import cn.m1yellow.mypages.common.constant.GlobalConstant;
 import cn.m1yellow.mypages.common.exception.AtomicityException;
 import cn.m1yellow.mypages.common.exception.FileSaveException;
+import cn.m1yellow.mypages.common.service.OssService;
 import cn.m1yellow.mypages.common.util.CheckParamUtil;
 import cn.m1yellow.mypages.common.util.CommonUtil;
 import cn.m1yellow.mypages.common.util.FileUtil;
 import cn.m1yellow.mypages.common.util.ObjectUtil;
+import cn.m1yellow.mypages.component.UserInfoSyncSender;
 import cn.m1yellow.mypages.constant.PlatformInfo;
 import cn.m1yellow.mypages.dto.UserFollowingDto;
 import cn.m1yellow.mypages.entity.UserFollowing;
 import cn.m1yellow.mypages.entity.UserFollowingRelation;
 import cn.m1yellow.mypages.entity.UserFollowingRemark;
-import cn.m1yellow.mypages.excavation.bo.UserInfoItem;
 import cn.m1yellow.mypages.service.UserFollowingRelationService;
 import cn.m1yellow.mypages.service.UserFollowingRemarkService;
 import cn.m1yellow.mypages.service.UserFollowingService;
+import cn.m1yellow.mypages.service.UserInfoExcavationService;
 import cn.m1yellow.mypages.vo.home.UserFollowingItem;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -37,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,15 +59,26 @@ import java.util.Map;
 @RequestMapping("/following")
 public class UserFollowingController {
 
-    @Value("${user.avatar.savedir}")
-    private String saveDir;
-
     @Autowired
     private UserFollowingService userFollowingService;
     @Autowired
     private UserFollowingRelationService userFollowingRelationService;
     @Autowired
     private UserFollowingRemarkService userFollowingRemarkService;
+    @Autowired
+    private UserInfoSyncSender userInfoSyncSender;
+    @Autowired
+    private UserInfoExcavationService userInfoExcavationService;
+    @Autowired
+    private OssService ossService;
+
+    @Value("${user.avatar.savedir}")
+    private String saveDir;
+
+    @Value("${aliyun.oss.bucketName}")
+    private String ALIYUN_OSS_BUCKET_NAME;
+    @Value("${aliyun.oss.dir.avatar}")
+    private String ALIYUN_OSS_DIR_AVATAR;
 
 
     /*
@@ -153,7 +167,9 @@ public class UserFollowingController {
 
         if (profile != null) {
             // 获取新头像相对路径
-            String newFilePath = FileUtil.getFilePath(UserFollowingController.class, profile, saveDir, oldFilePath, true, false);
+            //String newFilePath = FileUtil.getFilePath(UserFollowingController.class, profile, saveDir, oldFilePath, true, false);
+            // OSS 相对路径
+            String newFilePath = FileUtil.getFilePath(UserFollowingController.class, profile, ALIYUN_OSS_DIR_AVATAR, oldFilePath, true, false);
             log.info(">>>> init newFilePath: {}", newFilePath);
             // 设置新头像路径
             following.setProfilePhoto(newFilePath);
@@ -271,17 +287,18 @@ public class UserFollowingController {
 
         // 如果是用户，执行一次信息同步
         if (following.getIsUser()) {
-            // 获取用户信息
-            UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
-            if (userInfoItem == null) {
-                log.error("获取用户信息失败，following id:" + following.getFollowingId());
-                throw new AtomicityException("获取用户信息失败");
+            /*
+            // 通过 mq 异步请求同步
+            userInfoSyncSender.sendMessage(following);
+            */
+
+            // TODO 这里需要实时同步，使用 feign 远程调用
+            CommonResult<String> syncResult = userInfoExcavationService.syncFollowingInfo(following);
+            if (syncResult.getCode() != CommonResult.success().getCode()) {
+                log.error("同步用户信息失败，following id:" + following.getFollowingId());
+                throw new AtomicityException("同步用户信息失败");
             }
-            // 更新信息，保存入库
-            if (!userFollowingService.saveUserInfo(userInfoItem, saveFollowing)) {
-                log.error("保存用户信息失败");
-                throw new AtomicityException("保存用户信息失败");
-            }
+
         }
 
         // 重新加载封装对象
@@ -307,21 +324,57 @@ public class UserFollowingController {
             }
         }
 
-        // TODO 注意，上面用户头像文件已经上传完成了，如果下面的代码出错异常（放任何地方，只要代码异常，数据库记录会回滚，但已上传的文件不能自动撤销），
-        //  会导致头像文件成为孤立的垃圾文件，后续优化。
+        // TODO 保存头像文件，放在代码最后，出异常则抛出自定义文件保存异常，数据也会回滚，
+        //  避免头像上传成功，但业务代码出错，导致文件成为孤立的垃圾
         //  方案一：自定义文件保存异常，把保存文件方法放在数据操作之后，一旦文件保存出错，抛出异常，整个方法事务回滚，数据和文件都不会生效
-        //  方案二：使用定时任务清理没有用户关联的头像文件
-        // 保存头像文件，放在代码最后，出异常则抛出自定义文件保存异常，数据也会回滚
+        //  方案二：自定义文件保存异常，在异常业务处理代码中加上删除已上传的文件代码，方法出错抛出自定义异常，数据回滚，文件删除
+        //  方案三：使用定时任务清理没有用户关联的头像文件
         if (!following.getIsUser()) { // 非用户
             if (profile != null) {
                 // saveFile 文件保存出错会抛出自定义文件保存异常，整个方法的事务回滚
-                saveFile(profile, oldFilePath, following.getProfilePhoto());
+                //saveFile(profile, oldFilePath, following.getProfilePhoto());
+                // 保存到 OSS
+                saveFileToOSS(profile, oldFilePath, following.getProfilePhoto());
             }
         }
 
         return CommonResult.success(followingItem);
     }
 
+    /**
+     * 保存头像文件到OSS
+     *
+     * @param profile
+     * @param oldFilePath
+     * @param newFilePath
+     */
+    private void saveFileToOSS(MultipartFile profile, String oldFilePath, String newFilePath) {
+        InputStream is = null;
+        try {
+            is = profile.getInputStream();
+            boolean result = ossService.saveFile(ALIYUN_OSS_BUCKET_NAME, is, oldFilePath, newFilePath);
+            if (!result) {
+                // 抛出自定义文件保存异常，回滚前面的数据操作
+                throw new FileSaveException("保存用户头像失败");
+            }
+        } catch (Exception e) {
+            log.error("OSS 保存文件异常:{}", e.getMessage());
+            // TODO 出现异常，删除上传文件，不管是否已经上传成功
+            ossService.delete(ALIYUN_OSS_BUCKET_NAME, newFilePath);
+            // 抛出自定义文件保存异常，回滚前面的数据操作
+            throw new FileSaveException("保存用户头像失败");
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    log.error("OSS 文件流关闭异常", e);
+                    // 抛出自定义文件保存异常，回滚前面的数据操作
+                    //throw new FileSaveException("保存用户头像失败");
+                }
+            }
+        }
+    }
 
     /**
      * 保存头像文件
@@ -338,7 +391,7 @@ public class UserFollowingController {
             File oldFile = new File(oldFilePath);
             if (oldFile.exists() && oldFile.isFile()) {
                 if (oldFile.delete()) {
-                    log.error(">>>> 用户旧头像已删除：{}", oldFilePath);
+                    log.info(">>>> 用户旧头像已删除：{}", oldFilePath);
                 } else {
                     log.error(">>>> 用户旧头像删除失败：{}", oldFilePath);
                     throw new FileSaveException("用户旧头像删除失败：" + oldFilePath);
@@ -436,28 +489,10 @@ public class UserFollowingController {
             return CommonResult.failed("关注用户不存在");
         }
 
-        // 获取用户信息
-        UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
-        if (userInfoItem == null) {
-            log.error("用户信息获取失败，following id:" + followingId);
-            return CommonResult.failed("用户信息获取失败");
-        }
+        // 通过 mq 异步请求同步
+        userInfoSyncSender.sendMessage(following);
 
-        // 更新信息，保存入库。（注意，内容未改动，即影响行数为 0，返回的也是 false，实际上并不算失败）
-        UserFollowing saveFollowing = new UserFollowing();
-        BeanUtils.copyProperties(following, saveFollowing);
-        // 修正id
-        saveFollowing.setId(following.getFollowingId());
-
-        // 去字符串字段两边空格
-        ObjectUtil.stringFiledTrim(saveFollowing);
-
-        if (!userFollowingService.saveUserInfo(userInfoItem, saveFollowing)) {
-            log.error("用户信息保存失败，following id:" + followingId);
-            return CommonResult.failed("用户信息保存失败");
-        }
-
-        // 重新加载用户信息
+        // TODO 重新加载用户信息，注意，mq 消息队列任务因为是异步的，可能还没有执行，这里重新加载信息存在问题
         params.clear();
         params.put("userId", userId);
         params.put("platformId", platformId);
@@ -506,24 +541,10 @@ public class UserFollowingController {
 
         List<UserFollowingItem> userFollowingItemList = new ArrayList<>();
         for (UserFollowingDto following : userFollowingList) {
-            // 获取用户信息
-            UserInfoItem userInfoItem = userFollowingService.doExcavate(following);
-            if (userInfoItem == null) {
-                log.error("用户信息获取失败，following id:" + following.getFollowingId());
-                return CommonResult.failed("用户信息获取失败");
-            }
+            // 通过 mq 异步请求同步
+            userInfoSyncSender.sendMessage(following);
 
-            // 更新信息，保存入库
-            UserFollowing saveFollowing = new UserFollowing();
-            BeanUtils.copyProperties(following, saveFollowing);
-            // 修正id
-            saveFollowing.setId(following.getFollowingId());
-            // 去字符串字段两边空格
-            ObjectUtil.stringFiledTrim(saveFollowing);
-            // 保存入库
-            userFollowingService.saveUserInfo(userInfoItem, saveFollowing);
-
-            // 重新加载用户信息
+            // TODO 重新加载用户信息，注意，mq 消息队列任务因为是异步的，可能还没有执行，这里重新加载信息存在问题
             params.clear(); // 每次循环都 clear，不太友好，但不容易出错，各种判断，反而容易出问题
             params.put("userId", userId);
             params.put("platformId", platformId);

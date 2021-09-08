@@ -35,7 +35,7 @@ public class FileUtil {
             if (isNewName) {
                 // 获取后缀 .jpg
                 String suffixName = fileName.substring(fileName.lastIndexOf("."));
-                fileName = UUIDGenerateUtil.getUUID40() + suffixName;
+                fileName = UUIDGenerateUtil.getUUID32() + suffixName;
             }
         } catch (Exception e) {
             e.printStackTrace();

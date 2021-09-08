@@ -1,4 +1,4 @@
-package cn.m1yellow.mypages.common.domian;
+package cn.m1yellow.mypages.common.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

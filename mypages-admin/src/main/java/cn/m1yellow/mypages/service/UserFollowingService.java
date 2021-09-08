@@ -2,7 +2,6 @@ package cn.m1yellow.mypages.service;
 
 import cn.m1yellow.mypages.dto.UserFollowingDto;
 import cn.m1yellow.mypages.entity.UserFollowing;
-import cn.m1yellow.mypages.excavation.bo.UserInfoItem;
 import cn.m1yellow.mypages.vo.home.UserFollowingItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -21,21 +20,12 @@ import java.util.Map;
 public interface UserFollowingService extends IService<UserFollowing> {
 
     /**
-     * 获取用户信息
+     * 获取关注用户所在平台的id或标识
      *
      * @param following
      * @return
      */
-    UserInfoItem doExcavate(UserFollowingDto following);
-
-    /**
-     * 保存同步用户信息
-     *
-     * @param userInfoItem
-     * @param following
-     * @return
-     */
-    boolean saveUserInfo(UserInfoItem userInfoItem, UserFollowing following);
+    String getUserKeyFromMainPage(UserFollowingDto following);
 
     /**
      * 根据 id 逻辑删除
@@ -92,14 +82,6 @@ public interface UserFollowingService extends IService<UserFollowing> {
      * @return
      */
     List<Long> queryTypeIdList(Map params);
-
-    /**
-     * 获取关注用户所在平台的id或标识
-     *
-     * @param following
-     * @return
-     */
-    String getUserKeyFromMainPage(UserFollowingDto following);
 
     /**
      * 将关注用户传输对象转换为视图层需要的数据对象（包含标签）

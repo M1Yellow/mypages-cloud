@@ -11,6 +11,12 @@ spring:
           enabled: true # 开启从注册中心动态创建路由的功能
           lower-case-service-id: true # 使用小写服务名，默认是大写
       routes: # 配置路由路径
+        - id: mypages-admin
+          uri: lb://mypages-admin
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix=1
         - id: mypages-auth
           uri: lb://mypages-auth # 通过服务名称匹配
           predicates: # 断言，路径相匹配的进行路由
@@ -23,10 +29,10 @@ spring:
             - Path=/god/**
           filters:
             - StripPrefix=1
-        - id: mypages-admin
-          uri: lb://mypages-admin
+        - id: mypages-excavation
+          uri: lb://mypages-excavation
           predicates:
-            - Path=/admin/**
+            - Path=/excavation/**
           filters:
             - StripPrefix=1
   security: # 注意！！！对齐位置，在 spring 下一级。很容易出错，照着源项目、找了半天资料，结果是对齐的锅！！！
@@ -53,21 +59,23 @@ spring:
       time-to-live: 86400000 # 毫秒，一天 24 * 60 * 60 * 1000
   # rabbitmq 配置
   rabbitmq:
-    username: admin
-    password: 123456.a
-    virtual-host: /
     host: 192.168.137.151
     port: 5672
+    virtual-host: /mypages
+    username: admin
+    password: 123456.a
 
 
-management: #开启SpringBoot Admin的监控
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  endpoint:
-    health:
-      show-details: always
+# 开启SpringBoot Admin的监控。TODO 注意，暴露全部服务的话，可能导致项目配置信息泄漏
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: '*'
+#  endpoint:
+#    health:
+#      show-details: always
+
 
 # 修改 ribbon 负载均衡配置
 #load-balanced-service:

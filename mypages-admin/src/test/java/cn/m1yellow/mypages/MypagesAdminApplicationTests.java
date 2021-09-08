@@ -1,13 +1,17 @@
 package cn.m1yellow.mypages;
 
+import cn.m1yellow.mypages.common.service.OssService;
 import cn.m1yellow.mypages.common.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -17,8 +21,13 @@ class MypagesAdminApplicationTests {
 
     @Autowired
     private DataSource dataSource;
-    @Resource
+    @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private OssService ossService;
+
+    @Value("${aliyun.oss.dir.avatar}")
+    private String ALIYUN_OSS_DIR_AVATAR;
 
 
     @Test
@@ -61,6 +70,24 @@ class MypagesAdminApplicationTests {
         System.out.println(redisUtil.hkeys("page_1_3_9"));
         redisUtil.hdelall("page_1_3_9");
 
+    }
+
+    @Test
+    public void testOSS() throws Exception {
+        File file = new File("E:\\DocHub\\f1b5c4d9d59242e9992892d078bf6cca.jpeg");
+        InputStream is = new FileInputStream(file);
+        String path = ossService.getPathV2(ALIYUN_OSS_DIR_AVATAR, file.getName());
+        String url = ossService.upload("mypages", is, path, false);
+        if (is != null) {
+            is.close();
+        }
+        System.out.println(url);
+    }
+
+    @Test
+    public void testOSSDel() throws Exception {
+        ossService.delete("test1", "images/20210713");
+        ossService.delete("test1", "images");
     }
 
 }
