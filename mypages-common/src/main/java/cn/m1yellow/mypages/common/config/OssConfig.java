@@ -8,10 +8,12 @@ import com.aliyun.oss.common.auth.CredentialsProvider;
 import com.aliyun.oss.common.auth.DefaultCredentialProvider;
 import com.aliyun.oss.common.comm.Protocol;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(value = "aliyun.oss.enable", havingValue = "1") // 如果缺少 aliyun.oss.enable 配置项，则不会初始化这个 service 实例
 public class OssConfig {
 
     @Value("${aliyun.oss.endpoint}")
