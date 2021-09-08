@@ -211,6 +211,7 @@ user:
 # OSS 相关配置信息，外网访问需要流量、请求费用，建议购买 OSS 资源包
 aliyun:
   oss:
+    enable: 1 # 是否使用OSS，1-使用，不为 1 或者没有 aliyun.oss 相关配置，则不使用。用于控制是否加载 OSS 服务类
     # 外网查看、下载会产生流量费用，上传免费。内网都免费。配置内网地址，避免产生流量费用。
     # 内网：oss-cn-shenzhen-internal.aliyuncs.com 外网：oss-cn-shenzhen.aliyuncs.com
     endpoint: oss-cn-shenzhen.aliyuncs.com
